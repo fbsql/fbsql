@@ -50,9 +50,15 @@ Work (secure) with your backend database within HTML<br>
 <h2>Quick tutorial</h2>
 
 <h2>Table of Contents</h2>
-<a href="#reseult_set_format">Reseult set format</a>
+<a href="#reseult_set_format">Reseult set format</a><br>
+<a href="#installation_and_basic_example">Installation and basic example</a><br>
+<a href="#add_simple_authentication">Add simple authentication (SET ALLOW LOGIN)</a><br>
+<a href="#add_simple_role_based_authorization">Add simple role-based authorization (SET ALLOW LOGIN)</a><br>
+<a href="#secure_our_backend_with_whitelists">Secure our backend with whitelists (ADD WHITELIST)</a><br>
 
-<h3>Lesson 1. Installation and basic example</h3>
+
+<a id="installation_and_basic_example"></a>
+<h3>Installation and basic example</h3>
 
 1) Install FBSQL:<br>
 <ul>
@@ -108,7 +114,8 @@ Result:<br><br>
 <img src="hello-world-alert.png">
 
 <hr>
-<h3>Lesson 2. Add simple authentication (SET ALLOW LOGIN)</h3>
+<a id="add_simple_authentication"></a>
+<h3>Add simple authentication (SET ALLOW LOGIN)</h3>
 
 Backend:<br>
 
@@ -166,7 +173,8 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 3. Add simple role-based authorization (SET ALLOW LOGIN)</h3>
+<a id="add_simple_role_based_authorization"></a>
+<h3>Add simple role-based authorization (SET ALLOW LOGIN)</h3>
 
 Backend:<br>
 
@@ -237,7 +245,8 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 4. Secure our backend with whitelists (ADD WHITELIST)</h3>
+<a id="secure_our_backend_with_whitelists"></a>
+<h3>Secure our backend with whitelists (ADD WHITELIST)</h3>
 
 Backend:<br>
 
@@ -653,8 +662,8 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<a id="reseult_set_format">
-<h3>Lesson 11. Reseult set format</h3>
+<a id="reseult_set_format"></a>
+<h3>Reseult set format</h3>
 You can control the result set format by choosing one from the available formats:
 
 *Available formats:*
