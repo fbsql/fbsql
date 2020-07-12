@@ -83,14 +83,19 @@ Work (secure) with your backend database within HTML<br>
 
 <strong>Backend:</strong><br>
 
-1) Install FBSQL:<br><br>
+<ol>
+<li>
+Install FBSQL:<br><br>
 <ul>
 <li>Download the latest FBSQL release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest FBSQL release">fbsql-1.2-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file into some directory</li>
 </ul>
 <br>
-2) Add database connector:<br><br>
-Assume our database is SQLite. First of all we need to create database instance connector. Let's give it some name E.g. <code>my-sqlite</code>.
+</li>
+
+<li>
+Add database instance connector:<br><br>
+Assume our database is SQLite. Let's give some name E.g. <code>my-sqlite</code> to our connector.<br><br>
 <ul>
 <li>Make the connector directory: <code>~/fbsql/config/db/my-sqlite</code></li>
 <li>Copy the initialization script <code>init.sql</code> into the connector directory:</li>
@@ -107,8 +112,10 @@ Assume our database is SQLite. First of all we need to create database instance 
 
 CONNECT TO 'jdbc:sqlite:sample';
 ```
+</li>
 
-3) Start FBSQL server:<br>
+<li>
+Start FBSQL server:<br><br>
 <ul>
 <li>Go to the appropriate subdirectory of the FBSQL installation;</li>
 <li>Run the startup command from command line:</li>
@@ -117,6 +124,9 @@ CONNECT TO 'jdbc:sqlite:sample';
 ```sh
 fbsql start
 ```
+</li>
+</ol>
+
 <strong>Frontend:</strong><br>
 
 ```html
