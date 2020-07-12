@@ -83,7 +83,7 @@ Work (secure) with your backend database within HTML<br>
 
 <strong>Backend:</strong><br>
 
-1) Install FBSQL:<br>
+1) Install FBSQL:<br><br>
 <ul>
 <li>Download the latest FBSQL release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest FBSQL release">fbsql-1.2-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file into some directory</li>
