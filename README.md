@@ -47,18 +47,41 @@ Work (secure) with your backend database within HTML<br>
 	<br>
 </ul>
 
-<h2>Quick tutorial</h2>
+<h1>Quick tutorial</h1>
 
 <h2>Table of Contents</h2>
 <a href="#reseult_set_format">Reseult set format</a><br>
-<a href="#installation_and_basic_example">Installation and basic example</a><br>
+<a href="#installation_and_basic_example">Installation and basic example (CONNECT TO)</a><br>
 <a href="#add_simple_authentication">Add simple authentication (SET ALLOW LOGIN)</a><br>
 <a href="#add_simple_role_based_authorization">Add simple role-based authorization (SET ALLOW LOGIN)</a><br>
 <a href="#secure_our_backend_with_whitelists">Secure our backend with whitelists (ADD WHITELIST)</a><br>
+<a href="#reference_statements_by_their_hash">Reference statements by their SHA-256 hash</a><br>
+<a href="#reference_statements_by_custom_names">Reference statements by custom names</a><br>
+<a href="#assign_statements_to_roles">Assign statements to roles (SET ALLOW STATEMENT)</a><br>
+<a href="#execute_query_and_execute_update">executeQuery and executeUpdate</a><br>
+<a href="#parametrized_statements">Parametrized statements</a><br>
+<a href="#batch_execution">Batch execution</a><br>
+<a href="#session_management">Session management (CREATE/INVALIDATE SESSION, GET SESSION INFO, SET/GET SESSION ATTRIBUTES)</a><br>
+<a href="#cookies_management">Cookies management (ADD COOKIES, GET COOKIES)</a><br>
+<a href="#database_agnostic_stored_procedures">Database agnostic stored procedures written in JVM languages (DECLARE PROCEDURE)</a><br>
+<a href="#add_database_event_notifier">Add database event notifier (ADD NOTIFIER)</a><br>
+<a href="#schedule_periodic_jobs">Schedule periodic jobs (SCHEDULE)</a><br>
+<a href="#global_request_validator">Global request validator (SET VALIDATOR)</a><br>
+
+
+
+
+
+
+
+
+
 
 
 <a id="installation_and_basic_example"></a>
-<h3>Installation and basic example</h3>
+<h2>Installation and basic example (CONNECT TO)</h2>
+
+<strong>Backend:</strong><br>
 
 1) Install FBSQL:<br>
 <ul>
@@ -93,7 +116,7 @@ CONNECT TO 'jdbc:sqlite:sample';
 ```sh
 fbsql start
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -110,14 +133,14 @@ Frontend:<br>
     </body>
 </html>
 ```
-Result:<br><br>
+<strong>Result:</strong><br><br>
 <img src="hello-world-alert.png">
 
 <hr>
 <a id="add_simple_authentication"></a>
-<h3>Add simple authentication (SET ALLOW LOGIN)</h3>
+<h2>Add simple authentication (SET ALLOW LOGIN)</h2>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -154,7 +177,7 @@ SET ALLOW LOGIN IF EXISTS (
 );
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -174,9 +197,9 @@ Frontend:<br>
 ```
 <hr>
 <a id="add_simple_role_based_authorization"></a>
-<h3>Add simple role-based authorization (SET ALLOW LOGIN)</h3>
+<h2>Add simple role-based authorization (SET ALLOW LOGIN)</h2>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -226,7 +249,7 @@ SET ALLOW LOGIN IF EXISTS (
 );
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -246,9 +269,9 @@ Frontend:<br>
 ```
 <hr>
 <a id="secure_our_backend_with_whitelists"></a>
-<h3>Secure our backend with whitelists (ADD WHITELIST)</h3>
+<h2>Secure our backend with whitelists (ADD WHITELIST)</h2>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -274,7 +297,7 @@ SELECT 'Hello, World!' AS HELLO;
 
 ```
 
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -297,12 +320,13 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 5. Reference statements by their SHA-256 hash</h3>
+<a id="reference_statements_by_their_hash"></a>
+<h2>Reference statements by their SHA-256 hash</h2>
 FBSQL supports custom statement names in whitelist.<br>
 SHA-256 hash is a default statement reference name if no custom name was provided in whitelist:
 
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -328,7 +352,7 @@ SELECT 'Hello, World!' AS HELLO;
 
 ```
 
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -354,9 +378,10 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 6. Reference statements by custom names</h3>
+<a id="reference_statements_by_custom_names"></a>
+<h2>Reference statements by custom names</h2>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -383,7 +408,7 @@ SELECT 'Hello, World!' AS HELLO;
 
 ```
 
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -406,11 +431,12 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 7. Assign statements to roles (SET ALLOW STATEMENT)</h3>
+<a id="assign_statements_to_roles"></a>
+<h2>Assign statements to roles (SET ALLOW STATEMENT)</h2>
 FBSQL supports simple mechanism that helps assign particular SQL statements to specified roles.
 
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -474,7 +500,7 @@ SET ALLOW STATEMENT IF EXISTS (
 );
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -493,9 +519,10 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 8. executeQuery and executeUpdate</h3>
+<a id="execute_query_and_execute_update"></a>
+<h2>executeQuery and executeUpdate</h2>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -519,7 +546,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
 INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -563,9 +590,10 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 9. Parametrized statements</h3>
+<a id="parametrized_statements"></a>
+<h2>Parametrized statements</h2>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -589,7 +617,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
 INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -610,9 +638,10 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 10. Batch execution</h3>
+<a id="batch_execution"></a>
+<h2>Batch execution</h2>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -636,7 +665,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
 INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -663,7 +692,7 @@ Frontend:<br>
 ```
 <hr>
 <a id="reseult_set_format"></a>
-<h3>Reseult set format</h3>
+<h2>Reseult set format</h2>
 You can control the result set format by choosing one from the available formats:
 
 *Available formats:*
@@ -673,7 +702,7 @@ You can control the result set format by choosing one from the available formats
 	<li><code>PreparedStatement.FORMAT_OBJECT_OF_ARRAYS</code><br>Pivot object with column names as keys and arrays of cell values as values</li>
 </ul>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -697,7 +726,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
 INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -781,11 +810,14 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 12. Session management (CREATE/INVALIDATE SESSION, GET SESSION INFO, SET/GET SESSION ATTRIBUTES)</h3>
+<a id="session_management"></a>
+<h2>Session management (CREATE/INVALIDATE SESSION, GET SESSION INFO, SET/GET SESSION ATTRIBUTES)</h2>
 <hr>
-<h3>Lesson 12. Cookies management (ADD COOKIES, GET COOKIES)</h3>
+<a id="cookies_management"></a>
+<h2>Cookies management (ADD COOKIES, GET COOKIES)</h2>
 <hr>
-<h3>Lesson 12. Database agnostic stored procedures written in <abbr title="Java Virtual Machine">JVM</abbr> languages (DECLARE PROCEDURE)</h3>
+<a id="database_agnostic_stored_procedures"></a>
+<h2>Database agnostic stored procedures written in <abbr title="Java Virtual Machine">JVM</abbr> languages (DECLARE PROCEDURE)</h2>
 Procedures can be called from <code>init.sql</code> and/or frontend:
 
 ```sql
@@ -805,7 +837,7 @@ DECLARE PROCEDURE ADD_NEW_ITEM FOR "org.fbsql.examples.StoredProcedures::addNewI
 CALL ADD_NEW_ITEM('T-Shirt', 123);
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -826,9 +858,10 @@ Frontend:<br>
 </html>
 ```
 <hr>
-<h3>Lesson 12. Add database event notifier (ADD NOTIFIER)</h3>
+<a id="add_database_event_notifier"></a>
+<h2>Add database event notifier (ADD NOTIFIER)</h2>
 <hr>
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -845,7 +878,7 @@ DECLARE PROCEDURE MYNOTIFIER FOR "org.fbsql.examples.StoredProcedures::myNotifie
 ADD NOTIFIER MYNOTIFIER TO "add_new_employee";
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
@@ -861,8 +894,9 @@ Frontend:<br>
     </body>
 </html>
 ```
-<h3>Lesson 12. Schedule periodic jobs (SCHEDULE)</h3>
-Backend:<br>
+<a id="schedule_periodic_jobs"></a>
+<h2>Schedule periodic jobs (SCHEDULE)</h2>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -881,9 +915,10 @@ SCHEDULE PERIODICRUN AT "0/5 * * * * ?";
 ```
 
 <hr>
-<h3>Lesson 12. Global request validator (SET VALIDATOR)</h3>
+<a id="global_request_validator"></a>
+<h2>Global request validator (SET VALIDATOR)</h2>
 
-Backend:<br>
+<strong>Backend:</strong><br>
 
 ```sql
 /*
@@ -910,7 +945,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
 INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 
 ```
-Frontend:<br>
+<strong>Frontend:</strong><br>
 
 ```html
 <!DOCTYPE html>
