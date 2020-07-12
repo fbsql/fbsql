@@ -49,11 +49,14 @@ Work (secure) with your backend database within HTML<br>
 
 <h2>Quick tutorial</h2>
 
+<h2>Table of Contents</h2>
+<a href="#reseult_set_format">Reseult set format</a>
+
 <h3>Lesson 1. Installation and basic example</h3>
 
 1) Install FBSQL:<br>
 <ul>
-<li>Download and unzip the latest FBSQL release:<br><a href="fbsql-1.2-linux-x86-64.zip">fbsql-1.2-linux-x86-64.zip</a></li>
+<li>Download and unzip the latest FBSQL release:<br><a href="fbsql-1.2-linux-x86-64.zip" title="The latest FBSQL release">fbsql-1.2-linux-x86-64.zip</a></li>
 </ul>
 <br>
 2) Add connector:<br><br>
@@ -650,6 +653,7 @@ Frontend:<br>
 </html>
 ```
 <hr>
+<a id="reseult_set_format">
 <h3>Lesson 11. Reseult set format</h3>
 You can control the result set format by choosing one from the available formats:
 
