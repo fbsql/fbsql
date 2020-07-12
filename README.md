@@ -50,7 +50,6 @@ Work (secure) with your backend database within HTML<br>
 <h1>Quick tutorial</h1>
 
 <h2>Table of Contents</h2>
-<a href="#reseult_set_format">Reseult set format</a><br>
 <a href="#installation_and_basic_example">Installation and basic example (CONNECT TO)</a><br>
 <a href="#add_simple_authentication">Add simple authentication (SET ALLOW LOGIN)</a><br>
 <a href="#add_simple_role_based_authorization">Add simple role-based authorization (SET ALLOW LOGIN)</a><br>
@@ -61,6 +60,7 @@ Work (secure) with your backend database within HTML<br>
 <a href="#execute_query_and_execute_update">executeQuery and executeUpdate</a><br>
 <a href="#parametrized_statements">Parametrized statements</a><br>
 <a href="#batch_execution">Batch execution</a><br>
+<a href="#reseult_set_format">Reseult set format (PreparedStatement.setResultSetFormat(format))</a><br>
 <a href="#session_management">Session management (CREATE/INVALIDATE SESSION, GET SESSION INFO, SET/GET SESSION ATTRIBUTES)</a><br>
 <a href="#cookies_management">Cookies management (ADD COOKIES, GET COOKIES)</a><br>
 <a href="#database_agnostic_stored_procedures">Database agnostic stored procedures written in JVM languages (DECLARE PROCEDURE)</a><br>
@@ -85,10 +85,11 @@ Work (secure) with your backend database within HTML<br>
 
 1) Install FBSQL:<br>
 <ul>
-<li>Download and unzip the latest FBSQL release:<br><a href="fbsql-1.2-linux-x86-64.zip" title="The latest FBSQL release">fbsql-1.2-linux-x86-64.zip</a></li>
+<li>Download the latest FBSQL release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest FBSQL release">fbsql-1.2-linux-x86-64.zip</a></li>
+<li>Unzip the downloaded file into some directory</li>
 </ul>
 <br>
-2) Add connector:<br><br>
+2) Add database connector:<br><br>
 Assume our database is SQLite. First of all we need to create database instance connector. Let's give it some name E.g. <code>my-sqlite</code>.
 <ul>
 <li>Make the connector directory: <code>~/fbsql/config/db/my-sqlite</code></li>
@@ -107,10 +108,10 @@ Assume our database is SQLite. First of all we need to create database instance 
 CONNECT TO 'jdbc:sqlite:sample';
 ```
 
-3) Start server:<br>
+3) Start FBSQL server:<br>
 <ul>
 <li>Go to the appropriate subdirectory of the FBSQL installation;</li>
-<li>Run the startup command:</li>
+<li>Run the startup command from command line:</li>
 </ul>
 
 ```sh
@@ -692,7 +693,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 ```
 <hr>
 <a id="reseult_set_format"></a>
-<h2>Reseult set format</h2>
+<h2>Reseult set format (PreparedStatement.setResultSetFormat(format))</h2>
 You can control the result set format by choosing one from the available formats:
 
 *Available formats:*
