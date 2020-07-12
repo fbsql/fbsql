@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+
+<!--
+In this example we do not use authentication and authorization
+to access our backend SQL database.
+-->
+
+<head>
+<title>Example 05. FBSQL: Special functions</title>
+<script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+</head>
+
+<body>
+	<script type="text/javascript">
+        "use strict"
+
+		/* Connect to database instance with alias name 'h2-example02', user 'john' and password 'secret' as 'manager' */
+		const conn = new Connection('h2-example02', 'john', 'secret', 'manager');
+
+        let sql = "";
+		sql += "SELECT";
+		sql += " REMOTE_USER() AS REMOTE_USER,";
+		sql += " REMOTE_ADDR() AS REMOTE_ADDR,";
+		sql += " REMOTE_HOST() AS REMOTE_HOST,";
+		sql += " REMOTE_PORT() AS REMOTE_PORT,";
+		sql += " REMOTE_SESSION_ID() AS REMOTE_SESSION_ID,";
+		sql += " REMOTE_SESSION_CREATION_TIME() AS REMOTE_SESSION_CREATION_TIME,";
+		sql += " REMOTE_SESSION_LAST_ACCESSED_TIME() AS REMOTE_SESSION_LAST_ACCESSED_TIME,";
+		sql += " REMOTE_ROLE() AS REMOTE_ROLE,";
+		sql += " IN_ROLE('manager') AS IN_ROLE";
+
+        conn.prepareStatement(sql).logExecuteQuery(document.body, false)
+    </script>
+</body>
+
+</html>

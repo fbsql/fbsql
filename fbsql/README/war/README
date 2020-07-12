@@ -1,0 +1,126 @@
+                           ┌──────────────────────────────┐
+                           │ FBSQL - Frontend Backend SQL │
+                           └──────────────────────────────┘
+
+                             FBSQL WAR (MIT License)
+
+
+FBSQL - Web Application that allow SQL statements execution directly from browser
+JavaScript code.
+Any SQL database that provide JDBC compliant driver can be used at backend side.
+Any compliant Java Application Server can host FBSQL WAR.
+Try FBSQL SERVER if you need ready to use server with predeployed FBSQL WAR.
+
+How it works?
+=============
+
+┌────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                          FRONTEND                                          │
+│                            ┌────────────────────────────┐                                  │
+│                            │ FBSQL JavaScript (Browser) │<──────────────────┐              │
+│                            └────────────────────────────┘                   │              │
+└─────────────────────────────────────────────────────────────────────────────│──────────────┘
+                                                                              │
+┌─────────────────────────────────────────────────────────────────────────────│──────────────┐
+│                                          BACKEND                            │              │
+│ ┌─────────────────┐     ┌────────────────┐     ┌───────────┐   ┌────────────┴────────────┐ │
+│ │ SQL Database(s) ├──>──┤ JDBC Driver(s) ├──>──┤ FBSQL WAR ├─>─┤ Java Application Server │ │
+│ └─────────────────┘     └────────────────┘  │  └───────────┘   └─────────────────────────┘ │
+│                             ┌───────────────┴──────────┐                                   │
+│                             │ SQL Connection script(s) │                                   │
+│                             └──────────────────────────┘                                   │
+└────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Usage:
+======
+
+On backend:
+-----------
+
+• Embed your JDBC driver(s) JAR(s) into directory '/WEB-INF/lib' inside fbsql.war (actually the fbsql.war is regular ZIP-file)
+or set-up your Java Application Server classpath to make JDBC driver(s) JAR(s) accessible for Java Application Server.
+For instructions on how to set-up classpath, refer to the documentation for your Java Application Server.
+
+• Deploy fbsql.war to your Java Application Server. For instructions on how to deploy a .war file, refer to the documentation for your Java Application Server.
+
+• Put your connection SQL scripts files to directory specified into parameter DB_CONNECTORS_DIR (Database connectors directory) in '/WEB-INF/web.xml' file inside fbsql.war.
+Default DB_CONNECTORS_DIR value is: '~/fbsql/config/db'
+
+• Start your Java Application Server.
+
+
+On frontend:
+------------
+• Put FBSQL JavaScript client <script> tag in <head> section of your HTML file.
+E.g.:
+<head>
+    ...
+    <!-- Self-hosted FBSQL client -->
+    <script src="http://localhost:8080/fbsql.min.js"></script>
+    ...
+</head>
+
+• In JavaScript code create Connection object.
+E.g.:
+
+/* Connect to default database instance (instance with alias name 'fbsql-default') */
+const conn = new Connection();
+
+/* Connect to default database instance (instance with alias name 'fbsql-default') */
+const conn = new Connection('fbsql-default');
+
+/* Connect to default database instance (instance with alias name 'fbsql-default') */
+const conn = new Connection(null);
+
+/* Connect to default database instance (instance with alias name 'fbsql-default') */
+const conn = new Connection(undefined);
+
+/* Connect to database instance with alias name 'h2' by providing instance alias name */
+const conn = new Connection('h2');
+
+/* Connect to database instance with alias name 'h2' providing instance URL string */
+const conn = new Connection('http://localhost:8080/h2');
+
+/* Connect to database instance with alias name 'h2' providing instance URL object */
+const conn = new Connection(new URL('http://localhost:8080/h2'));
+
+/* Connect to database instance with alias name 'h2', user 'john' and password 'secret' */
+const conn = new Connection('h2', 'john', 'secret');
+
+/* Connect to database instance with alias name 'h2', user 'john', password 'secret' and role 'manager' */
+const conn = new Connection('h2', 'john', 'secret', 'manager');
+
+
+• Obtain instance of PreparedStatement.
+E.g.:
+
+const ps = conn.prepareStatement("SELECT * FROM employees");
+const ps = conn.prepareStatement("INSERT INTO employees (FIRST_NAME, BIRTH_DATE) VALUES(:first_name, :date");
+const ps = conn.prepareStatement("SELECT * FROM employees WHERE FIRST_NAME = :first_name AND BIRTH_DATE > :date");
+
+• Execute query or update.
+E.g.:
+
+/* Execute query */
+ps.executeQuery()
+.then(resultSet => alert(resultSet[0].FIRST_NAME));
+
+/* Execute parameterized query */
+ps.executeQuery({first_name: 'John', date: '1987-11-29'})
+.then(resultSet => alert(resultSet[0].LAST_NAME));
+
+/* Execute update */
+ps.executeUpdate({first_name: 'John', date: '1987-11-29'})
+.then(result => alert(JSON.stringify(result)));
+
+/* Execute batch update */
+ps.executeUpdate([
+    {first_name: 'John', date: '1987-11-29'},
+    {first_name: 'Jerry', date: '1995-07-14'},
+])
+.then(result => alert(JSON.stringify(result)));
+
+------------------------------------------------------------------------------------------
+Please contact Nėuro Lab by E-Mail neuro.lab.team@gmail.com
+or visit https://neuro-lab.github.io if you need additional
+information or have any questions.

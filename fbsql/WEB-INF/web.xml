@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+MIT License
+
+Copyright (c) 2020 FBSQL Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Home:   https://fbsql.github.io
+E-Mail: fbsql.team.team@gmail.com
+-->
+<web-app
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee webapp_4_0.xsd"
+	version="4.0">
+
+	<display-name>Neuro FB SQL Service</display-name>
+
+	<servlet>
+		<servlet-name>DbServlet</servlet-name>
+		<servlet-class>org.fbsql.servlet.DbServlet</servlet-class>
+		<init-param>
+			<!--                                                           -->
+			<!-- Database connectors directory                             -->
+			<!-- Default value: ${user.home}/fbsql/config/db               -->
+			<!--                                                           -->
+			<!-- WARNING!                                                  -->
+			<!--        - Absolute path required.                          -->
+			<!--        - No trailing slash '/'.                           -->
+			<!--                                                           -->
+			<!-- Syntax ${myvar} is used for Java System Properties values -->
+			<!-- Syntax  $[myvar] is used for OS environment variables     -->
+			<!--                                                           -->
+			<!-- Useful System Properties accessible as variables:         -->
+			<!-- ${user.home};                                             -->
+			<!-- ${user.dir};                                              -->
+			<!-- ${java.home};                                             -->
+			<!-- ${java.io.tmpdir}.                                        -->
+			<!--                                                           -->
+			<description>Database connectors directory</description>
+			<param-name>DB_CONNECTORS_DIR</param-name>
+			<param-value>${user.home}/fbsql/config/db</param-value>
+		</init-param>
+		<init-param>
+			<!--                                                           -->
+			<!-- JavaScript plugins directory                              -->
+			<!-- Default value: ${user.home}/fbsql/config/plugins          -->
+			<!--                                                           -->
+			<!-- WARNING!                                                  -->
+			<!--        - Absolute path required.                          -->
+			<!--        - No trailing slash '/'.                           -->
+			<!--                                                           -->
+			<!-- Syntax ${myvar} is used for Java System Properties values -->
+			<!-- Syntax  $[myvar] is used for OS environment variables     -->
+			<!--                                                           -->
+			<!-- Useful System Properties accessible as variables:         -->
+			<!-- ${user.home};                                             -->
+			<!-- ${user.dir};                                              -->
+			<!-- ${java.home};                                             -->
+			<!-- ${java.io.tmpdir}.                                        -->
+			<!--                                                           -->
+			<description>JavaScript plugins directory</description>
+			<param-name>JS_PLUGINS_DIR</param-name>
+			<param-value>${user.home}/fbsql/config/plugins</param-value>
+		</init-param>
+		<init-param>
+			<!--
+			https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin 
+		 	-->
+			<description>"Access-Control-Allow-Origin" HTTP header value</description>
+			<param-name>CORS_ALLOW_ORIGIN</param-name>
+			<param-value></param-value>
+		</init-param>
+		<init-param>
+			<description>Connection pool minimal size</description>
+			<param-name>CONNECTION_POOL_SIZE_MIN</param-name>
+			<param-value>1</param-value>
+		</init-param>
+		<init-param>
+			<description>Connection pool maximal size</description>
+			<param-name>CONNECTION_POOL_SIZE_MAX</param-name>
+			<param-value>1</param-value>
+		</init-param>
+		<load-on-startup>0</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>DbServlet</servlet-name>
+		<url-pattern>/db/*</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+<!--
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/index.html</location>
+	</error-page>
+	<error-page>
+		<error-code>400</error-code>
+		<location>/error.jsp</location>
+	</error-page>
+-->
+</web-app>
+
+<!--
+Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+or visit https://fbsql.github.io if you need additional
+information or have any questions.
+-->
+
+<!-- EOF -->

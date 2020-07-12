@@ -1,0 +1,134 @@
+
+List of third party libraries and tools used to develop, compile and run FBSQL WAR and FBSQL SERVER.
+----------------------------------------------------------------------------------------------------
+
+
+NAME       : OpenJDK
+LICENSE    : GPL 2.0 (GNU General Public License v2.0)
+HOME PAGE  : https://openjdk.java.net
+DESCRIPTION: Used as FBSQL server runtime platform
+
+
+NAME       : Eclipse IDE for Java Developers
+LICENSE    : EPL-2.0 (Eclipse Public License v2.0)
+HOME PAGE  : https://www.eclipse.org/eclipseide
+DESCRIPTION: Used as IDE
+
+
+NAME       : Apache Ant
+LICENSE    : Apache License 2.0
+HOME PAGE  : https://github.com/megastep/makeself
+DESCRIPTION: Used as build tool for produce FBSQL WAR and binary
+
+
+NAME       : Apache Tomcat
+LICENSE    : Apache License 2.0
+HOME PAGE  : http://tomcat.apache.org
+DESCRIPTION: Used as FBSQL servlet container
+
+
+NAME       : Mozilla Rhino
+LICENSE    : MPL-2.0 (Mozilla Public License v2.0)
+HOME PAGE  : https://github.com/mozilla/rhino
+DESCRIPTION: Used as JavaScript engine for parameter validation and event notification
+
+
+NAME       : makeself
+LICENSE    : GPL-2.0 (GNU General Public License v2.0)
+HOME PAGE  : https://github.com/megastep/makeself
+DESCRIPTION: Used to make FBSQL binary
+
+
+NAME       : Alasql
+LICENSE    : MIT License
+HOME PAGE  : http://alasql.org
+DESCRIPTION: Used as client in-browser database
+
+
+NAME       : H2 Database Engine
+LICENSE    : MPL-2.0 (Mozilla Public License v2.0), EPL-1.0 (Eclipse Public License v1.0)
+HOME PAGE  : https://www.h2database.com
+DESCRIPTION: Used modified version of SQL script reader FBSQL (org.h2.util.ScriptReader.java)
+
+
+NAME       : Apache Hive™
+LICENSE    : Apache License 2.0
+HOME PAGE  : https://hive.apache.org
+DESCRIPTION: Used for produce Murmur3 hashes (org.apache.hive.common.util.Murmur3.java)
+
+
+NAME       : Dean Hume. Experimenting with the Streams API.
+LICENSE    : MIT License
+HOME PAGE  : https://deanhume.com/experimenting-with-the-streams-api, https://github.com/deanhume/streams
+DESCRIPTION: Used if JavaScript client in implementation of database event notifier
+
+
+NAME       : MurmurHash3 JavaScript algorithm created by Austin Appleby (JavaScript port was authored by whitequark (based on Java port by Yonik Seeley))
+LICENSE    : Public domain. The author hereby disclaims copyright to this source code.
+HOME PAGE  : http://github.com/whitequark/murmurhash3-js
+DESCRIPTION: Used if JavaScript client to create hash to make URL unique
+
+
+
+
+NAME         : SQLite
+LICENSE      : Apache License 2.0
+HOME PAGE    : https://www.sqlite.org
+DOWNLOAD PAGE: https://www.sqlite.org/download.html
+DRIVER CLASS : org.sqlite.JDBC
+DESCRIPTION  : SQLite JDBC Driver
+
+
+NAME         : MariaDB Connector/J
+LICENSE      : LGPL-2.1 (GNU Lesser General Public License v2.1)
+HOME PAGE    : https://downloads.mariadb.org
+DOWNLOAD PAGE: https://downloads.mariadb.org/connector-java/
+DRIVER CLASS : org.mariadb.jdbc.Driver
+DESCRIPTION  : MariaDB and MySQL JDBC Driver
+
+
+NAME         : PostgreSQL JDBC Driver
+LICENSE      : BSD-2-Clause License
+HOME PAGE    : https://jdbc.postgresql.org
+DOWNLOAD PAGE: https://jdbc.postgresql.org/download.html
+DRIVER CLASS : org.postgresql.Driver
+DESCRIPTION  : PostgreSQL JDBC Driver
+
+
+NAME         : HSQLDB JDBC Driver
+LICENSE      : BSD License
+HOME PAGE    : http://hsqldb.org
+DOWNLOAD PAGE: http://www.hsqldb.org/download
+DRIVER CLASS : org.hsqldb.jdbc.JDBCDriver
+DESCRIPTION  : HSQLDB JDBC Driver
+
+
+NAME         : H2 Database Engine
+LICENSE      : MPL-2.0 (Mozilla Public License v2.0), EPL-1.0 (Eclipse Public License v1.0)
+HOME PAGE    : https://www.h2database.com
+DOWNLOAD PAGE: https://www.h2database.com/html/download.html
+DRIVER CLASS : org.h2.Driver
+DESCRIPTION  : Used modified version of SQL script reader FBSQL (org.h2.util.ScriptReader.java)
+
+
+NAME         : Apache Derby JDBC Driver
+LICENSE      : Apache License 2.0
+HOME PAGE    : http://db.apache.org/derby
+DOWNLOAD PAGE: http://db.apache.org/derby/derby_downloads.html
+DRIVER CLASS : org.apache.derby.jdbc.EmbeddedDriver
+DRIVER CLASS : org.apache.derby.jdbc.ClientDriver
+DESCRIPTION  : Apache Derby JDBC Driver
+
+
+NAME         : JTOpen
+LICENSE      : IPL-1.0 (IBM Public License v1.0)
+HOME PAGE    : http://jt400.sourceforge.net
+DOWNLOAD PAGE: https://sourceforge.net/projects/jt400/files/JTOpen-full
+DRIVER CLASS : com.ibm.as400.access.AS400JDBCDriver
+DESCRIPTION  : IBM i (or i5/OS or OS/400) JDBC Driver
+
+
+----------------------------------------------------------------------------------------------------
+Please contact Nėuro Lab by E-Mail neuro.lab.team@gmail.com
+or visit https://neuro-lab.github.io if you need additional
+information or have any questions.

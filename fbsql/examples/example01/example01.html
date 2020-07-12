@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+
+<!--
+In this example we do not use authentication and authorization
+to access our backend SQL database.
+-->
+
+<head>
+<title>Example 01. FBSQL: Result Set formats</title>
+<script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+</head>
+
+<body>
+	<script type="text/javascript">
+		"use strict"
+
+
+		/* Connect to database instance with alias name 'h2-example02', user 'john' and password 'secret' as 'manager' */
+		const conn = new Connection('h2-example02', 'john', 'secret', 'manager');
+		const ps    = conn.prepareStatement("SELECT * FROM countries");
+
+		ps
+		.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_OBJECTS).logExecuteQuery(document.body, false) // the default
+		.then((resultSet) => {
+			return ps
+			.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_ARRAYS)
+			.logExecuteQuery(document.body, false);
+		})
+		.then((resultSet) => {
+			return ps
+			.setResultSetFormat(PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
+			.logExecuteQuery(document.body, false);
+		});
+	</script>
+</body>
+
+</html>

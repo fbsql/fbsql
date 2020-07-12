@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('my-sqlite'); 
+            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
+            ps.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
+        </script>
+    </body>
+</html>

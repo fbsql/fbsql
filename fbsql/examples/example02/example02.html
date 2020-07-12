@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+
+<!--
+In this example we do not use authentication and authorization
+to access our backend SQL database.
+-->
+
+<head>
+<title>Example 02. FBSQL: Using promise API</title>
+<script src="http://localhost:8080/fbsql.min.js"></script>
+</head>
+
+<body>
+	<script type="text/javascript">
+		"use strict"
+
+		/* Connect to default database instance (instance with alias name 'fbsql-default') */
+		//const conn = new Connection();
+
+		/* Connect to default database instance (instance with alias name 'fbsql-default') */
+		//const conn = new Connection('fbsql-default');
+
+		/* Connect to default database instance (instance with alias name 'fbsql-default') */
+		//const conn = new Connection(null);
+
+		/* Connect to default database instance (instance with alias name 'fbsql-default') */
+		//const conn = new Connection(undefined);
+
+		/* Connect to database instance with alias name 'h2-example02' by providing instance alias name */
+		//const conn = new Connection('h2-example02');
+
+		/* Connect to database instance with alias name 'h2-example02' providing instance URL string */
+		//const conn = new Connection('http://localhost:8080/h2-example02');
+
+		/* Connect to database instance with alias name 'h2-example02' providing instance URL object */
+		//const conn = new Connection(new URL('http://localhost:8080/h2-example02'));
+
+		/* Connect to database instance with alias name 'h2-example02', user 'john' and password 'secret' as 'manager' */
+		const conn = new Connection('h2-example02', 'john', 'secret', 'manager');
+		//const conn = new Connection('my-sqlite', 'john', 'secret', 'manager');
+		//const conn = new Connection('my-sqlite');
+
+		/* Listen to database events */
+		conn.logDatabaseEvents(document.body, false);
+
+		conn.prepareStatement("SELECT * FROM employees")
+		.logExecuteQuery(document.body, false)
+		.then(result => {
+			return conn.prepareStatement("CALL TESTRUN(:price, 'xyz,XYZppp', :name)")
+			.setResultSetFormat(PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
+			.logExecuteQuery(document.body, false,
+				{name: 'Billy', price: 724}
+			);
+		})
+		.then(resultSet => {
+			return conn.prepareStatement("DELETE FROM employees")
+			.logExecuteUpdate(document.body, false);
+		})
+		.then(result => {
+			return conn.prepareStatement("INSERT INTO employees (FIRST_NAME, DATE_OF_BIRTH) VALUES(:first_name, :date_of_birth)")
+			.logExecuteUpdate(document.body, false,
+				[
+					{first_name: 'John',     date_of_birth: '1997-10-27'},
+					{first_name: 'Leonardo', date_of_birth: '1982-03-19'}
+				]
+			);
+		})
+		.then(result => {
+			return conn.prepareStatement("SELECT * FROM employees WHERE EMPLOYEE_ID = :id")
+			.logExecuteQuery(document.body, false,
+				{
+					id: result.generatedKeys[1].EMPLOYEE_ID
+				}
+			);
+		})
+		.then(resultSet => {
+			return conn.prepareStatement("UPDATE employees SET FIRST_NAME = :first_name, DATE_OF_BIRTH = :date_of_birth WHERE EMPLOYEE_ID = :id")
+			.logExecuteUpdate(document.body, false,
+				{
+					id: resultSet[0].EMPLOYEE_ID,
+					first_name: 'Leon ' + Math.floor(Math.random() * 1000),
+					date_of_birth: '1998-10-27'
+				}
+			);
+		})
+		.then(result => {
+			return conn.prepareStatement("SELECT * FROM employees").logExecuteQuery(document.body, false);
+		});
+
+	</script>
+</body>
+
+</html>

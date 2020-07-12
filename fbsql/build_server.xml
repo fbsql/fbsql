@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+MIT License
+
+Copyright (c) 2020 FBSQL Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Home:   https://fbsql.github.io
+E-Mail: fbsql.team.team@gmail.com
+-->
+
+<!--
+Important properties:
+
+<property name="version" value="2.3.4" />
+<property name="bundles-dir" value="${user.home}/fbsql-bundles" />
+<property name="out-dir" value="${user.home}/fbsql-releases/release-${version}" />
+-->
+
+<project name="FBSQL" default="main">
+	<echo>${ant.version}</echo>
+	<echo> </echo>
+
+	<!-- Third-party bundles -->
+	<property name="bundles-dir" value="${user.home}/fbsql-bundles" />
+
+	<property name="bundle-makeself" value="${bundles-dir}/makeself-2.4.0.run" />
+	<property name="bundle-jdk" value="${bundles-dir}/openjdk-13.0.2_linux-x64_bin.tar.gz" />
+	<property name="bundle-tomcat" value="${bundles-dir}/apache-tomcat-9.0.31.tar.gz" />
+	<property name="bundle-closure-compiler" value="${bundles-dir}/closure-compiler-v20200224.jar" />
+
+	<property name="version" value="2.3.4" />
+
+	<property name="out-dir" value="${user.home}/fbsql-releases/release-${version}" />
+	<property name="war-file" value="${out-dir}/fbsql.war" />
+	<property name="exe-file" value="${out-dir}/fbsql" />
+
+	<property name="tmpdir-war" value="${java.io.tmpdir}/fbsql-war-tmp" />
+	<property name="tmpdir-exe" value="${java.io.tmpdir}/fbsql-tmp" />
+
+	<property name="makeself-dir" value="${tmpdir-exe}/makeself-2.4.0" />
+	<property name="tomcat-dir" value="${tmpdir-exe}/apache-tomcat-9.0.31" />
+
+	<mkdir dir="${out-dir}" />
+	<echo>Output directory: ${out-dir}</echo>
+	<echo> </echo>
+
+	<target name="main">
+		<ant antfile="build.xml" target="main" useNativeBaseDir="true" />
+
+		<antcall target="server-prepare" />
+		<antcall target="copy-drivers" />
+
+		<antcall target="server">
+			<param name="server-product" value="fbsql-server-plus"/>
+		</antcall>
+
+		<antcall target="clean" />
+	</target>
+
+	<target name="war">
+		<property name="release-name-war" value="fbsql-war-${version}" />
+		<property name="zip-file-war" value="${out-dir}/${release-name-war}.zip" />
+		<delete file="${zip-file-war}" failonerror="false" />
+		<zip destfile="${zip-file-war}" comment="FBSQL WAR - Frontend Backend SQL Web Application">
+			<zipfileset dir="${out-dir}" includes="fbsql.war" prefix="${release-name-war}" />
+			<zipfileset dir="${basedir}" includes="LICENSES/**" prefix="${release-name-war}" />
+			<zipfileset dir="${basedir}/README/war" includes="README" prefix="${release-name-war}" />
+		</zip>
+
+		<echo>${zip-file-war}</echo>
+
+	</target>
+
+	<target name="server-prepare">
+
+		<property name="jdk-dir" value="${tomcat-dir}/jre" />
+
+		<untar src="${bundle-tomcat}" dest="${tmpdir-exe}" compression="gzip" />
+
+		<delete includeemptydirs="true">
+			<fileset dir="${tomcat-dir}" includes="webapps/**"/>
+		</delete>
+
+		<delete>
+			<fileset dir="${tomcat-dir}" includes="*"/>
+			<fileset dir="${tomcat-dir}" includes="bin/*.bat"/>
+			<fileset dir="${tomcat-dir}" includes="bin/startup.sh"/>
+			<fileset dir="${tomcat-dir}" includes="bin/shutdown.sh"/>
+			<fileset dir="${tomcat-dir}" includes="bin/*.tar.gz"/>
+			<fileset dir="${tomcat-dir}" includes="temp/safeToDelete.tmp"/>
+		</delete>
+
+		<unwar src="${war-file}" dest="${tomcat-dir}/webapps/ROOT" />
+
+		<mkdir dir="${jdk-dir}" />
+		<untar src="${bundle-jdk}" dest="${jdk-dir}" compression="gzip">
+			<cutdirsmapper dirs="1" />
+		</untar>
+
+		<delete includeemptydirs="true">
+			<fileset dir="${jdk-dir}" includes="bin/**" excludes="bin/java"/>
+			<fileset dir="${jdk-dir}" includes="include/**" />
+			<fileset dir="${jdk-dir}" includes="legal/**" />
+			<fileset dir="${jdk-dir}" includes="lib/src.zip" />
+			<fileset dir="${jdk-dir}" includes="release" />
+		</delete>
+
+		<mkdir dir="${tomcat-dir}/org/neuro/fbsql_server" />
+		<copy todir="${tomcat-dir}">
+			<fileset dir="${basedir}/bin">
+				<include name="org/neuro/fbsql_server/*.class" />
+			</fileset>
+		</copy>
+
+		<tstamp>
+			<format property="timestamp" pattern="yyyy-MM-dd'T'HH:mm:ss'Z'" timezone="UTC"/>
+		</tstamp>
+
+		<property name="start-script" value="${tomcat-dir}/start.sh" />
+		<echo file="${start-script}" append="true"><![CDATA[clear${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "┌─────────────────────────────────────┐";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "│ \033[1mFBSQL\033[0m - Frontend Backend SQL server │";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "│ Build:  ${timestamp}        │";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "└─────────────────────────────────────┘";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "                                                                 ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[parentdir="$(dirname "$PWD")"${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[if [ "$1" = "stop" ] && [ ! -d "$parentdir"/fbsql-server ]; then${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[echo "Running instance not found. Already stopped?";]]></echo>
+		
+		<echo file="${start-script}" append="true"><![CDATA[fi${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[export JRE_HOME=jre${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[export JAVA_OPTS="-Djdk.lang.Process.launchMechanism=vfork"${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[if [ "$1" = "stop" ]; then${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[bin/catalina.sh stop >/dev/null 2>&1${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[rm -rf "$parentdir"/fbsql-server${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "The server was successfully stopped.${line.separator}";]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[elif [ "$1" = "start" ] || [ "$1" = "run" ]; then${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[rm -rf "$parentdir"/fbsql-server${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[mv "$PWD" "$parentdir"/fbsql-server${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[cd "$parentdir"/fbsql-server${line.separator}]]></echo>
+
+		<!-- START copy config files to user home directory -->
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/tomcat/conf${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[cp -npr "$parentdir"/fbsql-server/conf/* $HOME/fbsql/config/tomcat/conf${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/jre/conf${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[cp -npr "$parentdir"/fbsql-server/jre/conf/* $HOME/fbsql/config/jre/conf${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/tomcat/webapps/ROOT/WEB-INF/classes${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[cp -npr "$parentdir"/fbsql-server/webapps/ROOT/index.html $HOME/fbsql/config/tomcat/webapps/ROOT${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[cp -npr "$parentdir"/fbsql-server/webapps/ROOT/WEB-INF/web.xml $HOME/fbsql/config/tomcat/webapps/ROOT/WEB-INF${line.separator}]]></echo>
+
+
+		<echo file="${start-script}" append="true"><![CDATA[if [ ! -d "$HOME"/fbsql/config/db ]; then${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/db${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/db/fbsql_default_db${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "   CONNECT TO 'jdbc:sqlite:memory:myDb';${line.separator}"             > $HOME/fbsql/config/db/fbsql_default_db/init.sql${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "-- CONNECT TO 'jdbc:h2:mem:myDb';${line.separator}"                   >> $HOME/fbsql/config/db/fbsql_default_db/init.sql${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "-- CONNECT TO 'jdbc:hsqldb:mem:myDb';${line.separator}"               >> $HOME/fbsql/config/db/fbsql_default_db/init.sql${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "-- CONNECT TO 'jdbc:derby:memory:myDb;create=true';${line.separator}" >> $HOME/fbsql/config/db/fbsql_default_db/init.sql${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[fi${line.separator}]]></echo>
+
+
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/logs${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/tomcat/bin${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[echo 'CATALINA_OUT=$HOME/fbsql/logs/catalina.out' >bin/setenv.sh${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[chmod +x bin/setenv.sh${line.separator}]]></echo>
+		<!-- END copy config files to user home directory -->
+
+		<echo file="${start-script}" append="true"><![CDATA[cd "$parentdir"/fbsql-server${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[$JRE_HOME/bin/java -cp ".:webapps/ROOT/WEB-INF/lib/*:webapps/ROOT/WEB-INF/classes" org.fbsql_server.Main${line.separator}]]></echo>
+		
+		<echo file="${start-script}" append="true"><![CDATA[if [ "$1" = "run" ]; then${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "running...";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[bin/catalina.sh run${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[elif [ "$1" = "start" ]; then${line.separator}]]></echo>		
+		<echo file="${start-script}" append="true"><![CDATA[bin/catalina.sh start >/dev/null 2>&1${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[fi${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "The server was successfully started.${line.separator}";]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[else${line.separator}]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[echo "Usage:                                         ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "                                               ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "fbsql <command>                                ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "                                               ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "commands:                                      ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "          start - start server (in basckground)";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "          stop  - stop server                  ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "                                               ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "          run   - run server (in foreground)   ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "                                               ";]]></echo>
+
+		<echo file="${start-script}" append="true"><![CDATA[fi]]></echo>
+
+		<chmod file="${start-script}" perm="ugo+rx" />
+		<chmod file="${tomcat-dir}/bin/catalina.sh" perm="ugo+rx" />
+		<chmod file="${jdk-dir}/bin/java" perm="ugo+rx" />
+
+		<property name="makeself" value="${tmpdir-exe}/makeself-2.4.0.run" />
+		<copy file="${bundle-makeself}" todir="${tmpdir-exe}" />
+		<chmod file="${makeself}" perm="ugo+rx" />
+
+		<exec executable="${makeself}" dir="${tmpdir-exe}">
+			<arg value="--nox11" />
+			<arg value="--noprogress" />
+		</exec>
+
+	</target>
+
+	<target name="server">
+		<delete file="${exe-file}" failonerror="false" />
+		<exec executable="${makeself-dir}/makeself.sh" dir="${makeself-dir}">
+			<arg value="--noprogress" />
+			<arg value="--nox11" />
+			<arg value="--nomd5" />
+			<arg value="--nocrc" />
+			<arg value="--follow" />
+			<arg value="--help-header" />
+			<arg value="${basedir}/help.txt" />
+			<arg value="${tomcat-dir}" />
+			<arg value="${exe-file}" />
+			<arg value="FBSQL..." />
+			<arg value="./start.sh" />
+		</exec>
+
+		<property name="release-name-server" value="${server-product}-${version}-linux-x86-64" />
+		<property name="zip-file-server" value="${out-dir}/${release-name-server}.zip" />
+		<delete file="${zip-file-server}" failonerror="false" />
+		<zip destfile="${zip-file-server}" comment="FBSQL SERVER - Frontend Backend SQL Server">
+			<zipfileset dir="${out-dir}" includes="fbsql" prefix="${release-name-server}" filemode="755" />
+			<zipfileset dir="${basedir}" includes="LICENSES/**" prefix="${release-name-server}" />
+			<zipfileset dir="${basedir}/README/server" includes="README" prefix="${release-name-server}" />
+		</zip>
+
+		<echo>${zip-file-server}</echo>
+	</target>
+
+	<target name="copy-drivers">
+		<copy todir="${tomcat-dir}/webapps/ROOT/WEB-INF/lib">
+			<fileset dir="${bundles-dir}/drivers">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${tomcat-dir}/webapps/ROOT/WEB-INF/lib">
+			<fileset dir="${bundles-dir}/drivers/derby">
+				<include name="*.*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="clean">
+		<delete includeemptydirs="true" dir="${tmpdir-exe}" />
+		<delete includeemptydirs="true" dir="${tmpdir-war}" />
+	</target>
+
+</project>
+
+<!--
+Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+or visit https://fbsql.github.io if you need additional
+information or have any questions.
+-->
+
+<!-- EOF -->

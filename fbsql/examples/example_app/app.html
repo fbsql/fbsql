@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+
+<head>
+<title>Example App</title>
+<script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+<style type="text/css">
+table {
+	border-color: #ddd;
+	border-collapse: collapse;
+}
+
+tr {
+	border: 1px solid;
+	border-color: #ddd;
+}
+
+td {
+	vertical-align: top;
+}
+
+td div {
+	padding: 1rem;
+	font-family: monospace;
+	white-space: pre;
+}
+
+td div:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+td div:nth-child(odd) {
+	background-color: #fff;
+}
+</style>
+</head>
+
+<body>
+
+	<label for="userInput">User:</label><input id="userInput" type="text" />
+	<br>
+	<div id="userErrorMessage" style="visibility: hidden;">User already exist!</div>
+	<br>
+	<label for="mailInput">Mail:</label><input id="mailInput" type="email" value="zevkarmat@gmail.com" />
+	<br>
+	<label for="passwordInput">Password:</label><input id="passwordInput" type="text" />
+	<br>
+	<br>
+	<button id="buttonSubmitUserRegistration">Register</button>
+	<br>
+	<br>
+	<br>
+	<br>
+	<label for="confirmationCodeInput">Confirmation code:</label><input id="confirmationCodeInput" type="text" />
+	<br>
+	<br>
+	<button id="buttonConfirmUserRegistration">Submit confirmation code</button>
+
+	<script type="text/javascript">
+        "use strict"
+
+        const guestConn = FBSQL.connectRemote('sc', 'guest', 'guest', 'guest');
+
+        let psIsUserExists            = guestConn.prepareStatement("SELECT TRUE FROM REGISTRY WHERE RGUSR=:user LIMIT 1");
+        let psCreateSession           = guestConn.prepareStatement("CREATE SESSION");
+        let psRegisterUser            = guestConn.prepareStatement("{CALL REGISTERUSER(:user, :password, :mail, REMOTE_SESSION_ID())}");
+        let psConfirmUserRegistration = guestConn.prepareStatement("{CALL CONFIRMREGISTRATION(:confirmationCode, REMOTE_SESSION_ID())}");
+
+        /* Listen to database events */
+        guestConn.setEventListener((event) => {
+            let div = document.createElement('div');
+            div.innerHTML = 'Database event received:<br><font color="darkcyan">' + JSON.stringify(event, null, '\t') + '</font>';
+            events.appendChild(div);
+        });
+
+		let userErrorMessage              = document.getElementById('userErrorMessage');
+        let userInput                     = document.getElementById('userInput');
+        let mailInput                     = document.getElementById('mailInput');
+        let passwordInput                 = document.getElementById('passwordInput');
+        let confirmationCodeInput         = document.getElementById('confirmationCodeInput');
+        let buttonSubmitUserRegistration  = document.getElementById('buttonSubmitUserRegistration');
+        let buttonConfirmUserRegistration = document.getElementById('buttonConfirmUserRegistration');
+
+        buttonSubmitUserRegistration.addEventListener('click', event => {
+        	psCreateSession.executeUpdate()
+        	.then((result) => {
+       			console.log(JSON.stringify(result));
+        		return psRegisterUser.executeQuery({user: userInput.value.trim(), password: passwordInput.value.trim(), mail: mailInput.value.trim()});
+        	})
+        	.then((resultSet) => {
+       			alert(JSON.stringify(resultSet));
+        	}, error => {
+        		console.log(error);
+        		alert(error.message);
+        	});
+        });
+
+        buttonConfirmUserRegistration.addEventListener('click', event => {
+        	psConfirmUserRegistration.executeUpdate({confirmationCode: confirmationCodeInput.value.trim()})
+        	.then((result) => {
+       			console.log(JSON.stringify(result));
+				alert("Ok");
+				let user = userInput.value.trim();
+				alert(user + "|" + passwordInput.value.trim());
+
+	            //const conn = FBSQL.connectRemote('sc', 'guest', 'guest', 'guest');
+	            //let ps = conn.prepareStatement("SELECT * FROM COUNTRIES");
+
+				
+				const customerConn = FBSQL.connectRemote('sc', user, passwordInput.value.trim(), 'customer');
+	            let ps = customerConn.prepareStatement("SELECT * FROM COUNTRIES WHERE COUNTRY_ID=?");
+				ps.executeQuery({a: 'DE'})
+	        	//ps.executeQuery({user: user})
+	        	.then((resultSet) => {
+	       			console.log(JSON.stringify(resultSet));
+					alert("Ok!!!!");
+	        	});
+
+        	});
+        });
+
+        userInput.addEventListener('input', event => {
+        	psIsUserExists.executeQuery({user: userInput.value.trim()})
+			.then((resultSet) => {
+				if (resultSet.length == 0)
+					userErrorMessage.style.visibility = "hidden";
+				else
+					userErrorMessage.style.visibility = "visible";
+			})
+        });
+
+    </script>
+</body>
+
+</html>

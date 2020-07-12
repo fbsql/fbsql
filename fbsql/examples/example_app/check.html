@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+
+<head>
+<title>Example App</title>
+<script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+<style type="text/css">
+table {
+	border-color: #ddd;
+	border-collapse: collapse;
+}
+
+tr {
+	border: 1px solid;
+	border-color: #ddd;
+}
+
+td {
+	vertical-align: top;
+}
+
+td div {
+	padding: 1rem;
+	font-family: monospace;
+	white-space: pre;
+}
+
+td div:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+td div:nth-child(odd) {
+	background-color: #fff;
+}
+</style>
+</head>
+
+<body>
+
+<div id="my" hidden>
+	SELECT (1 + :a) AS K
+</div>
+<input id="user" type="text"/>
+<div id="userMsg"></div>
+
+<button id="btn_submit">Submit</button>
+	<table border="1">
+		<tr>
+			<td id="results"></td>
+			<td id="events"></td>
+		</tr>
+	</table>
+	<script type="text/javascript">
+        "use strict"
+
+        let results = document.getElementById('results');
+        let events = document.getElementById('events');
+
+
+        /* Connect to default database instance (instance with alias name 'fbsql-default') */
+        //const conn = new Connection();
+
+        /* Connect to default database instance (instance with alias name 'fbsql-default') */
+        //const conn = new Connection('fbsql-default');
+
+        /* Connect to default database instance (instance with alias name 'fbsql-default') */
+        //const conn = new Connection(null);
+
+        /* Connect to default database instance (instance with alias name 'fbsql-default') */
+        //const conn = new Connection(undefined);
+
+        /* Connect to database instance with alias name 'h2-example02' by providing instance alias name */
+        //const conn = new Connection('h2-example02');
+
+        /* Connect to database instance with alias name 'h2-example02' providing instance URL string */
+        //const conn = new Connection('http://localhost:8080/h2-example02');
+
+        /* Connect to database instance with alias name 'h2-example02' providing instance URL object */
+        //const conn = new Connection(new URL('http://localhost:8080/h2-example02'));
+
+        /* Connect to database instance with alias name 'h2-example02', user 'john' and password 'secret' */
+        //const conn = new Connection('h2-example02', 'john', 'secret');
+
+        /* Connect to database instance with alias name 'h2-example02', user 'john', password 'secret' and role 'manager' */
+
+
+// console.log(alasql("CREATE TABLE test (language INT, hello STRING)"));
+// console.log(alasql("INSERT INTO test VALUES (1,'Hello!')"));
+// console.log(alasql("INSERT INTO test VALUES (2,'Aloha!')"));
+// console.log(alasql("INSERT INTO test VALUES (3,'Bonjour!')"));
+// console.log( alasql("SELECT * FROM test WHERE language > :k", {k: 0}) );
+
+
+let dt = [{a:1},{a:2},{a:3},{a:4},{a:5}];
+
+		let startTime = performance.now();
+
+       // const connLocal = new Connection({local: false});
+        //const connLocal = FBSQL.connectLocal('mmm');
+        
+        //const connLocal = FBSQL.connectMemory('mmm');
+        //const connLocal = FBSQL.connectLocalStorage('mmm');
+        //const conn = FBSQL.connectIndexedDb('mmm');
+        const guestConn = FBSQL.connectRemote('sc', '');
+        let psCheckUser = guestConn.prepareStatement("SELECT TRUE FROM REGISTRY WHERE RGUSR=:user LIMIT 1");
+        let psCreateSession = guestConn.prepareStatement("CREATE SESSION)");
+        let psInsertUser = guestConn.prepareStatement("CALL CONFIRMREGISTRATION(:user, :password, :mail, REMOTE_SESSION_ID())");
+        
+        /* Listen to database events */
+        guestConn.setEventListener((event) => {
+            let div = document.createElement('div');
+            div.innerHTML = 'Database event received:<br><font color="darkcyan">' + JSON.stringify(event, null, '\t') + '</font>';
+            events.appendChild(div);
+        });
+
+		let userMsg = document.getElementById('userMsg');
+        let input = document.getElementById('user');
+        let btn_submit = document.getElementById('btn_submit');
+        
+        btn_submit.addEventListener('click', event => {
+        	psCreateSession.executeUpdate()
+        	.then((result) => {
+       			console.log(JSON.stringify(result));
+        		return psInsertUser.executeQuery({user: input.value.trim(), password: 'pppppppppppp', mail: 'zevkarmat@gmail.com'});
+        	})
+        	.then((resultSet) => {
+       			alert(JSON.stringify(resultSet));
+        	});
+        });
+        input.addEventListener('input', event => {
+        	psCheckUser.executeQuery({user: input.value.trim()})
+			.then((resultSet) => {
+				if (resultSet.length == 0)
+					userMsg.innerHTML = "";
+				else
+					userMsg.innerHTML = "User already exist!";
+			})
+        });
+
+        
+//         //const connLocal = FBSQL.connectRemote();
+        
+//         //let ps1 = connLocal.prepareStatement("SELECT a FROM :dt WHERE a > :rrr");
+// //let ps1 = connLocal.prepareStatement("CREATE TABLE test (language INT, hello STRING)");
+// //let ps0 = connLocal.prepareStatement("CREATE DATABASE test252");
+// //let ps1 = connLocal.prepareStatement("CREATE TABLE test (language INT, hello VARCHAR(50))");
+// //let ps0 = connLocal.prepareStatement(cr);
+// let ps1 = conn.prepareStatement(my);
+// // let ps2 = conn.prepareStatement("INSERT INTO test (language, hello) VALUES (1,'Hello!')");
+// // let ps3 = conn.prepareStatement("INSERT INTO test (language, hello) VALUES (2,'Aloha!')");
+// // let ps4 = conn.prepareStatement("INSERT INTO test (language, hello) VALUES (3,'Bonjour!')");
+// // let ps5 = conn.prepareStatement("INSERT INTO test (language, hello) VALUES (:lang, :hl)");
+// // let psSelect = conn.prepareStatement("SELECT * FROM test WHERE language > :rrr");
+// // let psSelectAll = conn.prepareStatement("SELECT * FROM test");
+// //let psSelectAll = connLocal.prepareStatement("SELECT * FROM CSV('a.csv', {headers:true, separator:','})");
+
+// //let psSelect = connLocal.prepareStatement("SELECT * FROM test WHERE language > ?");
+// //let psSelect = connLocal.prepareStatement("SELECT * FROM test");
+        
+//         document.getElementById("btn_create_table")
+//         .addEventListener('click', event => {
+// 			ps1.executeQuery({a: 4})
+// 			.then((result) => {
+// 				let div = document.createElement('div');
+// 				div.innerHTML = '<strong>' + ps1.getStatement() + '</strong> <font color="green"><br><br>' + ' record(s) updated.</font><br><br>Result Set:<br><font color="brown">' + JSON.stringify(result, null, '    ') + '</font><br>';
+// 				results.appendChild(div);
+// 			})
+// 			.catch((error)=> {
+// 				console.log(error);
+// 				let div = document.createElement('div');
+// 				//div.innerHTML = '<font color="red">ERROR:<br>' + JSON.stringify({message: error.message}, null, '    ') + '</font>';
+// 				div.innerHTML = '<font color="red">ERROR:<br>' + error + '</font>';
+// 				results.appendChild(div);
+// 			})
+// 			.finally(()=> {
+// 				let div = document.createElement('div');
+// 				div.innerHTML = '<font color="darkcyan">*** Elapsed time: ' + ((performance.now() - startTime) / 1000) + ' seconds ***</font>';
+// 				results.appendChild(div);
+// 			});
+//         });
+
+    </script>
+</body>
+
+</html>

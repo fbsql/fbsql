@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+
+<head>
+<title>Example App</title>
+<script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+<style type="text/css">
+table {
+	border-color: #ddd;
+	border-collapse: collapse;
+}
+
+tr {
+	border: 1px solid;
+	border-color: #ddd;
+}
+
+td {
+	vertical-align: top;
+}
+
+td div {
+	padding: 1rem;
+	font-family: monospace;
+	white-space: pre;
+}
+
+td div:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+td div:nth-child(odd) {
+	background-color: #fff;
+}
+</style>
+</head>
+
+<body>
+
+<div id="my" hidden>
+	SELECT (1 + :a) AS K
+</div>
+<input id="user" type="text"/><br>
+<div id="userMsg"></div>
+<input id="password" type="text"/><br>
+<br>
+
+<button id="btn_submit">Submit</button>
+<br>
+<input id="conf" type="text"/>
+<br>
+<button id="btn_conf">Confirm</button>
+
+	<table border="1">
+		<tr>
+			<td id="results"></td>
+			<td id="events"></td>
+		</tr>
+	</table>
+	<script type="text/javascript">
+        "use strict"
+
+        let results = document.getElementById('results');
+        let events = document.getElementById('events');
+
+
+        /* Connect to default database instance (instance with alias name 'fbsql-default') */
+        //const conn = new Connection();
+
+        /* Connect to default database instance (instance with alias name 'fbsql-default') */
+        //const conn = new Connection('fbsql-default');
+
+        /* Connect to default database instance (instance with alias name 'fbsql-default') */
+        //const conn = new Connection(null);
+
+        /* Connect to default database instance (instance with alias name 'fbsql-default') */
+        //const conn = new Connection(undefined);
+
+        /* Connect to database instance with alias name 'h2-example02' by providing instance alias name */
+        //const conn = new Connection('h2-example02');
+
+        /* Connect to database instance with alias name 'h2-example02' providing instance URL string */
+        //const conn = new Connection('http://localhost:8080/h2-example02');
+
+        /* Connect to database instance with alias name 'h2-example02' providing instance URL object */
+        //const conn = new Connection(new URL('http://localhost:8080/h2-example02'));
+
+        /* Connect to database instance with alias name 'h2-example02', user 'john' and password 'secret' */
+        //const conn = new Connection('h2-example02', 'john', 'secret');
+
+        /* Connect to database instance with alias name 'h2-example02', user 'john', password 'secret' and role 'manager' */
+
+
+// console.log(alasql("CREATE TABLE test (language INT, hello STRING)"));
+// console.log(alasql("INSERT INTO test VALUES (1,'Hello!')"));
+// console.log(alasql("INSERT INTO test VALUES (2,'Aloha!')"));
+// console.log(alasql("INSERT INTO test VALUES (3,'Bonjour!')"));
+// console.log( alasql("SELECT * FROM test WHERE language > :k", {k: 0}) );
+
+
+let dt = [{a:1},{a:2},{a:3},{a:4},{a:5}];
+
+		let startTime = performance.now();
+
+       // const connLocal = new Connection({local: false});
+        //const connLocal = FBSQL.connectLocal('mmm');
+        
+        //const connLocal = FBSQL.connectMemory('mmm');
+        //const connLocal = FBSQL.connectLocalStorage('mmm');
+        //const conn = FBSQL.connectIndexedDb('mmm');
+        const guestConn = FBSQL.connectRemote('sc', 'guest', 'guest', 'guest');
+        let ps = guestConn.prepareStatement("SELECT * FROM COUNTRIES WHERE COUNTRY_ID=:a");
+		ps.executeQuery({a: 'DE'})
+	        	//ps.executeQuery({user: user})
+	        	.then((resultSet) => {
+	       			//console.log(JSON.stringify(resultSet));
+					alert(JSON.stringify(resultSet));
+	        	});
+
+        let ps2 = guestConn.prepareStatement("SELECT * FROM COUNTRIES");
+		ps2.executeQuery()
+	        	//ps.executeQuery({user: user})
+	        	.then((resultSet) => {
+	       			//console.log(JSON.stringify(resultSet));
+					alert(JSON.stringify(resultSet));
+	        	});
+
+    </script>
+</body>
+
+</html>

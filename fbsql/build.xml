@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+MIT License
+
+Copyright (c) 2020 FBSQL Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Home:   https://fbsql.github.io
+E-Mail: fbsql.team.team@gmail.com
+-->
+
+<!--
+WARNING! To run this script you need define "war-file" system property
+
+E.g.:
+-Dwar-file=/home/johndoe/apache-tomcat-9.0.30/fbsql.war
+-->
+
+<project default="main">
+	<echo>${ant.version}</echo>
+	<echo>
+	</echo>
+
+	<echo>External parameters:</echo>
+	<echo>-Dwar-file=${war-file}</echo>
+	<echo>
+	</echo>
+
+	<!-- Third-party bundles -->
+	<property name="bundles-dir" value="${user.home}/fbsql-bundles" />
+
+	<property name="bundle-closure-compiler" value="${bundles-dir}/closure-compiler-v20200224.jar" />
+
+	<property name="tmpdir-war" value="${java.io.tmpdir}/fbsql-war-tmp" />
+
+	<target name="main">
+		<property name="bin" value="${basedir}/bin" />
+		<property name="result-fbsql-js" value="${tmpdir-war}/fbsql.min.js" />
+
+		<mkdir dir="${tmpdir-war}" />
+
+		<macrodef name="minify">
+			<attribute name="input" />
+			<attribute name="output" />
+			<sequential>
+				<java jar="${bundle-closure-compiler}" fork="true">
+					<arg line="--js=@{input}" />
+					<arg line="--js_output_file=@{output}" />
+				</java>
+			</sequential>
+		</macrodef>
+
+		<minify input="${basedir}/js/fbsql.js" output="${result-fbsql-js}" />
+		<!--
+		<copy file="${basedir}/js/fbsql.js" tofile="${result-fbsql-js}" overwrite="true" />
+		-->
+		<delete file="${war-file}" failonerror="false" />
+		<war destfile="${war-file}" webxml="${basedir}/WEB-INF/web.xml" manifest="${basedir}/META-INF/MANIFEST.MF">
+			<fileset dir="${basedir}" includes="META-INF/**" />
+			<fileset file="${result-fbsql-js}" />
+			<fileset file="${basedir}/js/index.html" />
+			<classes dir="${bin}" />
+			<lib dir="${basedir}/WEB-INF/lib" />
+		</war>
+	</target>
+</project>
+
+<!--
+Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+or visit https://fbsql.github.io if you need additional
+information or have any questions.
+-->
+
+<!-- EOF -->
