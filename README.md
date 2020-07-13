@@ -50,23 +50,23 @@ Work (secure) with your backend database within HTML<br>
 <h1>Quick tutorial</h1>
 
 <h2>Table of Contents</h2>
-<a href="#installation_and_basic_example">Basic example</a><br>
-<a href="#add_simple_authentication">Add simple authentication (SET ALLOW LOGIN)</a><br>
-<a href="#add_simple_role_based_authorization">Add simple role-based authorization (SET ALLOW LOGIN)</a><br>
-<a href="#secure_our_backend_with_whitelists">Secure our backend with whitelists (ADD WHITELIST)</a><br>
-<a href="#reference_statements_by_their_hash">Reference statements by their SHA-256 hash</a><br>
-<a href="#reference_statements_by_custom_names">Reference statements by custom names</a><br>
-<a href="#assign_statements_to_roles">Assign statements to roles (SET ALLOW STATEMENT)</a><br>
-<a href="#execute_query_and_execute_update">executeQuery and executeUpdate</a><br>
-<a href="#parametrized_statements">Parametrized statements</a><br>
-<a href="#batch_execution">Batch execution</a><br>
-<a href="#reseult_set_format">Reseult set format (PreparedStatement.setResultSetFormat(format))</a><br>
-<a href="#session_management">Session management (CREATE/INVALIDATE SESSION, GET SESSION INFO, SET/GET SESSION ATTRIBUTES)</a><br>
-<a href="#cookies_management">Cookies management (ADD COOKIES, GET COOKIES)</a><br>
-<a href="#database_agnostic_stored_procedures">Database agnostic stored procedures written in JVM languages (DECLARE PROCEDURE)</a><br>
-<a href="#add_database_event_notifier">Add database event notifier (ADD NOTIFIER)</a><br>
-<a href="#schedule_periodic_jobs">Schedule periodic jobs (SCHEDULE)</a><br>
-<a href="#global_request_validator">Global request validator (SET VALIDATOR)</a><br>
+<a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, execute query and get data from backend database.">Basic example</a><br>
+<a href="#add_simple_authentication" title="How to add simple authentication and usage of SET ALLOW LOGIN statement.">Authentication</a><br>
+<a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of SET ALLOW LOGIN statement.">Authorization</a><br>
+<a href="#secure_our_backend_with_whitelists" title="How to secure our backend with whitelists with ADD WHITELIST statement.">Whitelists</a><br>
+<a href="#reference_statements_by_their_hash" title="How to reference statements by their SHA-256 hash.">Reference statements by their SHA-256 hash</a><br>
+<a href="#reference_statements_by_custom_names" title="How to use custom names as statements references.">Reference statements by name</a><br>
+<a href="#assign_statements_to_roles" title="How to limit statement availability by role and/or user by using SET ALLOW STATEMENT statement.">Limit statement availability by role and/or user</a><br>
+<a href="#execute_query_and_execute_update" title="">executeQuery and executeUpdate</a><br>
+<a href="#parametrized_statements" title="">Parametrized statements</a><br>
+<a href="#batch_execution" title="">Batch execution</a><br>
+<a href="#reseult_set_format" title="">Reseult set format (PreparedStatement.setResultSetFormat(format))</a><br>
+<a href="#session_management" title="">Session management (CREATE/INVALIDATE SESSION, GET SESSION INFO, SET/GET SESSION ATTRIBUTES)</a><br>
+<a href="#cookies_management" title="">Cookies management (ADD COOKIES, GET COOKIES)</a><br>
+<a href="#database_agnostic_stored_procedures" title="">Database agnostic stored procedures written in JVM languages (DECLARE PROCEDURE)</a><br>
+<a href="#add_database_event_notifier" title="">Add database event notifier (ADD NOTIFIER)</a><br>
+<a href="#schedule_periodic_jobs" title="">Schedule periodic jobs (SCHEDULE)</a><br>
+<a href="#global_request_validator" title="">Global request validator (SET VALIDATOR)</a><br>
 
 
 
@@ -80,9 +80,9 @@ Work (secure) with your backend database within HTML<br>
 
 <a id="installation_and_basic_example"></a>
 <h2>Basic example</h2>
-<i>
-In this chapter, we will learn how to install FBSQL, create database instance connector <code>init.sql</code>, connect to backend database execute query and get result.
-</i>
+<p><i>
+In this chapter we will learn how to install FBSQL, create database connector, use CONNECT TO statement, execute query and get data from backend database.
+</i></p>
 
 <strong>Backend:</strong><br>
 
@@ -152,7 +152,10 @@ fbsql start
 
 <hr>
 <a id="add_simple_authentication"></a>
-<h2>Add simple authentication (SET ALLOW LOGIN)</h2>
+<h2>Authentication</h2>
+<p><i>
+In this chapter we will learn how to add simple authentication and usage of SET ALLOW LOGIN statement.
+</i></p>
 
 <strong>Backend:</strong><br>
 
@@ -211,7 +214,10 @@ SET ALLOW LOGIN IF EXISTS (
 ```
 <hr>
 <a id="add_simple_role_based_authorization"></a>
-<h2>Add simple role-based authorization (SET ALLOW LOGIN)</h2>
+<h2>Authorization</h2>
+<p><i>
+In this chapter we will learn how to add simple role-based authorization, and usage of SET ALLOW LOGIN statement.
+</i></p>
 
 <strong>Backend:</strong><br>
 
@@ -283,7 +289,11 @@ SET ALLOW LOGIN IF EXISTS (
 ```
 <hr>
 <a id="secure_our_backend_with_whitelists"></a>
-<h2>Secure our backend with whitelists (ADD WHITELIST)</h2>
+<h2>Whitelists</h2>
+<p><i>
+In this chapter we will learn how to secure our backend with whitelists with ADD WHITELIST statement.
+</i></p>
+
 
 <strong>Backend:</strong><br>
 
@@ -336,6 +346,10 @@ SELECT 'Hello, World!' AS HELLO;
 <hr>
 <a id="reference_statements_by_their_hash"></a>
 <h2>Reference statements by their SHA-256 hash</h2>
+<p><i>
+In this chapter we will learn how to reference statements by their SHA-256 hash.
+</i></p>
+
 FBSQL supports custom statement names in whitelist.<br>
 SHA-256 hash is a default statement reference name if no custom name was provided in whitelist:
 
@@ -393,7 +407,11 @@ SELECT 'Hello, World!' AS HELLO;
 ```
 <hr>
 <a id="reference_statements_by_custom_names"></a>
-<h2>Reference statements by custom names</h2>
+<h2>Reference statements by name</h2>
+<p><i>
+In this chapter we will learn how to use custom names as statements references.
+</i></p>
+
 
 <strong>Backend:</strong><br>
 
@@ -446,7 +464,11 @@ SELECT 'Hello, World!' AS HELLO;
 ```
 <hr>
 <a id="assign_statements_to_roles"></a>
-<h2>Assign statements to roles (SET ALLOW STATEMENT)</h2>
+<h2>Limit statement availability by role and/or user</h2>
+<p><i>
+In this chapter we will learn how to limit statement availability by role and/or user by using SET ALLOW STATEMENT statement.
+</i></p>
+
 FBSQL supports simple mechanism that helps assign particular SQL statements to specified roles.
 
 
