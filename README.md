@@ -50,7 +50,7 @@ Work (secure) with your backend database within HTML<br>
 <h1>Quick tutorial</h1>
 
 <h2>Table of Contents</h2>
-<a href="#installation_and_basic_example">Installation and basic example (CONNECT TO)</a><br>
+<a href="#installation_and_basic_example">Basic example</a><br>
 <a href="#add_simple_authentication">Add simple authentication (SET ALLOW LOGIN)</a><br>
 <a href="#add_simple_role_based_authorization">Add simple role-based authorization (SET ALLOW LOGIN)</a><br>
 <a href="#secure_our_backend_with_whitelists">Secure our backend with whitelists (ADD WHITELIST)</a><br>
@@ -79,7 +79,9 @@ Work (secure) with your backend database within HTML<br>
 
 
 <a id="installation_and_basic_example"></a>
-<h2>Installation and basic example (CONNECT TO)</h2>
+<h2>Basic example</h2>
+<i>Installation. Database instance connector. init.sql script. CONNECT TO statement.</i>
+<hr>
 
 <strong>Backend:</strong><br>
 
