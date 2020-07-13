@@ -47,26 +47,26 @@ Work (secure) with your backend database within HTML<br>
 	<br>
 </ul>
 
-<h1>Quick tutorial</h1>
+<h1>FBSQL tutorial</h1>
 
 <h2>Table of Contents</h2>
-<a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, execute query and get data from backend database.">Basic example</a><br>
+<a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Basic example</a><br>
 <a href="#add_simple_authentication" title="How to add simple authentication and usage of SET ALLOW LOGIN statement.">Authentication</a><br>
 <a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of SET ALLOW LOGIN statement.">Authorization</a><br>
 <a href="#secure_our_backend_with_whitelists" title="How to secure our backend with whitelists with ADD WHITELIST statement.">Whitelists</a><br>
 <a href="#reference_statements_by_their_hash" title="How to reference statements by their SHA-256 hash.">Reference statements by their SHA-256 hash</a><br>
 <a href="#reference_statements_by_custom_names" title="How to use custom names as statements references.">Reference statements by name</a><br>
 <a href="#assign_statements_to_roles" title="How to limit statement availability by role and/or user by using SET ALLOW STATEMENT statement.">Limit statement availability by role and/or user</a><br>
-<a href="#execute_query_and_execute_update" title="">executeQuery and executeUpdate</a><br>
-<a href="#parametrized_statements" title="">Parametrized statements</a><br>
-<a href="#batch_execution" title="">Batch execution</a><br>
-<a href="#reseult_set_format" title="">Reseult set format (PreparedStatement.setResultSetFormat(format))</a><br>
-<a href="#session_management" title="">Session management (CREATE/INVALIDATE SESSION, GET SESSION INFO, SET/GET SESSION ATTRIBUTES)</a><br>
-<a href="#cookies_management" title="">Cookies management (ADD COOKIES, GET COOKIES)</a><br>
-<a href="#database_agnostic_stored_procedures" title="">Database agnostic stored procedures written in JVM languages (DECLARE PROCEDURE)</a><br>
-<a href="#add_database_event_notifier" title="">Add database event notifier (ADD NOTIFIER)</a><br>
-<a href="#schedule_periodic_jobs" title="">Schedule periodic jobs (SCHEDULE)</a><br>
-<a href="#global_request_validator" title="">Global request validator (SET VALIDATOR)</a><br>
+<a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a><br>
+<a href="#parametrized_statements" title="How to use parametrized statements.">Parametrized statements</a><br>
+<a href="#batch_execution" title="How to use batch execution">Batch execution</a><br>
+<a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set format</a><br>
+<a href="#session_management" title="How to manage your sessions (CREATE SESSION and INVALIDATE SESSION statements), access to session information (GET SESSION INFO statement), set and get custom attributes (SET SESSION ATTRIBUTES and GET SESSION ATTRIBUTES statements).">Session management</a><br>
+<a href="#cookies_management" title="How to manage your cookies (ADD COOKIES and GET COOKIES statements).">Cookies management</a><br>
+<a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a><br>
+<a href="#add_database_event_notifier" title="How to add database event notifier (ADD NOTIFIER statement).">Database event notification</a><br>
+<a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a><br>
+<a href="#global_request_validator" title="How to write and use global request validator (SET VALIDATOR statement).">Global request validator</a><br>
 
 
 
@@ -81,7 +81,7 @@ Work (secure) with your backend database within HTML<br>
 <a id="installation_and_basic_example"></a>
 <h2>Basic example</h2>
 <p><i>
-In this chapter we will learn how to install FBSQL, create database connector, use CONNECT TO statement, execute query and get data from backend database.
+In this chapter we will learn how to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.
 </i></p>
 
 <strong>Backend:</strong><br>
@@ -556,7 +556,10 @@ SET ALLOW STATEMENT IF EXISTS (
 ```
 <hr>
 <a id="execute_query_and_execute_update"></a>
-<h2>executeQuery and executeUpdate</h2>
+<h2>Execute SQL statements</h2>
+<p><i>
+In this chapter we will learn how to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.
+</i></p>
 
 <strong>Backend:</strong><br>
 
@@ -628,6 +631,10 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 <hr>
 <a id="parametrized_statements"></a>
 <h2>Parametrized statements</h2>
+<p><i>
+In this chapter we will learn how to use parametrized statements.
+</i></p>
+
 
 <strong>Backend:</strong><br>
 
@@ -676,6 +683,9 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 <hr>
 <a id="batch_execution"></a>
 <h2>Batch execution</h2>
+<p><i>
+In this chapter we will learn how to use batch execution.
+</i></p>
 
 <strong>Backend:</strong><br>
 
@@ -728,7 +738,11 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 ```
 <hr>
 <a id="reseult_set_format"></a>
-<h2>Reseult set format (PreparedStatement.setResultSetFormat(format))</h2>
+<h2>Reseult set format</h2>
+<p><i>
+In this chapter we will learn how to receive result set in various formats by using setResultSetFormat() method.
+</i></p>
+
 You can control the result set format by choosing one from the available formats:
 
 *Available formats:*
@@ -847,13 +861,25 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 ```
 <hr>
 <a id="session_management"></a>
-<h2>Session management (CREATE/INVALIDATE SESSION, GET SESSION INFO, SET/GET SESSION ATTRIBUTES)</h2>
+<h2>Session management</h2>
+<p><i>
+In this chapter we will learn how to manage your sessions (CREATE SESSION and INVALIDATE SESSION statements), access to session information (GET SESSION INFO statement), set and get custom attributes (SET SESSION ATTRIBUTES and GET SESSION ATTRIBUTES statements).
+</i></p>
+
+
 <hr>
 <a id="cookies_management"></a>
-<h2>Cookies management (ADD COOKIES, GET COOKIES)</h2>
+<h2>Cookies management</h2>
+<p><i>
+In this chapter we will learn how to manage your cookies (ADD COOKIES and GET COOKIES statements).
+</i></p>
+
 <hr>
 <a id="database_agnostic_stored_procedures"></a>
-<h2>Database agnostic stored procedures written in <abbr title="Java Virtual Machine">JVM</abbr> languages (DECLARE PROCEDURE)</h2>
+<h2>Database agnostic stored procedures</h2>
+<p><i>
+In this chapter we will learn how to write and use database agnostic stored procedures written in JavaScript or <abbr title="Java Virtual Machine">JVM</abbr> languages (DECLARE PROCEDURE statement).
+</i></p>
 Procedures can be called from <code>init.sql</code> and/or frontend:
 
 ```sql
@@ -895,7 +921,11 @@ CALL ADD_NEW_ITEM('T-Shirt', 123);
 ```
 <hr>
 <a id="add_database_event_notifier"></a>
-<h2>Add database event notifier (ADD NOTIFIER)</h2>
+<h2>Database event notification</h2>
+<p><i>
+In this chapter we will learn how  to add database event notifier (ADD NOTIFIER statement).
+</i></p>
+
 <hr>
 <strong>Backend:</strong><br>
 
@@ -931,7 +961,11 @@ ADD NOTIFIER MYNOTIFIER TO "add_new_employee";
 </html>
 ```
 <a id="schedule_periodic_jobs"></a>
-<h2>Schedule periodic jobs (SCHEDULE)</h2>
+<h2>Schedule periodic jobs</h2>
+<p><i>
+In this chapter we will learn how to schedule periodic jobs (SCHEDULE statement).
+</i></p>
+
 <strong>Backend:</strong><br>
 
 ```sql
@@ -952,7 +986,10 @@ SCHEDULE PERIODICRUN AT "0/5 * * * * ?";
 
 <hr>
 <a id="global_request_validator"></a>
-<h2>Global request validator (SET VALIDATOR)</h2>
+<h2>Global request validator</h2>
+<p><i>
+In this chapter we will learn how to write and use global request validator (SET VALIDATOR statement).
+</i></p>
 
 <strong>Backend:</strong><br>
 
