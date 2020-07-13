@@ -56,11 +56,11 @@ Work (secure) with your backend database within HTML<br>
 <a href="#secure_our_backend_with_whitelists" title="How to secure our backend with whitelists with ADD WHITELIST statement.">Whitelists</a><br>
 <a href="#reference_statements_by_their_hash" title="How to reference statements by their SHA-256 hash.">Reference statements by their SHA-256 hash</a><br>
 <a href="#reference_statements_by_custom_names" title="How to use custom names as statements references.">Reference statements by name</a><br>
-<a href="#assign_statements_to_roles" title="How to limit statement availability by role and/or user by using SET ALLOW STATEMENT statement.">Limit statement availability by role and/or user</a><br>
+<a href="#assign_statements_to_roles" title="How to limit statements by role and/or user with SET ALLOW STATEMENT statement.">Limit statements by role/user</a><br>
 <a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a><br>
 <a href="#parametrized_statements" title="How to use parametrized statements.">Parametrized statements</a><br>
 <a href="#batch_execution" title="How to use batch execution">Batch execution</a><br>
-<a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set format</a><br>
+<a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a><br>
 <a href="#session_management" title="How to manage your sessions (CREATE SESSION and INVALIDATE SESSION statements), access to session information (GET SESSION INFO statement), set and get custom attributes (SET SESSION ATTRIBUTES and GET SESSION ATTRIBUTES statements).">Session management</a><br>
 <a href="#cookies_management" title="How to manage your cookies (ADD COOKIES and GET COOKIES statements).">Cookies management</a><br>
 <a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a><br>
@@ -125,7 +125,7 @@ Start FBSQL server:<br><br>
 </ul>
 
 ```sh
-fbsql start
+./fbsql start
 ```
 </li>
 </ol>
@@ -464,9 +464,9 @@ SELECT 'Hello, World!' AS HELLO;
 ```
 <hr>
 <a id="assign_statements_to_roles"></a>
-<h2>Limit statement availability by role and/or user</h2>
+<h2>Limit statements by role/user</h2>
 <p><i>
-In this chapter we will learn how to limit statement availability by role and/or user by using SET ALLOW STATEMENT statement.
+In this chapter we will learn how to limit statements by role and/or user with SET ALLOW STATEMENT statement.
 </i></p>
 
 FBSQL supports simple mechanism that helps assign particular SQL statements to specified roles.
@@ -599,35 +599,78 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 
             /* Select all records */
             const ps1   = conn.prepareStatement("SELECT * FROM COUNTRIES");
+
+            /* Update one record */
+            const ps2   = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_NAME = 'Federal Republic of Germany' WHERE COUNTRY_ID = 'DE'");
+
+
             ps1.executeQuery()
-            .then(resultSet => console.log(resultSet));
-            /*
-                Output:
-
-                [
-                    {
-                        COUNTRY_ID: "AU",
-                        COUNTRY_NAME: "Australia"
-                    },
-                    {
-                        COUNTRY_ID: "DE",
-                        COUNTRY_NAME: "Germany"
-                    },
-                    {
-                        COUNTRY_ID: "IN",
-                        COUNTRY_NAME: "India"
-                    }
-                ]
-            */
-
-            /* Add new record */
-            const ps2   = conn.prepareStatement("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IT', 'Italy')");
-            ps2.executeUpdate()
-            .then(result => console.log(result));
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *   
+                 *   [
+                 *       {
+                 *           "COUNTRY_ID": "AU",
+                 *           "COUNTRY_NAME": "Australia"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "DE",
+                 *           "COUNTRY_NAME": "Germany"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "IN",
+                 *           "COUNTRY_NAME": "India"
+                 *       }
+                 *   ]
+                 */
+                 return ps2.executeUpdate();
+            })
+            .then(result => {
+                console.log(result);
+                /*
+                 *   Output:
+                 *   
+                 *   {
+                 *       "rowCount": 1,                                  // one record updated
+                 *       "generatedKeys": [
+                 *                          {
+                 *                              "last_insert_rowid()": 0 // database product specific key names
+                 *                          }
+                 *                      ]
+                 *   }
+                 */
+                return ps1.executeQuery();
+            })
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *   
+                 *   [
+                 *       {
+                 *           "COUNTRY_ID": "AU",
+                 *           "COUNTRY_NAME": "Australia"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "DE",
+                 *           "COUNTRY_NAME": "Federal Republic of Germany"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "IN",
+                 *           "COUNTRY_NAME": "India"
+                 *       }
+                 *   ]
+                 */
+            });
         </script>
     </body>
 </html>
 ```
+
+
+
 <hr>
 <a id="parametrized_statements"></a>
 <h2>Parametrized statements</h2>
@@ -738,7 +781,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 ```
 <hr>
 <a id="reseult_set_format"></a>
-<h2>Reseult set format</h2>
+<h2>Reseult set formats</h2>
 <p><i>
 In this chapter we will learn how to receive result set in various formats by using setResultSetFormat() method.
 </i></p>
@@ -791,70 +834,71 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
             const ps1   = conn.prepareStatement("SELECT * FROM COUNTRIES");
             ps1.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_OBJECTS);
             ps1.executeQuery()
-            .then(resultSet => console.log(resultSet));
-            /*
-                Output:
-
-                [
-                    {
-                        COUNTRY_ID: "AU",
-                        COUNTRY_NAME: "Australia"
-                    },
-                    {
-                        COUNTRY_ID: "DE",
-                        COUNTRY_NAME: "Germany"
-                    },
-                    {
-                        COUNTRY_ID: "IN",
-                        COUNTRY_NAME: "India"
-                    }
-                ]
-            */
-
-            const ps2   = conn.prepareStatement("SELECT * FROM COUNTRIES");
-            ps2.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_ARRAYS);
-            ps2.executeQuery()
-            .then(resultSet => console.log(resultSet));
-            /*
-                Output:
-
-                [
-                    [
-                        "AU",
-                        "Australia"
-                    ],
-                    [
-                        "DE",
-                        "Germany"
-                    ],
-                    [
-                        "IN",
-                        "India"
-                    ]
-                ]
-            */
-
-            const ps3   = conn.prepareStatement("SELECT * FROM COUNTRIES");
-            ps3.setResultSetFormat(PreparedStatement.FORMAT_OBJECT_OF_ARRAYS);
-            ps3.executeQuery()
-            .then(resultSet => console.log(resultSet));
-            /*
-                Output:
-
-                {
-                    COUNTRY_ID: [
-                        "AU",
-                        "DE",
-                        "IN",
-                    ],
-                    COUNTRY_NAME: [
-                        "Australia",
-                        "Germany",
-                        "India"
-                    ]
-                }
-            */
-
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *
+                 *   [
+                 *       {
+                 *           "COUNTRY_ID": "AU",
+                 *           "COUNTRY_NAME": "Australia"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "DE",
+                 *           "COUNTRY_NAME": "Germany"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "IN",
+                 *           "COUNTRY_NAME": "India"
+                 *       }
+                 *   ]
+                 */
+                ps1.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_ARRAYS);
+                return ps1.executeQuery();
+            })
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *
+                 *   [
+                 *       [
+                 *           "AU",
+                 *           "Australia"
+                 *       ],
+                 *       [
+                 *           "DE",
+                 *           "Germany"
+                 *       ],
+                 *       [
+                 *           "IN",
+                 *           "India"
+                 *       ]
+                 *   ]
+                 */
+                ps1.setResultSetFormat(PreparedStatement.FORMAT_OBJECT_OF_ARRAYS);
+                return ps1.executeQuery();
+            })
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *
+                 *   {
+                 *       "COUNTRY_ID": [
+                 *           "AU",
+                 *           "DE",
+                 *           "IN",
+                 *       ],
+                 *       "COUNTRY_NAME": [
+                 *           "Australia",
+                 *           "Germany",
+                 *           "India"
+                 *       ]
+                 *   }
+                 */
+            });
         </script>
     </body>
 </html>
