@@ -1010,6 +1010,370 @@ ADD NOTIFIER MYNOTIFIER TO "add_new_employee";
 In this chapter we will learn how to schedule periodic jobs (SCHEDULE statement).
 </i></p>
 
+------------------------------------------------------------------------------------------------------
+
+https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/support/CronSequenceGenerator.html
+<div class="block">Date sequence generator for a
+<a href="https://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
+allowing clients to specify a pattern that the sequence matches.
+<p>The pattern is a list of six single space-separated fields: representing
+second, minute, hour, day, month, weekday. Month and weekday names can be
+given as the first three letters of the English names.
+<p>Example patterns:
+<ul>
+<li>"0 0 * * * *" = the top of every hour of every day.</li>
+<li>"*&#47;10 * * * * *" = every ten seconds.</li>
+<li>"0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.</li>
+<li>"0 0 6,19 * * *" = 6:00 AM and 7:00 PM every day.</li>
+<li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</li>
+<li>"0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays</li>
+<li>"0 0 0 25 12 ?" = every Christmas Day at midnight</li>
+</ul></div>
+------------------------------------------------------------------------------------------------------
+http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html
+
+<h2 id="introduction">Introduction</h2>
+
+<p><tt>cron</tt> is a UNIX tool that has been around for a long time, so its scheduling capabilities are powerful
+and proven. The <tt>CronTrigger</tt> class is based on the scheduling capabilities of cron.</p>
+
+<p><tt>CronTrigger</tt> uses “cron expressions”, which are able to create firing schedules such as: “At 8:00am every
+Monday through Friday” or “At 1:30am every last Friday of the month”.</p>
+
+<p>Cron expressions are powerful, but can be pretty confusing. This tutorial aims to take some of the mystery out of
+creating a cron expression, giving users a resource which they can visit before having to ask in a forum or mailing
+list.</p>
+
+<h2 id="format">Format</h2>
+
+<p>A cron expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the
+allowed values, along with various combinations of the allowed special characters for that field. The fields are as
+follows:</p>
+<table cellpadding="3" cellspacing="1">
+    <tbody>
+        <tr>
+            <th>Field Name</th>
+            <th>Mandatory</th>
+            <th>Allowed Values</th>
+            <th>Allowed Special Characters</th>
+        </tr>
+        <tr>
+            <td>Seconds</td>
+            <td>YES</td>
+            <td>0-59</td>
+            <td>, - * /</td>
+        </tr>
+        <tr>
+            <td>Minutes</td>
+            <td>YES</td>
+            <td>0-59</td>
+            <td>, - * /</td>
+        </tr>
+        <tr>
+            <td>Hours</td>
+            <td>YES</td>
+            <td>0-23</td>
+            <td>, - * /</td>
+        </tr>
+        <tr>
+            <td>Day of month</td>
+            <td>YES</td>
+            <td>1-31</td>
+            <td>, - * ? / L W<br clear="all" />
+            </td>
+        </tr>
+        <tr>
+            <td>Month</td>
+            <td>YES</td>
+            <td>1-12 or JAN-DEC</td>
+            <td>, - * /</td>
+        </tr>
+        <tr>
+            <td>Day of week</td>
+            <td>YES</td>
+            <td>1-7 or SUN-SAT</td>
+            <td>, - * ? / L #</td>
+        </tr>
+        <tr>
+            <td>Year</td>
+            <td>NO</td>
+            <td>empty, 1970-2099</td>
+            <td>, - * /</td>
+        </tr>
+    </tbody>
+</table>
+<p>So cron expressions can be as simple as this: <tt>* * * * ? *</tt></p>
+<p>or more complex, like this: <tt>0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2002-2010</tt></p>
+
+<h2 id="special-characters">Special characters</h2>
+
+<ul>
+  <li>
+    <p><tt><strong>*</strong></tt> (<em>“all values”</em>) - used to select all values within a field. For example, “<strong>*</strong>”
+  in the minute field means <em>“every minute”</em>.</p>
+  </li>
+  <li>
+    <p><tt><strong>?</strong></tt> (<em>“no specific value”</em>) - useful when you need to specify something in one of the
+  two fields in which the character is allowed, but not the other. For example, if I want my trigger to fire on a
+  particular day of the month (say, the 10th), but don’t care what day of the week that happens to be, I would put
+  “10” in the day-of-month field, and “?” in the day-of-week field. See the examples below for clarification.</p>
+  </li>
+  <li>
+    <p><tt><strong>-</strong></tt> - used to specify ranges. For example, “10-12” in the hour field means <em>“the
+  hours 10, 11 and 12”</em>.</p>
+  </li>
+  <li>
+    <p><tt><strong>,</strong></tt> - used to specify additional values. For example, “MON,WED,FRI” in the day-of-week
+  field means <em>“the days Monday, Wednesday, and Friday”</em>.</p>
+  </li>
+  <li>
+    <p><tt><strong>/</strong></tt> - used to specify increments. For example, “0/15” in the seconds field means <em>“the
+  seconds 0, 15, 30, and 45”</em>. And “5/15” in the seconds field means <em>“the seconds 5, 20, 35, and 50”</em>. You can
+  also specify ‘/’ after the ‘<strong>’ character - in this case ‘</strong>’ is equivalent to having ‘0’ before the ‘/’. ‘1/3’
+  in the day-of-month field means <em>“fire every 3 days starting on the first day of the month”</em>.</p>
+  </li>
+  <li>
+    <p><tt><strong>L</strong></tt> (<em>“last”</em>) - has different meaning in each of the two fields in which it is
+  allowed. For example, the value “L” in the day-of-month field means <em>“the last day of the month”</em> - day
+  31 for January, day 28 for February on non-leap years. If used in the day-of-week field by itself, it simply means
+  “7” or “SAT”. But if used in the day-of-week field after another value, it means <em>“the last xxx day of the
+  month”</em> - for example “6L” means <em>“the last friday of the month”</em>. You can also specify an offset
+  from the last day of the month, such as “L-3” which would mean the third-to-last day of the calendar month.
+  <em>When using the ‘L’ option, it is important not to specify lists, or ranges of values, as you’ll get
+  confusing/unexpected results.</em></p>
+  </li>
+  <li>
+    <p><tt><strong>W</strong></tt> (<em>“weekday”</em>) - used to specify the weekday (Monday-Friday) nearest the given day.
+  As an example, if you were to specify “15W” as the value for the day-of-month field, the meaning is: <em>“the
+  nearest weekday to the 15th of the month”</em>. So if the 15th is a Saturday, the trigger will fire on Friday the 14th.
+  If the 15th is a Sunday, the trigger will fire on Monday the 16th. If the 15th is a Tuesday, then it will fire on
+  Tuesday the 15th. However if you specify “1W” as the value for day-of-month, and the 1st is a Saturday, the trigger
+  will fire on Monday the 3rd, as it will not ‘jump’ over the boundary of a month’s days. The ‘W’ character can only
+  be specified when the day-of-month is a single day, not a range or list of days.</p>
+  </li>
+</ul>
+<blockquote>
+            The 'L' and 'W' characters can also be combined in the day-of-month field to yield 'LW', which
+            translates to *"last weekday of the month"*.
+</blockquote>
+
+<ul>
+  <li><tt><strong>#</strong></tt> - used to specify “the nth” XXX day of the month. For example, the value of “6#3”
+  in the day-of-week field means <em>“the third Friday of the month”</em> (day 6 = Friday and “#3” = the 3rd one in
+  the month). Other examples: “2#1” = the first Monday of the month and “4#5” = the fifth Wednesday of the month. Note
+  that if you specify “#5” and there is not 5 of the given day-of-week in the month, then no firing will occur that
+  month.</li>
+</ul>
+<blockquote>
+            The legal characters and the names of months and days of the week are not case sensitive. <tt>MON</tt>
+            is the same as <tt>mon</tt>.
+</blockquote>
+
+<h2 id="examples">Examples</h2>
+
+<p>Here are some full examples:</p>
+<table cellpadding="3" cellspacing="1">
+    <tbody>
+        <tr>
+            <td width="200">**Expression**</td>
+            <td>**Meaning**</td>
+        </tr>
+        <tr>
+            <td><tt>0 0 12 * * ?</tt></td>
+            <td>Fire at 12pm (noon) every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * *</tt></td>
+            <td>Fire at 10:15am every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 * * ?</tt></td>
+            <td>Fire at 10:15am every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 * * ? *</tt></td>
+            <td>Fire at 10:15am every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 * * ? 2005</tt></td>
+            <td>Fire at 10:15am every day during the year 2005</td>
+        </tr>
+        <tr>
+            <td><tt>0 * 14 * * ?</tt></td>
+            <td>Fire every minute starting at 2pm and ending at 2:59pm, every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 0/5 14 * * ?</tt></td>
+            <td>Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 0/5 14,18 * * ?</tt></td>
+            <td>Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5
+            minutes starting at 6pm and ending at 6:55pm, every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 0-5 14 * * ?</tt></td>
+            <td>Fire every minute starting at 2pm and ending at 2:05pm, every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 10,44 14 ? 3 WED</tt></td>
+            <td>Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * MON-FRI</tt></td>
+            <td>Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 15 * ?</tt></td>
+            <td>Fire at 10:15am on the 15th day of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 L * ?</tt></td>
+            <td>Fire at 10:15am on the last day of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 L-2 * ?</tt></td>
+            <td>Fire at 10:15am on the 2nd-to-last last day of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * 6L</tt></td>
+            <td>Fire at 10:15am on the last Friday of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * 6L</tt></td>
+            <td>Fire at 10:15am on the last Friday of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * 6L 2002-2005</tt></td>
+            <td>Fire at 10:15am on every last friday of every month during the years 2002,
+            2003, 2004 and 2005</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * 6#3</tt></td>
+            <td>Fire at 10:15am on the third Friday of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 0 12 1/5 * ?</tt></td>
+            <td>Fire at 12pm (noon) every 5 days every month, starting on the first day of the
+            month.</td>
+        </tr>
+        <tr>
+            <td><tt>0 11 11 11 11 ?</tt></td>
+            <td>Fire every November 11th at 11:11am.</td>
+        </tr>
+    </tbody>
+</table>
+<blockquote>
+        Pay attention to the effects of '?' and '*' in the day-of-week and day-of-month fields!
+</blockquote>
+
+<h2 id="notes">Notes</h2>
+
+<ul>
+  <li>Support for specifying both a day-of-week and a day-of-month value is not complete (you must currently use
+  the ‘?’ character in one of these fields).</li>
+  <li>Be careful when setting fire times between the hours of the morning when “daylight savings” changes occur
+  in your locale (for US locales, this would typically be the hour before and after 2:00 AM - because the time
+  shift can cause a skip or a repeat depending on whether the time moves back or jumps forward.  You may find
+  this wikipedia entry helpful in determining the specifics to your locale:<br />
+  <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world">https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world</a></li>
+</ul>
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------
+http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/tutorial-lesson-06.html
+
+<p>if you need a job-firing schedule that recurs based on calendar-like notions</p>
+
+<p>With SCHEDULE statement, you can specify firing-schedules such as “every Friday at noon”, or “every weekday and 9:30
+am”, or even “every 5 minutes between 9:00 am and 10:00 am on every Monday, Wednesday and Friday during January”.</p>
+
+<h3>Cron Expressions</h3>
+
+<p><strong><em>Cron-Expressions</em></strong> are used to configure FBSQL scheduler. Cron-Expressions are strings
+that are actually made up of seven sub-expressions, that describe individual details of the schedule. These
+sub-expression are separated with white-space, and represent:</p>
+
+<ol>
+  <li>Seconds</li>
+  <li>Minutes</li>
+  <li>Hours</li>
+  <li>Day-of-Month</li>
+  <li>Month</li>
+  <li>Day-of-Week</li>
+  <li>Year (optional field)</li>
+</ol>
+
+<p>An example of a complete cron-expression is the string <em>“0 0 12 ? * WED”</em> - which means “every
+Wednesday at 12:00:00 pm”.</p>
+
+<p>Individual sub-expressions can contain ranges and/or lists. For example, the day of week field in the previous
+(which reads “WED”) example could be replaced with “MON-FRI”, “MON,WED,FRI”, or even “MON-WED,SAT”.</p>
+
+<p>Wild-cards (the ‘<em>’ character) can be used to say “every” possible value of this field. Therefore the ‘</em>’
+character in the “Month” field of the previous example simply means “every month”. A ‘*’ in the Day-Of-Week field would
+therefore obviously mean “every day of the week”.</p>
+
+<p>All of the fields have a set of valid values that can be specified. These values should be fairly obvious - such
+as the numbers 0 to 59 for seconds and minutes, and the values 0 to 23 for hours. Day-of-Month can be any value 1-31,
+but you need to be careful about how many days are in a given month! Months can be specified as values between 0 and
+11, or by using the strings JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV and DEC. Days-of-Week can be specified
+as values between 1 and 7 (1 = Sunday) or by using the strings SUN, MON, TUE, WED, THU, FRI and SAT.</p>
+
+<p>The ‘/’ character can be used to specify increments to values. For example, if you put ‘0/15’ in the Minutes
+field, it means ‘every 15th minute of the hour, starting at minute zero’. If you used ‘3/20’ in the Minutes field, it
+would mean ‘every 20th minute of the hour, starting at minute three’ - or in other words it is the same as specifying
+‘3,23,43’ in the Minutes field.  Note the subtlety that “<em>/35” does *not</em> mean “every 35 minutes” - it mean
+“every 35th minute of the hour, starting at minute zero” - or in other words the same as specifying ‘0,35’.</p>
+
+<p>The ‘?’ character is allowed for the day-of-month and day-of-week fields. It is used to specify “no specific
+value”. This is useful when you need to specify something in one of the two fields, but not the other. See the examples
+below for clarification.</p>
+
+<p>The ‘L’ character is allowed for the day-of-month and day-of-week fields. This character is short-hand for
+“last”, but it has different meaning in each of the two fields. For example, the value “L” in the day-of-month field
+means “the last day of the month” - day 31 for January, day 28 for February on non-leap years. If used in the
+day-of-week field by itself, it simply means “7” or “SAT”. But if used in the day-of-week field after another value, it
+means “the last xxx day of the month” - for example “6L” or “FRIL” both mean “the last friday of the month”.  You
+can also specify an offset from the last day of the month, such as “L-3” which would mean the third-to-last day of the
+calendar month. <em>When using the ‘L’ option, it is important not to specify lists, or ranges of values, as you’ll get
+confusing/unexpected results.</em></p>
+
+<p>The ‘W’ is used to specify the weekday (Monday-Friday) nearest the given day. As an example, if you were to
+specify “15W” as the value for the day-of-month field, the meaning is: “the nearest weekday to the 15th of the month”.</p>
+
+<p>The ‘#’ is used to specify “the nth” XXX weekday of the month. For example, the value of “6#3” or “FRI#3” in the
+day-of-week field means “the third Friday of the month”.</p>
+
+<p>Here are a few more examples of expressions and their meanings - you can find even more in the JavaDoc for
+org.quartz.CronExpression</p>
+
+<h3>Example Cron Expressions</h3>
+
+<p>Example 1 - an expression to create a trigger that simply fires every 5 minutes</p>
+
+<p>“0 0/5 * * * ?”</p>
+
+<p>Example 2 - an expression to create a trigger that fires every 5 minutes, at 10 seconds after the minute
+(i.e. 10:00:10 am, 10:05:10 am, etc.).</p>
+
+<p>“10 0/5 * * * ?”</p>
+
+<p>Example 3 - an expression to create a trigger that fires at 10:30, 11:30, 12:30, and 13:30, on every
+Wednesday and Friday.</p>
+
+<p>“0 30 10-13 ? * WED,FRI”</p>
+
+<p>Example 4 - an expression to create a trigger that fires every half hour between the hours of 8 am and 10 am
+on the 5th and 20th of every month. Note that the trigger will NOT fire at 10:00 am, just at 8:00, 8:30, 9:00 and 9:30</p>
+
+<p>“0 0/30 8-9 5,20 * ?”</p>
+
 <strong>Backend:</strong><br>
 
 ```sql
