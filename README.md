@@ -80,8 +80,9 @@ Work (secure) with your backend database within HTML<br>
 
 <a id="installation_and_basic_example"></a>
 <h2>Basic example</h2>
-<i>Installation. Database instance connector. init.sql script. CONNECT TO statement.</i>
-<hr>
+<i>
+In this chapter, we will learn how to install FBSQL, create database instance connector <code>init.sql</code>, connect to backend database execute query and get result.
+</i>
 
 <strong>Backend:</strong><br>
 
