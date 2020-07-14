@@ -18,16 +18,13 @@ Work (secure) with your backend database within HTML<br>
 <h3>F.A.Q.</h3>
 <ul>
 	<li><strong>Q.</strong> What is FBSQL?</li>
-	<li><strong>A.</strong> FBSQL is a server that transparently connects your frontend to the remote database.</li>
+	<li><strong>A.</strong> FBSQL is a server that transparently yet secure connects your frontend to the remote database.</li>
 	<br>
 	<li><strong>Q.</strong> Is it really two-tier architecture?</li>
 	<li><strong>A.</strong> Well, yes and no. Look at the FBSQL as two-tier architecture with third tier under the hood.</li>
 	<br>
-	<li><strong>Q.</strong> Is it really possible to implement an entire web application only with SQL and JavaScript/HTML?</li>
-	<li><strong>A.</strong> Yes. In addition to full SQL access to underlying database FBSQL provide the set of it's own statements, to cover missing features required for typical web application</li>
-	<br>
 	<li><strong>Q.</strong> Which features are provided out of the box?</li>
-	<li><strong>A.</strong>
+	<li><strong>A.</strong> In addition to underlying database native SQL access FBSQL provide the minimalist set of it's own statements, to cover missing features required for secure data access and web application functionality:
 	<ul>
 		<li>Authentication</li>
 		<li>Authorization</li>
@@ -35,17 +32,74 @@ Work (secure) with your backend database within HTML<br>
 		<li>Custom request triggers</li>
 		<li>Database events notification</li>
 		<li>Background job execution</li>
-		<li>etc.</li>
-	</ul>
+	</ul>	
 	</li>
 	<br>
-	<li><strong>Q.</strong> Which features are under the hood?</li>
-	<li><strong>A.</strong> Connection pooling, ETag-optimized HTTP communication, compressed responses, static «warmed up» queries with no database interaction etc.</li>
+	<li><strong>Q.</strong> What about performance and scalability?</li>
+	<li><strong>A.</strong>
+		<ul>
+		<li>Connection pooling</li>
+		<li>ETag-optimized HTTP communication</li>
+		<li>Compressed responses</li>
+		<li>Static «warmed up» queries with no database interaction</li>
+		</ul>
+	</li>
 	<br>
 	<li><strong>Q.</strong> Which databases are supported?</li>
 	<li><strong>A.</strong> FBSQL will works with any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, DB2 etc.</li>
 	<br>
+	<strong>Q.</strong> Which databases are available in FBSQL Database distribution?<br>
+	<strong>A.</strong> FBSQL Database distribution include following databases and their drivers:
+	<ul>
+		<li>SQLite</li>
+		<li>Apache Derby</li>
+		<li>H2</li>
+		<li>HSQLDB</li>
+	</ul>
+	<br>
+	<strong>Q.</strong> How to configure FBSQL Server to work with MySQL (PostgreSQL, Oracle etc.)?<br>
+	<strong>A.</strong> Please do following:
+	<ul>
+		<li>Copy the JDBC driver file(s) to <strong>"~/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib"</strong> directory</li>
+		<li>Copy the initial connector script file to <strong>"~/fbsql/config/db"</strong> directory</li>
+	</ul>
+	<br>
+	<strong>Q.</strong> What is initial connector script?<br>
+	<strong>A.</strong> Initial connector script is a SQL script in which defined:
+	<ul>
+		<li>Connection to database</li>
+		<li>Authentication and authorization</li>
+		<li>SQL statements executed on FBSQL start up</li>
+	</ul>
 </ul>
+
+<h3>Comparison of FBSQL distributions:</h3>
+<table border="1">
+<tr>
+<th></th><th>Servlet</th><th>Server</th><th>Database</th>
+<tr>
+<tr>
+<td>FBSQL engine          </td><td>Yes</td><td>Yes</td><td>Yes</td>
+<tr>
+<tr>
+<td>JavaScript client     </td><td>Yes</td><td>Yes</td><td>Yes</td>
+<tr>
+<tr>
+<td>Java Runtime Environment (JRE)</td><td></td><td>Yes</td><td>Yes</td>
+<tr>
+<tr>
+<td>Servlet container     </td><td></td><td>Yes</td><td>Yes</td>
+<tr>
+<tr>
+<td>Command line interface</td><td></td><td>Yes</td><td>Yes</td>
+<tr>
+<tr>
+<td>JDBC driver(s)        </td><td></td><td></td><td>Yes SQLite, Apache Derby, H2, HSQLDB</td>
+<tr>
+<tr>
+<td>Database(s)           </td><td></td><td></td><td>Yes SQLite, Apache Derby, H2, HSQLDB</td>
+<tr>
+</table>
 
 <h1>FBSQL tutorial</h1>
 
@@ -1099,7 +1153,7 @@ and proven.</p>
 <p>SCHEDULE statement uses cron expressions, which are able to create firing schedules such as: “At 8:00am every
 Monday through Friday” or “At 1:30am every last Friday of the month”.</p>
 
-<h2 id="format">Format</h2>
+<h3>Format</h3>
 
 <p>A cron expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the
 allowed values, along with various combinations of the allowed special characters for that field. The fields are as
@@ -1160,7 +1214,7 @@ follows:</p>
 <p>So cron expressions can be as simple as this: <tt>* * * * ? *</tt></p>
 <p>or more complex, like this: <tt>0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2002-2010</tt></p>
 
-<h2 id="special-characters">Special characters</h2>
+<h3>Special characters</h3>
 
 <ul>
   <li>
@@ -1322,7 +1376,7 @@ follows:</p>
         Pay attention to the effects of '?' and '*' in the day-of-week and day-of-month fields!
 </blockquote>
 
-<h2 id="notes">Notes</h2>
+<h3>Notes</h3>
 
 <ul>
   <li>Support for specifying both a day-of-week and a day-of-month value is not complete (you must currently use
