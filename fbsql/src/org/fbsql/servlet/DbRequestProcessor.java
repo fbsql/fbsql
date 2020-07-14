@@ -122,7 +122,7 @@ public class DbRequestProcessor implements Runnable {
 	 */
 	private static final String EXEC_TYPE_UPDATE = "U";
 
-	private static Map<BrowsCapField, Class> browsCapFieldInfoMap;
+	private static Map<BrowsCapField, Class<?>> browsCapFieldInfoMap;
 
 	static {
 		browsCapFieldInfoMap = new HashMap<>();
@@ -301,6 +301,11 @@ public class DbRequestProcessor implements Runnable {
 			String              jsonStrFormat   = bodyMap.get("format");
 			Integer             resultSetFormat = JsonUtils.parseJsonInt(jsonStrFormat);
 			String              parameters      = bodyMap.get("parameters");
+			String              userInfoJson    = generateUserInfoJson(                                    //
+					request,                                                                               //
+					userAgentParser,                                                                       //
+					clientInfoJson                                                                         //
+			);
 
 			String updateResultJson = null;
 
@@ -416,12 +421,6 @@ public class DbRequestProcessor implements Runnable {
 			for (String paramJson : paramJsons) {
 				String validatorStoredProcedureName = validatorsMap.get(statementId);
 				if (validatorStoredProcedureName != null) {
-					String userInfoJson = generateUserInfoJson( //
-							request, //
-							userAgentParser, //
-							clientInfoJson //
-					);
-
 					String statementInfoJson = generateStatementInfoJson( //
 							instanceName, //
 							statementId, //
@@ -449,9 +448,9 @@ public class DbRequestProcessor implements Runnable {
 							String   className  = array[0];
 							String   methodName = array[1];
 
-							Class  clazz  = Class.forName(className);
-							Method method = clazz.getMethod(methodName, Connection.class, String.class, String.class);
-							modifiedParamsJson = (String) method.invoke(null, dbConnection0.getConnection(), userInfoJson, statementInfoJson);
+							Class<?> clazz  = Class.forName(className);
+							Method   method = clazz.getMethod(methodName, Connection.class, String.class, String.class);
+							modifiedParamsJson = (String) method.invoke(null, request, dbConnection0.getConnection(), userInfoJson, statementInfoJson);
 						}
 					} finally {
 						if (dbConnection0 != null)
@@ -499,6 +498,8 @@ public class DbRequestProcessor implements Runnable {
 			preparedStatement = preparedStatement.replace("REMOTE_SESSION_CREATION_TIME()", sessionCreationTime == null ? SQL_NULL : Long.toString(sessionCreationTime));
 			preparedStatement = preparedStatement.replace("REMOTE_SESSION_LAST_ACCESSED_TIME()", sessionLastAccessedTime == null ? SQL_NULL : Long.toString(sessionLastAccessedTime));
 			preparedStatement = preparedStatement.replace("REMOTE_SESSION_ATTRIBUTES()", sessionAttributesJson == null ? SQL_NULL : SQL_QUOTE_CHAR + sessionAttributesJson + SQL_QUOTE_CHAR);
+
+			preparedStatement = preparedStatement.replace("USER_INFO()", userInfoJson == null ? SQL_NULL : SQL_QUOTE_CHAR + userInfoJson + SQL_QUOTE_CHAR);
 
 			//			preparedStatement = preparedStatement.replace("REMOTE_INFO()", SQL_QUOTE_CHAR + remoteInfoJson + SQL_QUOTE_CHAR);
 			//			preparedStatement = preparedStatement.replace("CLIENT_INFO()", SQL_QUOTE_CHAR + clientInfoJson + SQL_QUOTE_CHAR);
@@ -609,15 +610,21 @@ public class DbRequestProcessor implements Runnable {
 					if (executeTypeUpdate) {
 						int rowCount = 0;
 						for (Map<String, Object> parametersMap : parametersListOfMaps) {
-							Object[] parameterValues = CallUtils.getCallStatementParameterValues(dbConnection.getConnection(), unprocessedNamedPreparedStatement, parametersMap);
-							method.invoke(null, parameterValues);
+							List<Object> parameterValues = new ArrayList<>();
+							parameterValues.add(request);
+							parameterValues.add(dbConnection.getConnection());
+							CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+							method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
 							rowCount++;
 						}
 						bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
 					} else if (executeTypeQuery) {
 						Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
-						Object[]            parameterValues = CallUtils.getCallStatementParameterValues(dbConnection.getConnection(), unprocessedNamedPreparedStatement, parametersMap);
-						try (ResultSet rs = (ResultSet) method.invoke(null, parameterValues)) {
+						List<Object>        parameterValues = new ArrayList<>();
+						parameterValues.add(request);
+						parameterValues.add(dbConnection.getConnection());
+						CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+						try (ResultSet rs = (ResultSet) method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]))) {
 							Integer                                                        compression       = connectionInfo.compressionLevel == null ? QueryUtils.COMPRESSION_NONE : connectionInfo.compressionLevel;
 							List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
 							List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
@@ -970,12 +977,6 @@ public class DbRequestProcessor implements Runnable {
 										Collection<String /* Notifier stored procedure name */ > notifiers = notifiersMap.get(statementId);
 										if (notifiers != null) {
 
-											String userInfoJson = generateUserInfoJson( //
-													request, //
-													userAgentParser, //
-													clientInfoJson //
-											);
-
 											String selfClientInfoJson = getClientInfo(selfRequest, sharedCoder.decoder);
 
 											String selfUserInfoJson = generateUserInfoJson( //
@@ -1018,9 +1019,9 @@ public class DbRequestProcessor implements Runnable {
 														String   className  = array[0];
 														String   methodName = array[1];
 
-														Class  clazz        = Class.forName(className);
-														Method notifyMethod = clazz.getMethod(methodName, Connection.class, String.class, String.class, String.class, String.class);
-														outEvent = (String) notifyMethod.invoke(null, dbConnection0.getConnection(), userInfoJson, selfUserInfoJson, statementInfoJson, executionResultJson);
+														Class<?> clazz        = Class.forName(className);
+														Method   notifyMethod = clazz.getMethod(methodName, Connection.class, String.class, String.class, String.class, String.class);
+														outEvent = (String) notifyMethod.invoke(null, selfRequest, dbConnection0.getConnection(), userInfoJson, selfUserInfoJson, statementInfoJson, executionResultJson);
 													}
 												} finally {
 													if (dbConnection0 != null)
@@ -1269,7 +1270,6 @@ public class DbRequestProcessor implements Runnable {
 			long timestamp, //
 			String updateResultJson //
 	) {
-		final String  NULL  = "null";
 		final char    COLON = ':';
 		final char    COMMA = ',';
 		StringBuilder sb    = new StringBuilder();
@@ -1338,7 +1338,7 @@ public class DbRequestProcessor implements Runnable {
 		sb.append("{");
 		for (Map.Entry<BrowsCapField, String> entry : map.entrySet()) {
 			BrowsCapField key   = entry.getKey();
-			Class         type  = browsCapFieldInfoMap.get(key);
+			Class<?>      type  = browsCapFieldInfoMap.get(key);
 			String        value = entry.getValue().trim();
 			if (type == Boolean.class) {
 				if (!"true".equals(value) && !"false".equals(value))

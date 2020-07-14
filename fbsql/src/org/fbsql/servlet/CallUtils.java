@@ -44,17 +44,17 @@ public class CallUtils {
 	/**
 	 * Single quote character constant (string parameter wrapped in single quotes)
 	 */
-	private static final char Q1    = '\''; // single quote
+	private static final char Q1 = '\''; // single quote
 
 	/**
 	 * Double quote character constant (string parameter wrapped in double quotes)
 	 */
-	private static final char Q2    = '"';  // double quote
+	private static final char Q2 = '"'; // double quote
 
 	/**
 	 * Comma character constant (parameters separator)
 	 */
-	private static final char COMMA = ',';  // comma
+	private static final char COMMA = ','; // comma
 
 	/**
 	 * Get CALL Statement Method
@@ -96,15 +96,12 @@ public class CallUtils {
 	/**
 	 * Get CALL Statement Parameter Values
 	 *
-	 * @param connection
 	 * @param sql
 	 * @param namedParametersMap
-	 * @return
+	 * @param parameterValues
 	 * @throws Exception
 	 */
-	public static Object[] getCallStatementParameterValues(Connection connection, String sql, Map<String /* parameter name */, Object /* parameter value */> namedParametersMap) throws Exception {
-		List<Object> parameterValues = new ArrayList<>();
-
+	public static void getCallStatementParameterValues(String sql, Map<String /* parameter name */, Object /* parameter value */> namedParametersMap, List<Object> parameterValues) throws Exception {
 		int posLeft = sql.indexOf('(');
 		if (posLeft == -1)
 			throw new IllegalArgumentException(MessageFormat.format("Syntax error: missing left parenthesis: {0}", sql));
@@ -116,10 +113,9 @@ public class CallUtils {
 		String params = sql.substring(posLeft + 1, posRight).trim();
 
 		List<String> parameterNames = new ArrayList<>();
-		parameterNames.add(null); // Connection
-
-		parameterValues.add(connection); // Connection
-
+		for (Object value : parameterValues) // add corresponding entries to parameterNames 
+			parameterNames.add(null);
+		//
 		parseNamedSqlParameters(params, parameterNames, parameterValues);
 
 		for (int i = 0; i < parameterNames.size(); i++) {
@@ -130,7 +126,6 @@ public class CallUtils {
 				parameterValues.set(i, parameterValue);
 			}
 		}
-		return parameterValues.toArray(new Object[parameterValues.size()]);
 	}
 
 	/**

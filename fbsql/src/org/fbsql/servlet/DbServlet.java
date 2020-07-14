@@ -115,6 +115,11 @@ import com.blueconic.browscap.UserAgentService;
 public class DbServlet extends HttpServlet {
 
 	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Debug mode flag
 	 *
 	 * true in debug mode
@@ -452,8 +457,9 @@ public class DbServlet extends HttpServlet {
 				Method method             = CallUtils.getCallStatementMethod(statement, proceduresMap);
 				if (method != null) { // Process CALL statement
 					List<Object> parameterValues = new ArrayList<>();
+					parameterValues.add(connection);
 					CallUtils.parseSqlParameters(statement, parameterValues);
-					method.invoke(null, parameterValues);
+					method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
 				} //
 				else if (!SqlParseUtils.isSpecialServerStatement(statementUpperCase)) // Not a special statements => native SQL
 					st.execute(statement);
@@ -532,7 +538,7 @@ public class DbServlet extends HttpServlet {
 									String   className  = array[0];
 									String   methodName = array[1];
 
-									Class  clazz  = Class.forName(className);
+									Class<?>  clazz  = Class.forName(className);
 									Method method = clazz.getMethod(methodName, Connection.class, String.class);
 									method.invoke(null, dbConnection0.getConnection(), cronExpression);
 								}

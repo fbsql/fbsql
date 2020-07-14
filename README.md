@@ -92,7 +92,13 @@ In this chapter we will learn how to install FBSQL, create database connector, u
 Install FBSQL:<br><br>
 <ul>
 <li>Download the latest FBSQL release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest FBSQL release">fbsql-1.2-linux-x86-64.zip</a></li>
-<li>Unzip the downloaded file into some directory</li>
+Expand (unzip) the archive on your machine.
+<li>Unzip the downloaded file on your machine</li>
+<br>
+Expanding the archive yields the following folder structure:<br>
+<code>
+</code>
+where ... represents elided files/directories.
 </ul>
 <br>
 </li>
@@ -938,11 +944,64 @@ Procedures can be called from <code>init.sql</code> and/or frontend:
 
 CONNECT TO 'jdbc:sqlite:sample';
 
-DECLARE PROCEDURE GET_ITEMS    FOR "org.fbsql.examples.StoredProcedures::getItems";
-DECLARE PROCEDURE ADD_NEW_ITEM FOR "org.fbsql.examples.StoredProcedures::addNewItem";
+DECLARE PROCEDURE GET_EMPLOYEES    FOR "org.fbsql.examples.StoredProcedures::getEmployees";
 
-CALL ADD_NEW_ITEM('T-Shirt', 123);
+```
 
+```java
+package org.fbsql.examples;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.h2.tools.SimpleResultSet;
+
+public class StoredProcedures {
+	/**
+	 * Simple stored procedure that return ResultSet
+	 *
+	 * @param request
+	 * @param connection
+	 * @param namePrefix
+	 * @return
+	 */
+	public static ResultSet getEmployees(HttpServletRequest request, Connection connection, String nameStartsWith) {
+		/**
+		 * Our "database"
+		 */
+		Map<Integer, String> employees = new HashMap<>();
+		employees.put(123, "John");
+		employees.put(152, "Loren");
+		employees.put(451, "Lisa");
+		employees.put(481, "Ivan");
+		employees.put(508, "Donald");
+		employees.put(611, "Carlos");
+		employees.put(751, "Lora");
+
+		/**
+		 * ResultSet
+		 */
+		SimpleResultSet rs = new SimpleResultSet();
+		rs.addColumn("ID", Types.INTEGER, 10, 0);
+		rs.addColumn("NAME", Types.VARCHAR, 255, 0);
+
+		/*
+		 * Select data by condition
+		 */
+		for (Map.Entry<Integer, String> employee : employees.entrySet()) {
+			int    id   = employee.getKey();
+			String name = employee.getValue();
+			if (name.startsWith(nameStartsWith)) // match condition
+				rs.addRow(id, name);
+		}
+		return rs;
+	}
+}
 ```
 <strong>Frontend:</strong><br>
 
@@ -956,10 +1015,24 @@ CALL ADD_NEW_ITEM('T-Shirt', 123);
         <script type="text/javascript">
             const conn = new Connection('my-sqlite');
 
-            const ps   = conn.prepareStatement("CALL GET_ITEMS(:maxPrice)");
+            const ps   = conn.prepareStatement("CALL GET_EMPLOYEES(:nameStartsWith)");
             ps.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_OBJECTS);
-            ps.executeQuery({maxPrice: 200})
+            ps.executeQuery({nameStartsWith: 'Lo'})
             .then(resultSet => console.log(JSON.stringify(resultSet)));
+            /*
+             * Output:
+             *
+             *    [
+             *        {
+             *            "ID": 152,
+             *            "NAME": "Loren"
+             *        },
+             *        {
+             *            "ID": 751,
+             *            "NAME": "Lora"
+             *        }
+             *    ]
+             */
         </script>
     </body>
 </html>
