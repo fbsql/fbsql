@@ -931,22 +931,25 @@ In this chapter we will learn how to manage your cookies (ADD COOKIES and GET CO
 <p><i>
 In this chapter we will learn how to write and use database agnostic stored procedures written in JavaScript or <abbr title="Java Virtual Machine">JVM</abbr> languages (DECLARE PROCEDURE statement).
 </i></p>
-Procedures can be called from <code>init.sql</code> and/or frontend:
+Procedures can be called from <code>init.sql</code> and/or frontend.<br><br>
+
+<strong>Backend:</strong><br>
 
 ```sql
 /*
  * init.sql
- *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
  */
 
 CONNECT TO 'jdbc:sqlite:sample';
 
-DECLARE PROCEDURE GET_EMPLOYEES    FOR "org.fbsql.examples.StoredProcedures::getEmployees";
+/*
+ * Simple stored procedure that extracts employees by condition from mock "database" and return ResultSet
+ */
+DECLARE PROCEDURE GET_EMPLOYEES FOR "org.fbsql.examples.StoredProcedures::getEmployees";
 
 ```
+<br>
+org.fbsql.examples.StoredProcedures.java
 
 ```java
 package org.fbsql.examples;
@@ -962,15 +965,17 @@ import javax.servlet.http.HttpServletRequest;
 import org.h2.tools.SimpleResultSet;
 
 public class StoredProcedures {
+
 	/**
-	 * Simple stored procedure that return ResultSet
+	 * Simple stored procedure that extracts employees by condition from mock "database" and return ResultSet
 	 *
-	 * @param request
-	 * @param connection
-	 * @param namePrefix
+	 * @param request    javax.servlet.http.HttpServletRequest is mandatory parameter that receive each stored procedure
+	 * @param connection java.sql.Connection is mandatory parameter that receive each stored procedure
+	 * @param namePrefix Some user defined parameter
 	 * @return
 	 */
 	public static ResultSet getEmployees(HttpServletRequest request, Connection connection, String nameStartsWith) {
+
 		/**
 		 * Our "database"
 		 */
@@ -987,7 +992,7 @@ public class StoredProcedures {
 		 * ResultSet
 		 */
 		SimpleResultSet rs = new SimpleResultSet();
-		rs.addColumn("ID", Types.INTEGER, 10, 0);
+		rs.addColumn("ID",   Types.INTEGER,  10, 0);
 		rs.addColumn("NAME", Types.VARCHAR, 255, 0);
 
 		/*
@@ -996,14 +1001,15 @@ public class StoredProcedures {
 		for (Map.Entry<Integer, String> employee : employees.entrySet()) {
 			int    id   = employee.getKey();
 			String name = employee.getValue();
-			if (name.startsWith(nameStartsWith)) // match condition
+			if (name.startsWith(nameStartsWith)) // match our condition
 				rs.addRow(id, name);
 		}
 		return rs;
 	}
 }
 ```
-<strong>Frontend:</strong><br>
+
+<strong>Frontend:</strong>
 
 ```html
 <!DOCTYPE html>
@@ -1082,41 +1088,16 @@ ADD NOTIFIER MYNOTIFIER TO "add_new_employee";
 <h2>Schedule periodic jobs</h2>
 <p><i>
 In this chapter we will learn how to schedule periodic jobs (SCHEDULE statement).
+Most of information here was taken from <a href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html">Cron Trigger Tutorial</a>
+
 </i></p>
 
-------------------------------------------------------------------------------------------------------
+FBSQL has own scheduler to run periodic jobs. Stored procedures can be scheduled to run according <strong>cron</strong> expression.
 
-https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/support/CronSequenceGenerator.html
-<div class="block">Date sequence generator for a
-<a href="https://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
-allowing clients to specify a pattern that the sequence matches.
-<p>The pattern is a list of six single space-separated fields: representing
-second, minute, hour, day, month, weekday. Month and weekday names can be
-given as the first three letters of the English names.
-<p>Example patterns:
-<ul>
-<li>"0 0 * * * *" = the top of every hour of every day.</li>
-<li>"*&#47;10 * * * * *" = every ten seconds.</li>
-<li>"0 0 8-10 * * *" = 8, 9 and 10 o'clock of every day.</li>
-<li>"0 0 6,19 * * *" = 6:00 AM and 7:00 PM every day.</li>
-<li>"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.</li>
-<li>"0 0 9-17 * * MON-FRI" = on the hour nine-to-five weekdays</li>
-<li>"0 0 0 25 12 ?" = every Christmas Day at midnight</li>
-</ul></div>
-------------------------------------------------------------------------------------------------------
-http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html
-
-<h2 id="introduction">Introduction</h2>
-
-<p><tt>cron</tt> is a UNIX tool that has been around for a long time, so its scheduling capabilities are powerful
-and proven. The <tt>CronTrigger</tt> class is based on the scheduling capabilities of cron.</p>
-
-<p><tt>CronTrigger</tt> uses “cron expressions”, which are able to create firing schedules such as: “At 8:00am every
+<p><a href="https://en.wikipedia.org/wiki/Cron" title="Article from wikipedia.org">cron</a> is a UNIX tool that has been around for a long time, so its scheduling capabilities are powerful
+and proven.</p>
+<p>SCHEDULE statement uses cron expressions, which are able to create firing schedules such as: “At 8:00am every
 Monday through Friday” or “At 1:30am every last Friday of the month”.</p>
-
-<p>Cron expressions are powerful, but can be pretty confusing. This tutorial aims to take some of the mystery out of
-creating a cron expression, giving users a resource which they can visit before having to ask in a forum or mailing
-list.</p>
 
 <h2 id="format">Format</h2>
 
@@ -1352,101 +1333,6 @@ follows:</p>
   this wikipedia entry helpful in determining the specifics to your locale:<br />
   <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world">https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world</a></li>
 </ul>
-
-
-
-
-
-
-
-------------------------------------------------------------------------------------------------------
-http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/tutorial-lesson-06.html
-
-<p>if you need a job-firing schedule that recurs based on calendar-like notions</p>
-
-<p>With SCHEDULE statement, you can specify firing-schedules such as “every Friday at noon”, or “every weekday and 9:30
-am”, or even “every 5 minutes between 9:00 am and 10:00 am on every Monday, Wednesday and Friday during January”.</p>
-
-<h3>Cron Expressions</h3>
-
-<p><strong><em>Cron-Expressions</em></strong> are used to configure FBSQL scheduler. Cron-Expressions are strings
-that are actually made up of seven sub-expressions, that describe individual details of the schedule. These
-sub-expression are separated with white-space, and represent:</p>
-
-<ol>
-  <li>Seconds</li>
-  <li>Minutes</li>
-  <li>Hours</li>
-  <li>Day-of-Month</li>
-  <li>Month</li>
-  <li>Day-of-Week</li>
-  <li>Year (optional field)</li>
-</ol>
-
-<p>An example of a complete cron-expression is the string <em>“0 0 12 ? * WED”</em> - which means “every
-Wednesday at 12:00:00 pm”.</p>
-
-<p>Individual sub-expressions can contain ranges and/or lists. For example, the day of week field in the previous
-(which reads “WED”) example could be replaced with “MON-FRI”, “MON,WED,FRI”, or even “MON-WED,SAT”.</p>
-
-<p>Wild-cards (the ‘<em>’ character) can be used to say “every” possible value of this field. Therefore the ‘</em>’
-character in the “Month” field of the previous example simply means “every month”. A ‘*’ in the Day-Of-Week field would
-therefore obviously mean “every day of the week”.</p>
-
-<p>All of the fields have a set of valid values that can be specified. These values should be fairly obvious - such
-as the numbers 0 to 59 for seconds and minutes, and the values 0 to 23 for hours. Day-of-Month can be any value 1-31,
-but you need to be careful about how many days are in a given month! Months can be specified as values between 0 and
-11, or by using the strings JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV and DEC. Days-of-Week can be specified
-as values between 1 and 7 (1 = Sunday) or by using the strings SUN, MON, TUE, WED, THU, FRI and SAT.</p>
-
-<p>The ‘/’ character can be used to specify increments to values. For example, if you put ‘0/15’ in the Minutes
-field, it means ‘every 15th minute of the hour, starting at minute zero’. If you used ‘3/20’ in the Minutes field, it
-would mean ‘every 20th minute of the hour, starting at minute three’ - or in other words it is the same as specifying
-‘3,23,43’ in the Minutes field.  Note the subtlety that “<em>/35” does *not</em> mean “every 35 minutes” - it mean
-“every 35th minute of the hour, starting at minute zero” - or in other words the same as specifying ‘0,35’.</p>
-
-<p>The ‘?’ character is allowed for the day-of-month and day-of-week fields. It is used to specify “no specific
-value”. This is useful when you need to specify something in one of the two fields, but not the other. See the examples
-below for clarification.</p>
-
-<p>The ‘L’ character is allowed for the day-of-month and day-of-week fields. This character is short-hand for
-“last”, but it has different meaning in each of the two fields. For example, the value “L” in the day-of-month field
-means “the last day of the month” - day 31 for January, day 28 for February on non-leap years. If used in the
-day-of-week field by itself, it simply means “7” or “SAT”. But if used in the day-of-week field after another value, it
-means “the last xxx day of the month” - for example “6L” or “FRIL” both mean “the last friday of the month”.  You
-can also specify an offset from the last day of the month, such as “L-3” which would mean the third-to-last day of the
-calendar month. <em>When using the ‘L’ option, it is important not to specify lists, or ranges of values, as you’ll get
-confusing/unexpected results.</em></p>
-
-<p>The ‘W’ is used to specify the weekday (Monday-Friday) nearest the given day. As an example, if you were to
-specify “15W” as the value for the day-of-month field, the meaning is: “the nearest weekday to the 15th of the month”.</p>
-
-<p>The ‘#’ is used to specify “the nth” XXX weekday of the month. For example, the value of “6#3” or “FRI#3” in the
-day-of-week field means “the third Friday of the month”.</p>
-
-<p>Here are a few more examples of expressions and their meanings - you can find even more in the JavaDoc for
-org.quartz.CronExpression</p>
-
-<h3>Example Cron Expressions</h3>
-
-<p>Example 1 - an expression to create a trigger that simply fires every 5 minutes</p>
-
-<p>“0 0/5 * * * ?”</p>
-
-<p>Example 2 - an expression to create a trigger that fires every 5 minutes, at 10 seconds after the minute
-(i.e. 10:00:10 am, 10:05:10 am, etc.).</p>
-
-<p>“10 0/5 * * * ?”</p>
-
-<p>Example 3 - an expression to create a trigger that fires at 10:30, 11:30, 12:30, and 13:30, on every
-Wednesday and Friday.</p>
-
-<p>“0 30 10-13 ? * WED,FRI”</p>
-
-<p>Example 4 - an expression to create a trigger that fires every half hour between the hours of 8 am and 10 am
-on the 5th and 20th of every month. Note that the trigger will NOT fire at 10:00 am, just at 8:00, 8:30, 9:00 and 9:30</p>
-
-<p>“0 0/30 8-9 5,20 * ?”</p>
 
 <strong>Backend:</strong><br>
 
