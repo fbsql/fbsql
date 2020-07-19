@@ -27,7 +27,7 @@ Work (secure) with your backend database within HTML<br>
 </ul>
 
 <h3>Comparison of FBSQL distributions:</h3>
-<table border="1">
+<table>
 <tr>
 <th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL ServerPlus</th>
 </tr>
@@ -91,7 +91,7 @@ In this chapter we will learn how to install FBSQL, create database connector, u
 
 <strong>Backend:</strong><br>
 
-The "FBSQL ServerPlus Edition" distribution is good point to start, because<br>
+The <i>«FBSQL ServerPlus»</i> edition is good point to start, because
 it already equipped with set of popular embedded databases and their drivers:
 <ul>
 	<li>SQLite</li>
@@ -99,12 +99,12 @@ it already equipped with set of popular embedded databases and their drivers:
 	<li>H2</li>
 	<li>HSQLDB</li>
 </ul>
-
+<br>
 <ol>
 <li>
 Install FBSQL:<br><br>
 <ul>
-<li>Download the latest <i>"FBSQL ServerPlus Edition"</i> release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest "FBSQL Server Plus Edition" release">fbsql-1.2-linux-x86-64.zip</a></li>
+<li>Download the latest <i>«FBSQL ServerPlus»</i> release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest «FBSQL ServerPlus» release">fbsql-1.2-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine</li>
 </ul>
 <br>
