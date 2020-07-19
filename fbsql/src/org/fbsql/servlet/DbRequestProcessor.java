@@ -1031,7 +1031,7 @@ public class DbRequestProcessor implements Runnable {
 														writer.append(outEvent + '\n');
 														writer.flush();
 														if (connectionInfo.debug) {
-															System.out.println("Event delivered to client:");
+															System.out.println("Event was delivered to client:");
 															System.out.println(outEvent);
 														}
 													}

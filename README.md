@@ -1,104 +1,54 @@
 <h1>FBSQL - Frontend Backend SQL</h1>
 Work (secure) with your backend database within HTML<br>
 
-<h3>Features:</h3>
-<ul>
-	<li>Prepared statements</li>
-	<li>Batch execution</li>
-	<li>Background jobs</li>
-	<li>Events notification</li>
-	<li>Promise based JavaScript API</li>
-	<li>Out of the box connection pooling</li>
-	<li>Automatic session management</li>
-	<li>ETag-optimized HTTP communication</li>
-	<li>Compressed responses</li>
-	<li>Static «warmed up» queries with no database interaction</li>
-</ul>
+<h3>Features</h3>
+	<ul>
+		<li>Prepared statements</li>
+		<li>Batch execution</li>
+		<li>Database events notification</li>
+		<li>Background jobs</li>
+	</ul>	
 
 <h3>F.A.Q.</h3>
 <ul>
 	<li><strong>Q.</strong> What is FBSQL?</li>
-	<li><strong>A.</strong> FBSQL is a server that transparently yet secure connects your frontend to the remote database.</li>
+	<li><strong>A.</strong> FBSQL is a server that transparently yet secure connects your frontend to the remote database.<br>
+	</li>
 	<br>
 	<li><strong>Q.</strong> Is it really two-tier architecture?</li>
 	<li><strong>A.</strong> Well, yes and no. Look at the FBSQL as two-tier architecture with third tier under the hood.</li>
 	<br>
-	<li><strong>Q.</strong> Which features are provided out of the box?</li>
-	<li><strong>A.</strong> In addition to underlying database native SQL access FBSQL provide the minimalist set of it's own statements, to cover missing features required for secure data access and web application functionality:
-	<ul>
-		<li>Authentication</li>
-		<li>Authorization</li>
-		<li>Session management</li>
-		<li>Custom request triggers</li>
-		<li>Database events notification</li>
-		<li>Background job execution</li>
-	</ul>	
-	</li>
-	<br>
-	<li><strong>Q.</strong> What about performance and scalability?</li>
-	<li><strong>A.</strong>
-		<ul>
-		<li>Connection pooling</li>
-		<li>ETag-optimized HTTP communication</li>
-		<li>Compressed responses</li>
-		<li>Static «warmed up» queries with no database interaction</li>
-		</ul>
-	</li>
-	<br>
 	<li><strong>Q.</strong> Which databases are supported?</li>
-	<li><strong>A.</strong> FBSQL will works with any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, DB2 etc.</li>
+	<li><strong>A.</strong> FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, Microsoft SQL Server, IBM Db2 etc.<br>
+	All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.</li>
 	<br>
-	<strong>Q.</strong> Which databases are available in FBSQL Database distribution?<br>
-	<strong>A.</strong> FBSQL Database distribution include following databases and their drivers:
-	<ul>
-		<li>SQLite</li>
-		<li>Apache Derby</li>
-		<li>H2</li>
-		<li>HSQLDB</li>
-	</ul>
-	<br>
-	<strong>Q.</strong> How to configure FBSQL Server to work with MySQL (PostgreSQL, Oracle etc.)?<br>
-	<strong>A.</strong> Please do following:
-	<ul>
-		<li>Copy the JDBC driver file(s) to <strong>"~/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib"</strong> directory</li>
-		<li>Copy the initial connector script file to <strong>"~/fbsql/config/db"</strong> directory</li>
-	</ul>
-	<br>
-	<strong>Q.</strong> What is initial connector script?<br>
-	<strong>A.</strong> Initial connector script is a SQL script in which defined:
-	<ul>
-		<li>Connection to database</li>
-		<li>Authentication and authorization</li>
-		<li>SQL statements executed on FBSQL start up</li>
-	</ul>
+	<li><strong>Q.</strong> What about performance?</li>
+	<li><strong>A.</strong> FBSQL was designed with performance in mind and out of the box support of connection pooling, ETag-optimized HTTP communication, compressed responses and static «warmed up» queries with no interaction with underlying database</li>
 </ul>
 
 <h3>Comparison of FBSQL distributions:</h3>
 <table border="1">
 <tr>
-<th></th><th>Servlet</th><th>Server</th><th>Database</th>
+<th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL ServerPlus</th>
+</tr>
 <tr>
-<tr>
-<td>FBSQL engine          </td><td>Yes</td><td>Yes</td><td>Yes</td>
-<tr>
+<td>FBSQL engine (servlet)         </td><td>Yes</td><td>Yes</td><td>Yes</td>
+</tr>
 <tr>
 <td>JavaScript client     </td><td>Yes</td><td>Yes</td><td>Yes</td>
-<tr>
+</tr>
 <tr>
 <td>Java Runtime Environment (JRE)</td><td></td><td>Yes</td><td>Yes</td>
-<tr>
+</tr>
 <tr>
 <td>Servlet container     </td><td></td><td>Yes</td><td>Yes</td>
-<tr>
+</tr>
 <tr>
 <td>Command line interface</td><td></td><td>Yes</td><td>Yes</td>
+</tr>
 <tr>
-<tr>
-<td>JDBC driver(s)        </td><td></td><td></td><td>Yes SQLite, Apache Derby, H2, HSQLDB</td>
-<tr>
-<tr>
-<td>Database(s)           </td><td></td><td></td><td>Yes SQLite, Apache Derby, H2, HSQLDB</td>
-<tr>
+<td>Embedded database</td><td></td><td></td><td>Yes</td>
+</tr>
 </table>
 
 <h1>FBSQL tutorial</h1>
@@ -135,25 +85,37 @@ Work (secure) with your backend database within HTML<br>
 
 <a id="installation_and_basic_example"></a>
 <h2>Basic example</h2>
-<p><i>
+<blockquote>
 In this chapter we will learn how to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.
-</i></p>
+</blockquote>
 
 <strong>Backend:</strong><br>
+
+The "FBSQL ServerPlus Edition" distribution is good point to start, because<br>
+it already equipped with set of popular embedded databases and their drivers:
+<ul>
+	<li>SQLite</li>
+	<li>Apache Derby</li>
+	<li>H2</li>
+	<li>HSQLDB</li>
+</ul>
 
 <ol>
 <li>
 Install FBSQL:<br><br>
 <ul>
-<li>Download the latest FBSQL release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest FBSQL release">fbsql-1.2-linux-x86-64.zip</a></li>
-Expand (unzip) the archive on your machine.
+<li>Download the latest <i>"FBSQL ServerPlus Edition"</i> release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest "FBSQL Server Plus Edition" release">fbsql-1.2-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine</li>
+</ul>
 <br>
 Expanding the archive yields the following folder structure:<br>
-<code>
-</code>
-where ... represents elided files/directories.
-</ul>
+
+```sql
+	release-2.3.4
+		fbsql
+		fbsql.war
+		fbsql-server-plus-2.3.4-linux-x86-64.zip
+```
 <br>
 </li>
 

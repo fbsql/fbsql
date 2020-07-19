@@ -52,6 +52,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -70,6 +71,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Collection;
@@ -83,6 +85,7 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.Random;
 import java.util.ServiceLoader;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.servlet.AsyncContext;
@@ -528,19 +531,44 @@ public class DbServlet extends HttpServlet {
 							try {
 								dbConnection0 = connectionPoolManager.getConnection();
 
+								String outEvent = null;
 								String javaMethod = proceduresMap.get(storedProcedureName);
 								if (javaMethod == null) {
 									CallableStatement cs = dbConnection0.getCallableStatement("{call " + storedProcedureName + "(?)}");
 									cs.setString(1, cronExpression);
-									cs.execute();
+									boolean b = cs.execute();
+									if (b) // first result is a ResultSet object
+										try (ResultSet rs = cs.getResultSet()) {
+											if (rs.next())
+												outEvent = rs.getString(1);
+										}
 								} else {
 									String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
 									String   className  = array[0];
 									String   methodName = array[1];
 
-									Class<?>  clazz  = Class.forName(className);
-									Method method = clazz.getMethod(methodName, Connection.class, String.class);
-									method.invoke(null, dbConnection0.getConnection(), cronExpression);
+									Class<?> clazz  = Class.forName(className);
+									Method   method = clazz.getMethod(methodName, Connection.class, String.class);
+									Object   result = method.invoke(null, dbConnection0.getConnection(), cronExpression);
+									if (result instanceof String)
+										outEvent = (String) result;
+									else if (result instanceof ResultSet)
+										try (ResultSet rs = (ResultSet) result) {
+											if (rs.next())
+												outEvent = rs.getString(1);
+										}
+								}
+
+								for (AsyncContext ac : ongoingRequests) {
+									if (outEvent != null) { // send if outEvent is not null
+										Writer writer = ac.getResponse().getWriter();
+										writer.append(outEvent + '\n');
+										writer.flush();
+										if (info.debug) {
+											System.out.println("Background job event was delivered to client:");
+											System.out.println(outEvent);
+										}
+									}
 								}
 							} finally {
 								if (dbConnection0 != null)
@@ -571,6 +599,7 @@ public class DbServlet extends HttpServlet {
 		}
 
 		return instanceName;
+
 	}
 
 	/**

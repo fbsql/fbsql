@@ -712,41 +712,6 @@ public class SqlParseUtils {
 
 	}
 
-	//	/**
-	//	 * Parse named prepared statement and return parameter name to index map and
-	//	 * replace host variables with '?' character to provide standard prepared statement form
-	//	 * 
-	//	 * @param sql       - named prepared statement
-	//	 * @param resultSQL - standard prepared statement
-	//	 * @return            map parameter name to index (indexes starts from 1) 
-	//	 */
-	//	public static Map<String /* name */, List<Integer /* index */>> parseNamedPreparedStatement222(String sql, StringBuilder resultSQL) {
-	//		Map<String /* name */, List<Integer /* index */>> map = new LinkedHashMap<>();
-	//
-	//		int index = 0;
-	//		while (true) {
-	//			int offset = indexOf(sql, ":");
-	//			if (offset == -1)
-	//				break;
-	//			int pos = indexOf(sql, offset, "= ,+-*/)"); // list of 'stop' characters
-	//			if (pos == -1) // end of line and end of variable are reached
-	//				pos = sql.length();
-	//			String name = sql.substring(offset + 1, pos).trim();
-	//			index++;
-	//			//
-	//			List<Integer /* index */> indexes = map.get(name);
-	//			if (indexes == null) {
-	//				indexes = new ArrayList<>();
-	//				map.put(name, indexes);
-	//			}
-	//			indexes.add(index);
-	//
-	//			sql = sql.substring(0, offset) + '?' + sql.substring(pos);
-	//		}
-	//		resultSQL.append(sql);
-	//		return map;
-	//	}
-
 	/**
 	 * Parse named prepared statement and return parameter name to index map and
 	 * replace host variables with '?' character to provide standard prepared statement form
@@ -774,52 +739,7 @@ public class SqlParseUtils {
 			}
 			indexes.add(i + 1);
 		}
-		//		int index = 0;
-		//		while (true) {
-		//			int offset = indexOf(sql, ":");
-		//			if (offset == -1)
-		//				break;
-		//			int pos = indexOf(sql, offset, "= ,+-*/)"); // list of 'stop' characters
-		//			if (pos == -1) // end of line and end of variable are reached
-		//				pos = sql.length();
-		//			String name = sql.substring(offset + 1, pos).trim();
-		//			index++;
-		//			//
-		//			List<Integer /* index */> indexes = map.get(name);
-		//			if (indexes == null) {
-		//				indexes = new ArrayList<>();
-		//				map.put(name, indexes);
-		//			}
-		//			indexes.add(index);
-		//
-		//			sql = sql.substring(0, offset) + '?' + sql.substring(pos);
-		//		}
-		//		resultSQL.append(sql);
 		return map;
-	}
-
-	public static void main(String[] args) {
-		//	replaceFunction(null, "SELCET MY(?, 'zz, ?, z', ?, 333, ?) FROM ttt", "MY", null);
-
-		//		processCallStatement(null, "CALL MY(the quick,\"brown, fox jumps\", ?, 12.5, :zek, -300, over,\"the\",,\"lazy dog\") > 0", "MY", null);
-		//		//replaceFunction(null, "SELCET MY(?, \"zz, ?, z\", ?, 333, ?) FROM ttt", "MY", null);
-		String    sql1  = "/*+ HINT */ xxx /* comment ? */ :a 'yyyy' :b :c :a zzzzz -- :xx XX\n";
-		ParsedSql psql1 = NamedParameterUtils.parseSqlStatement(sql1);
-		//		//		  assertEquals("/*+ HINT */ xxx /* comment ? */ ? yyyy ? ? ? zzzzz -- :xx XX\n",
-		//		//		      NamedParameterUtils.substituteNamedParameters(psql1, null));
-		String z = NamedParameterUtils.parseSqlStatementIntoString(sql1);
-		System.out.println(z);
-		MapSqlParameterSource map    = new MapSqlParameterSource();
-		List<SqlParameter>    params = NamedParameterUtils.buildSqlParameterList(psql1, map);
-		//		
-		for (SqlParameter object : params) {
-			System.out.println(object.getName());
-		}
-		//		//System.out.println(params);
-		//		MapSqlParameterSource paramMap = new MapSqlParameterSource();
-		//		paramMap.addValue("a", "a");
-		//		paramMap.addValue("b", "b");
-		//		paramMap.addValue("c", "c");
 	}
 
 	/**
@@ -858,34 +778,6 @@ public class SqlParseUtils {
 				return true;
 		return false;
 	}
-
-	//	/**
-	//	 * Iterate over 'stop' characters list and return index of closest to offset 'stop' character
-	//	 * or -1 if end of string reached.
-	//	 * 
-	//	 * @param s      - search source
-	//	 * @param offset - the index to start the search from.
-	//	 * @param chars  - list of stop-characters.
-	//	 * @return       - index of closest to offset 'stop' character
-	//	 * or -1 if end of string reached.
-	//	 */
-	//	private static int indexOf(String s, int offset, String chars) {
-	//		int     minPos = -1;
-	//		boolean found  = false;
-	//		for (int i = 0; i < chars.length(); i++) {
-	//			char c   = chars.charAt(i);
-	//			int  pos = s.indexOf(c, offset);
-	//			if (pos == -1)
-	//				continue;
-	//			if (found)
-	//				minPos = Math.min(minPos, pos);
-	//			else {
-	//				found  = true;
-	//				minPos = pos;
-	//			}
-	//		}
-	//		return minPos;
-	//	}
 
 }
 /*
