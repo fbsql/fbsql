@@ -12,18 +12,17 @@ Work (secure) with your backend database within HTML<br>
 <h3>F.A.Q.</h3>
 <ul>
 	<li><strong>Q.</strong> What is FBSQL?</li>
-	<li><strong>A.</strong> FBSQL is a server that transparently yet secure connects your frontend to the remote database.<br>
-	</li>
+	<li><strong>A.</strong> FBSQL is a server that transparently yet secure connects your frontend to the remote database.</li>
 	<br>
 	<li><strong>Q.</strong> Is it really two-tier architecture?</li>
 	<li><strong>A.</strong> Well, yes and no. Look at the FBSQL as two-tier architecture with third tier under the hood.</li>
 	<br>
 	<li><strong>Q.</strong> Which databases are supported?</li>
-	<li><strong>A.</strong> FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, Microsoft SQL Server, IBM Db2 etc.<br>
+	<li><strong>A.</strong> FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, Microsoft SQL Server, IBM Db2 etc.
 	All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.</li>
 	<br>
 	<li><strong>Q.</strong> What about performance?</li>
-	<li><strong>A.</strong> FBSQL was designed with performance in mind and out of the box support of connection pooling, ETag-optimized HTTP communication, compressed responses and static «warmed up» queries with no interaction with underlying database</li>
+	<li><strong>A.</strong> FBSQL was designed with performance in mind with out of the box support of connection pooling, ETag-optimized HTTP communication, compressed responses and static «warmed up» queries with no interaction with underlying database.</li>
 </ul>
 
 <h3>Comparison of FBSQL distributions:</h3>
