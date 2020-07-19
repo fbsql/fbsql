@@ -32,22 +32,22 @@ Work (secure) with your backend database within HTML<br>
 <th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL ServerPlus</th>
 </tr>
 <tr>
-<td>FBSQL engine (servlet)         </td><td>Yes</td><td>Yes</td><td>Yes</td>
+<td>FBSQL engine (servlet)         </td><td>&check;</td><td>&check;</td><td>&check;</td>
 </tr>
 <tr>
-<td>JavaScript client     </td><td>Yes</td><td>Yes</td><td>Yes</td>
+<td>JavaScript client     </td><td>&check;</td><td>&check;</td><td>&check;</td>
 </tr>
 <tr>
-<td>Java Runtime Environment (JRE)</td><td></td><td>Yes</td><td>Yes</td>
+<td>Java Runtime Environment (JRE)</td><td></td><td>&check;</td><td>&check;</td>
 </tr>
 <tr>
-<td>Servlet container     </td><td></td><td>Yes</td><td>Yes</td>
+<td>Servlet container     </td><td></td><td>&check;</td><td>&check;</td>
 </tr>
 <tr>
-<td>Command line interface</td><td></td><td>Yes</td><td>Yes</td>
+<td>Command line interface</td><td></td><td>&check;</td><td>&check;</td>
 </tr>
 <tr>
-<td>Embedded database</td><td></td><td></td><td>Yes</td>
+<td>Embedded database</td><td></td><td></td><td>&check;</td>
 </tr>
 </table>
 
