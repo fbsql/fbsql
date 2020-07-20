@@ -86,9 +86,7 @@ Work (secure) with your backend database within HTML<br>
 
 <a id="installation_and_basic_example"></a>
 <h2>Basic example</h2>
-<small>
-<p>In this chapter we will learn how to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.</p>
-</small>
+<h6>In this chapter we will learn how to install FBSQL, create database connector and use CONNECT TO statement. We also write simple «Hello, world!» HTML page which execute query and get data from our backend database.</h6>
 
 <strong>Backend:</strong><br>
 
