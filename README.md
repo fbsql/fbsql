@@ -22,13 +22,13 @@ Work (secure) with your backend database within HTML<br>
 	All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.</li>
 	<br>
 	<li><strong>Q.</strong> What about performance?</li>
-	<li><strong>A.</strong> FBSQL was designed with performance in mind. FBSQL out of the box supports connection pooling, ETag-optimized HTTP communication, compressed responses and static «warmed up» queries with no interaction with underlying database.</li>
+	<li><strong>A.</strong> FBSQL was designed with performance in mind and supports out of the box connection pooling, ETag-optimization, response compression and static queries «warming up» with no interaction with underlying database.</li>
 </ul>
 
 <h3>Comparison of FBSQL distributions:</h3>
 <table>
 <tr>
-<th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL ServerPlus</th>
+<th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL Server Plus</th>
 </tr>
 <tr>
 <td>FBSQL engine (servlet)         </td><td>&check;</td><td>&check;</td><td>&check;</td>
@@ -72,7 +72,7 @@ Work (secure) with your backend database within HTML<br>
 <li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
 <li><a href="#global_request_validator" title="How to write and use global request validator (SET VALIDATOR statement).">Global request validator</a></li>
 <li><a href="#warmed_up_queries" title="How to use «warmed up» static queries with no interaction with underlying database.">«warmed up» queries.</a></li>
-<li><a href="#blob_type" title="How to use BLOB type.">BLOB type</a></li>
+<li><a href="#blob_type" title="How to work with BLOB type.">BLOB type</a></li>
 </ul>
 
 
@@ -103,15 +103,15 @@ it already equipped with set of popular embedded databases and their drivers:
 <li>
 Install FBSQL:<br><br>
 <ul>
-<li>Download the latest <i>«FBSQL ServerPlus»</i> release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest «FBSQL ServerPlus» release">fbsql-1.2-linux-x86-64.zip</a></li>
+<li>Download the latest <i>«FBSQL Server Plus»</i> release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest «FBSQL Server Plus» release">fbsql-1.2-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine</li>
 </ul>
-<br>
 Expanding the archive yields the following folder structure:<br>
 
 ```text
+
 fbsql-server-plus-2.3.4-linux-x86-64 ─┐
-                                      ├─ fbsql    - FBSQL server executable
+                                      ├─ fbsql    - FBSQL Server Plus executable
                                       ├─ README   - Release information 
                                       └─ LICENSES - Third party licenses
 ```
@@ -142,7 +142,7 @@ CONNECT TO 'jdbc:sqlite:sample';
 <li>
 Start FBSQL server:<br><br>
 <ul>
-<li>Go to the appropriate subdirectory of the FBSQL installation;</li>
+<li>Go to the appropriate subdirectory of the FBSQL installation</li>
 <li>Run the startup command from command line:</li>
 </ul>
 
@@ -158,7 +158,7 @@ Start FBSQL server:<br><br>
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql.min.js" async></script>
     </head>
     <body>
         <script type="text/javascript">
@@ -169,6 +169,10 @@ Start FBSQL server:<br><br>
     </body>
 </html>
 ```
+<blockquote>
+FBSQL JavaScript API (client) is self-hosted by FBSQL Server, so we need just place &lt;script&gt; tag with appropriate URL in &lt;head&gt; section of our HTML.
+</blockquote>
+
 <strong>Result:</strong><br><br>
 <img src="hello-world-alert.png">
 
@@ -1425,7 +1429,110 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
     </body>
 </html>
 ```
+<hr>
+<a id="blob_type"></a>
+<h2>BLOB type</h2>
+<p><i>
+In this chapter we will learn how to work with BLOB type.
+</i></p>
 
+<strong>Backend:</strong><br>
+
+```sql
+CONNECT TO 'jdbc:sqlite:sample';
+
+DROP TABLE IF EXISTS COUNTRIES;
+CREATE TABLE IF NOT EXISTS COUNTRIES (
+    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
+    COUNTRY_NAME VARCHAR(40) NOT NULL,
+    COUNTRY_FLAG BLOB
+);
+
+/* image taken from wikipedia.org https://en.wikipedia.org/wiki/Australia */
+INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Australia', 'data:image/png;base64,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');
+
+```
+<strong>Frontend:</strong><br>
+
+```html
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="http://localhost:8080/fbsql.min.js"></script>
+
+        <style type="text/css">
+            div {
+                width: 400px;
+                border: 1px solid #999999;
+                border-radius: 3px;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+
+            img {
+                border: 1px solid #cccccc;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            button {
+                border: none;
+                color: #ffffff;
+                background-color: #4CAF50;
+                padding: 10px 32px;
+                text-align: center;
+                font-size: 1rem;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div>
+            <img id="myImage">
+            <label for="myInput">Select new image:</label>
+            <input id="myInput" type="file" accept="image/*">
+        </div>
+        <button id="btnSave">Save</button>
+
+        <script type="text/javascript">
+            let myImage = document.getElementById("myImage");
+            let myInput = document.getElementById("myInput");
+            let btnSave = document.getElementById('btnSave');
+
+            const conn = new Connection('my-sqlite');
+            let psSelect = conn.prepareStatement("SELECT COUNTRY_FLAG FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
+            let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_FLAG = :country_flag WHERE COUNTRY_ID = 'AU'");
+
+            /* Load image from database */
+            psSelect.executeQuery()
+            .then(resultSet => {
+                myImage.src = resultSet[0].COUNTRY_FLAG;
+            });
+
+            /* Select new image */
+            myInput.onchange = function(event) {
+                var input = event.target;
+                var reader = new FileReader();
+                reader.onload = function() {
+                    //let arrayBuffer = arrayBufferToBase64(reader.result); // BINARY
+                    myImage.src = reader.result;;
+                };
+                //reader.readAsArrayBuffer(input.files[0]); // BINARY
+                reader.readAsDataURL(input.files[0]);
+            };
+
+            /* Store image in the database as BLOB */
+            btnSave.onclick = function() {
+            	psUpdate.executeUpdate({country_flag: myImage.src})
+                .then(result => {
+                    alert("Image stored in database as BLOB.");
+                });
+            };
+        </script>
+    </body>
+</html>
+```
 <h3>Contacts and support:</h3>
 <ul>
 	<li>Home: <a href="https://fbsql.github.io" target="_blank">https://fbsql.github.io</a></li>
