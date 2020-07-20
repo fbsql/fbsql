@@ -111,11 +111,8 @@ Expanding the archive yields the following folder structure:<br>
 
 ```text
 fbsql-server-plus-2.3.4-linux-x86-64 ─┐
-                                      │
                                       ├─ fbsql    - FBSQL server executable
-                                      │
                                       ├─ README   - Release information 
-                                      │
                                       └─ LICENSES - Third party licenses
 ```
 <br>
