@@ -109,11 +109,14 @@ Install FBSQL:<br><br>
 <br>
 Expanding the archive yields the following folder structure:<br>
 
-```sql
-	release-2.3.4
-		fbsql
-		fbsql.war
-		fbsql-server-plus-2.3.4-linux-x86-64.zip
+```text
+fbsql-server-plus-2.3.4-linux-x86-64 ─┐
+                                      │
+                                      ├─ fbsql    - FBSQL server executable
+                                      │
+                                      ├─ README   - Release information 
+                                      │
+                                      └─ LICENSES - Third party licenses
 ```
 <br>
 </li>
