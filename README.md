@@ -22,7 +22,7 @@ Work (secure) with your backend database within HTML<br>
 	All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.</li>
 	<br>
 	<li><strong>Q.</strong> What about performance?</li>
-	<li><strong>A.</strong> FBSQL was designed with performance in mind with out of the box support of connection pooling, ETag-optimized HTTP communication, compressed responses and static «warmed up» queries with no interaction with underlying database.</li>
+	<li><strong>A.</strong> FBSQL was designed with performance in mind. FBSQL out of the box supports connection pooling, ETag-optimized HTTP communication, compressed responses and static «warmed up» queries with no interaction with underlying database.</li>
 </ul>
 
 <h3>Comparison of FBSQL distributions:</h3>
@@ -71,6 +71,8 @@ Work (secure) with your backend database within HTML<br>
 <li><a href="#add_database_event_notifier" title="How to add database event notifier (ADD NOTIFIER statement).">Database event notification</a></li>
 <li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
 <li><a href="#global_request_validator" title="How to write and use global request validator (SET VALIDATOR statement).">Global request validator</a></li>
+<li><a href="#warmed_up_queries" title="How to use «warmed up» static queries with no interaction with underlying database.">«warmed up» queries.</a></li>
+<li><a href="#blob_type" title="How to use BLOB type.">BLOB type</a></li>
 </ul>
 
 
@@ -84,9 +86,9 @@ Work (secure) with your backend database within HTML<br>
 
 <a id="installation_and_basic_example"></a>
 <h2>Basic example</h2>
-<blockquote>
-In this chapter we will learn how to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.
-</blockquote>
+<small>
+<p>In this chapter we will learn how to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.</p>
+</small>
 
 <strong>Backend:</strong><br>
 
@@ -1037,8 +1039,7 @@ public class StoredProcedures {
             const conn = new Connection('my-sqlite');
 
             const ps   = conn.prepareStatement("CALL GET_EMPLOYEES(:nameStartsWith)");
-            ps.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_OBJECTS);
-            ps.executeQuery({nameStartsWith: 'Lo'})
+            ps.executeQuery({nameStartsWith: 'Lor'})
             .then(resultSet => console.log(JSON.stringify(resultSet)));
             /*
              * Output:
