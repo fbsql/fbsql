@@ -1449,7 +1449,7 @@ CREATE TABLE IF NOT EXISTS COUNTRIES (
 );
 
 /* image taken from wikipedia.org https://en.wikipedia.org/wiki/Australia */
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Australia', 'data:image/png;base64,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');
+INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Australia', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAUCAMAAADImI+JAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAA1VBMVEX/UFD/wMDa2u5eXrYDA4wAAIurq9n/AABnWKvsbXdmWa3rdH//TU3/u7sCAoxeUanqc37e3vBmZrmsrNkEBI1oaLrNyOT40dX/xMT/6en7+/398PHz8/nKyucNDZHBweMoKJ3/6+v/xsb97u/5zdDOyOMpKZ5pabsiIppVVbLY2O3/w8P/UVHwaHBwX60WFpViYrj9/f5HR6vuZm9pWKoGBo7MzOgSEpNQUK9vb70kJJsqKp4REZODg8eYmNCJicn///9KSq3IyObJyebV1ewhIZpZWbMCZbC/AAAAAWJLR0RA/tlc2AAAAAd0SU1FB+MBEhEJAFdSByYAAAEBSURBVCjPlZDndsIwDIWdYQsKuCPsEUZbMGUV2pCww3z/R2pik5ycJIfj6o8t6bPkexFSVE3HGBMA4h16JosUnBLoKZcv+CgHdZGlgpg+v+QLr28GgCFuxbBJSyUagoQQo1yp1uoAjWqt2TK8QtA0220zBCElwpGdDpYDo3/0V7ea3d47QL3b+/iMrubRH7C7mOHXaDyZ+mLEjYuhs9ldx/d8wUFNHY1/fgN7RObVreXSEqDt6BxUUDYTNVxTFeSDq5UV8/FxOI4kuF4nwE3/4YsA3O72+91WAsQH1z3ITDyeXPd0jDUpYzQxkZ3PLD7FvFzMBHi17Wti3+0m7eP/wT9+PSI8GL08QQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0wMS0xOFQxNzowODo1OSswMDowMNmWJTYAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMDEtMThUMTc6MDg6NTkrMDA6MDCoy52KAAAAAElFTkSuQmCC');
 
 ```
 <strong>Frontend:</strong><br>
@@ -1460,40 +1460,12 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Aus
 <html lang="en">
     <head>
         <script src="http://localhost:8080/fbsql.min.js"></script>
-
-        <style type="text/css">
-            div {
-                width: 400px;
-                border: 1px solid #999999;
-                border-radius: 3px;
-                padding: 10px;
-                margin-bottom: 10px;
-            }
-
-            img {
-                border: 1px solid #cccccc;
-                width: 100%;
-                margin-bottom: 10px;
-            }
-
-            button {
-                border: none;
-                color: #ffffff;
-                background-color: #4CAF50;
-                padding: 10px 32px;
-                text-align: center;
-                font-size: 1rem;
-            }
-        </style>
     </head>
 
     <body>
-        <div>
-            <img id="myImage">
-            <label for="myInput">Select new image:</label>
-            <input id="myInput" type="file" accept="image/*">
-        </div>
-        <button id="btnSave">Save</button>
+        <img id="myImage"><br><br>
+        <input id="myInput" type="file" accept="image/*"><br><br>
+        <button id="btnSave">Store in database</button>
 
         <script type="text/javascript">
             let myImage = document.getElementById("myImage");
@@ -1516,7 +1488,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Aus
                 var reader = new FileReader();
                 reader.onload = function() {
                     //let arrayBuffer = arrayBufferToBase64(reader.result); // BINARY
-                    myImage.src = reader.result;;
+                    myImage.src = reader.result;
                 };
                 //reader.readAsArrayBuffer(input.files[0]); // BINARY
                 reader.readAsDataURL(input.files[0]);

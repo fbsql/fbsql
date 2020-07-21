@@ -7,44 +7,45 @@
     <body>
         <img id="myImage"><br><br>
         <input id="myInput" type="file" accept="image/*"><br><br>
+        <button id="btnSave">Store in database</button>
 
         <script type="text/javascript">
             let myImage = document.getElementById("myImage");
             let myInput = document.getElementById("myInput");
+            let btnSave = document.getElementById('btnSave');
 
             const conn = new Connection('my-h2');
             let psSelect = conn.prepareStatement("SELECT COUNTRY_FLAG FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
             let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_FLAG = :country_flag WHERE COUNTRY_ID = 'AU'");
 
-            var reader;
-
             /* Load image from database */
             psSelect.executeQuery()
             .then(resultSet => {
+//                myImage.src = resultSet[0].COUNTRY_FLAG;
             	let base64data = resultSet[0].COUNTRY_FLAG;
             	if (base64data != null)
             		myImage.src = 'data:;base64,' + base64data;
+
             });
 
             /* Select new image */
             myInput.onchange = function(event) {
                 var input = event.target;
-                reader = new FileReader();
+                var reader = new FileReader();
                 reader.onload = function() {
-                	psUpdate.executeUpdate({country_flag: reader.result})
-                    .then(result => {
-                    	return psSelect.executeQuery();
-                    })
-                    .then(resultSet => {
-                    	myImage.onload = function(event) {
-                    		console.log(`${reader.result.byteLength} byte(s) stored in database as VARBINARY and readed back.`);
-                    	}
-                    	let base64data = resultSet[0].COUNTRY_FLAG;
-                    	if (base64data != null)
-                    		myImage.src = 'data:;base64,' + base64data;
-                    });
+                    //let arrayBuffer = arrayBufferToBase64(reader.result); // BINARY
+                    myImage.src = reader.result;
                 };
-                reader.readAsArrayBuffer(input.files[0]); // BINARY
+                //reader.readAsArrayBuffer(input.files[0]); // BINARY
+                reader.readAsDataURL(input.files[0]);
+            };
+
+            /* Store image in the database as BLOB */
+            btnSave.onclick = function() {
+            	psUpdate.executeUpdate({country_flag: myImage.src})
+                .then(result => {
+                    alert("Image stored in database as BLOB.");
+                });
             };
         </script>
     </body>

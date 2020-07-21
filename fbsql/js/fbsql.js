@@ -371,6 +371,11 @@ class PreparedStatement {
 
 			if (parameters === undefined || parameters == null)
 				parameters = {};
+
+			for (const [key, value] of Object.entries(parameters))
+				if (value instanceof ArrayBuffer)
+					parameters[key] = arrayBufferToBase64(value);
+
 			json['parameters'] = parameters;
 
 			/**
@@ -441,6 +446,11 @@ class PreparedStatement {
 
 			if (parameters === undefined || parameters == null)
 				parameters = {};
+
+			for (const [key, value] of Object.entries(parameters))
+				if (value instanceof ArrayBuffer)
+					parameters[key] = arrayBufferToBase64(value);
+
 			json['parameters'] = parameters;
 
 			/**

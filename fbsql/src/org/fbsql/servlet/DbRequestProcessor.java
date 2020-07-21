@@ -55,6 +55,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Calendar;
 import java.util.Collection;
@@ -895,13 +896,15 @@ public class DbRequestProcessor implements Runnable {
 													ps.setTime(n, new Time(Long.parseLong(pvalue)));
 												else
 													ps.setString(n, pvalue);
-											} else if (parameterType == Types.BINARY || parameterType == Types.VARBINARY) // JavaScript ArrayBuffer
+											} else if (parameterType == Types.BINARY || parameterType == Types.VARBINARY || parameterType == Types.LONGVARBINARY) { // JavaScript ArrayBuffer
+												pvalue = extractData(pvalue);
 												ps.setBytes(n, sharedCoder.decoder.decode(pvalue));
-											else if (parameterType == Types.BLOB) { // JavaScript ArrayBuffer
+											} else if (parameterType == Types.BLOB) { // JavaScript ArrayBuffer converted to BASE64 at client side and stored in BLOB "AS IS" (as BASE64 string)
+												pvalue = extractData(pvalue);
 												Blob blob = ps.getConnection().createBlob();
-												blob.setBytes(1L, pvalue.getBytes(StandardCharsets.UTF_8));
+												blob.setBytes(1L, sharedCoder.decoder.decode(pvalue));
 												ps.setBlob(n, blob);
-											} else if (parameterType == Types.CLOB) { // JavaScript ArrayBuffer
+											} else if (parameterType == Types.CLOB) { // JavaScript string stored in CLOB "AS IS" (as String)
 												Clob clob = ps.getConnection().createClob();
 												clob.setString(1L, pvalue);
 												ps.setClob(n, clob);
@@ -916,9 +919,7 @@ public class DbRequestProcessor implements Runnable {
 						//
 						if (executeTypeQuery) { // Execute Query
 							try (ResultSet rs = ps.executeQuery()) {
-								Integer compression = connectionInfo.compressionLevel == null ? QueryUtils.COMPRESSION_NONE : connectionInfo.compressionLevel;
-								//								List<Map<String /* column name */, String /* JSON value */>> list        = QueryUtils.resutlSetToListOfMapsJsonValues(rs, sharedCoder.encoder);
-
+								Integer                                                        compression       = connectionInfo.compressionLevel == null ? QueryUtils.COMPRESSION_NONE : connectionInfo.compressionLevel;
 								List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
 								List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
 
@@ -1112,6 +1113,21 @@ public class DbRequestProcessor implements Runnable {
 				t.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * This method extracts data part from data URI
+	 *
+	 * @param s
+	 * @return
+	 */
+	private static String extractData(String s) {
+		if (s.startsWith("data:")) { // data URI
+			int pos = s.indexOf(";base64,"); // The data, separated from the preceding part by a comma (,)
+			if (pos != -1)
+				return s.substring(pos + 8);
+		}
+		return s;
 	}
 
 	private static String getClientInfo(HttpServletRequest request, Decoder decoder) throws IOException {

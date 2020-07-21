@@ -37,6 +37,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -168,9 +169,9 @@ public class QueryUtils {
 				else if (value instanceof Blob) {
 					Blob   blob = (Blob) value;
 					byte[] bs   = blob.getBytes(1L, (int) blob.length());
-					svalue = "\"" + new String(bs, StandardCharsets.UTF_8) + "\"";
+					svalue = "\"" + encoder.encodeToString(bs) + "\"";
 				}
-				/* BINARY, VARBINARY, BLOB */
+				/* BINARY, VARBINARY, LONGVARBINARY, BLOB */
 				else if (value instanceof byte[]) { // value returned as Base64 encoded string
 					byte[] bs = (byte[]) value;
 					svalue = "\"" + encoder.encodeToString(bs) + "\"";
@@ -179,7 +180,7 @@ public class QueryUtils {
 					String strValue = ((String) value).trim();
 					/* JSON Types */
 					if ( //
-							(strValue.startsWith("{") && strValue.endsWith("}")) || // JSON Objecty
+					(strValue.startsWith("{") && strValue.endsWith("}")) || // JSON Objecty
 							(strValue.startsWith("[") && strValue.endsWith("]")) || // JSON Array
 							(strValue.startsWith("\"") && strValue.endsWith("\"")) || // JSON String
 							(strValue.equals("null")) || // JSON null
@@ -225,7 +226,14 @@ public class QueryUtils {
 			for (int i = 0; i < columnCount; i++) {
 				int    n          = i + 1;
 				String columnName = md.getColumnName(n);
-				Object value      = rs.getObject(n);
+				int    columnType = md.getColumnType(n);
+				Object value;
+				if (columnType == Types.BINARY || columnType == Types.VARBINARY || columnType == Types.LONGVARBINARY)
+					value = rs.getBytes(n);
+				else if (columnType == Types.BLOB)
+					value = rs.getBlob(n);
+				else
+					value = rs.getObject(n);
 				map.put(columnName, value);
 			}
 			list.add(map);
