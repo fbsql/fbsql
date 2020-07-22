@@ -25,7 +25,7 @@ Work (secure) with your backend database within HTML<br>
 	<li><strong>A.</strong> FBSQL was designed with performance in mind and supports out of the box connection pooling, ETag-optimization, response compression and static queries «warming up» with no interaction with underlying database.</li>
 </ul>
 
-<h3>Comparison of FBSQL distributions:</h3>
+<h3>FBSQL distributions</h3>
 <table>
 <tr>
 <th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL Server Plus</th>
@@ -71,11 +71,10 @@ Work (secure) with your backend database within HTML<br>
 <li><a href="#add_database_event_notifier" title="How to add database event notifier (ADD NOTIFIER statement).">Database event notification</a></li>
 <li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
 <li><a href="#global_request_validator" title="How to write and use global request validator (SET VALIDATOR statement).">Global request validator</a></li>
-<li><a href="#warmed_up_queries" title="How to use «warmed up» static queries with no interaction with underlying database.">«warmed up» queries.</a></li>
-<li><a href="#blob_type" title="How to work with BLOB type.">BLOB type</a></li>
+<li><a href="#warmed_up_queries" title="How to use «warmed up» static queries with no interaction with underlying database.">Warming up your queries</a></li>
+<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
+<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
 </ul>
-
-
 
 
 
@@ -1429,11 +1428,11 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
     </body>
 </html>
 ```
-<hr>
+
 <a id="blob_type"></a>
-<h2>BLOB type</h2>
+<h2>Binary data</h2>
 <p><i>
-In this chapter we will learn how to work with BLOB type.
+In this chapter we will learn how to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.
 </i></p>
 
 <strong>Backend:</strong><br>
@@ -1448,8 +1447,7 @@ CREATE TABLE IF NOT EXISTS COUNTRIES (
     COUNTRY_FLAG BLOB
 );
 
-/* image taken from wikipedia.org https://en.wikipedia.org/wiki/Australia */
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Australia', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAUCAMAAADImI+JAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAA1VBMVEX/UFD/wMDa2u5eXrYDA4wAAIurq9n/AABnWKvsbXdmWa3rdH//TU3/u7sCAoxeUanqc37e3vBmZrmsrNkEBI1oaLrNyOT40dX/xMT/6en7+/398PHz8/nKyucNDZHBweMoKJ3/6+v/xsb97u/5zdDOyOMpKZ5pabsiIppVVbLY2O3/w8P/UVHwaHBwX60WFpViYrj9/f5HR6vuZm9pWKoGBo7MzOgSEpNQUK9vb70kJJsqKp4REZODg8eYmNCJicn///9KSq3IyObJyebV1ewhIZpZWbMCZbC/AAAAAWJLR0RA/tlc2AAAAAd0SU1FB+MBEhEJAFdSByYAAAEBSURBVCjPlZDndsIwDIWdYQsKuCPsEUZbMGUV2pCww3z/R2pik5ycJIfj6o8t6bPkexFSVE3HGBMA4h16JosUnBLoKZcv+CgHdZGlgpg+v+QLr28GgCFuxbBJSyUagoQQo1yp1uoAjWqt2TK8QtA0220zBCElwpGdDpYDo3/0V7ea3d47QL3b+/iMrubRH7C7mOHXaDyZ+mLEjYuhs9ldx/d8wUFNHY1/fgN7RObVreXSEqDt6BxUUDYTNVxTFeSDq5UV8/FxOI4kuF4nwE3/4YsA3O72+91WAsQH1z3ITDyeXPd0jDUpYzQxkZ3PLD7FvFzMBHi17Wti3+0m7eP/wT9+PSI8GL08QQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0wMS0xOFQxNzowODo1OSswMDowMNmWJTYAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMDEtMThUMTc6MDg6NTkrMDA6MDCoy52KAAAAAElFTkSuQmCC');
+INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('AU', 'Australia');
 
 ```
 <strong>Frontend:</strong><br>
@@ -1463,14 +1461,12 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Aus
     </head>
 
     <body>
-        <img id="myImage"><br><br>
-        <input id="myInput" type="file" accept="image/*"><br><br>
-        <button id="btnSave">Store in database</button>
+        <img id="myImage"><br>
+        <input id="myInput" type="file" accept="image/*">
 
         <script type="text/javascript">
             let myImage = document.getElementById("myImage");
             let myInput = document.getElementById("myInput");
-            let btnSave = document.getElementById('btnSave');
 
             const conn = new Connection('my-sqlite');
             let psSelect = conn.prepareStatement("SELECT COUNTRY_FLAG FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
@@ -1479,7 +1475,9 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Aus
             /* Load image from database */
             psSelect.executeQuery()
             .then(resultSet => {
-                myImage.src = resultSet[0].COUNTRY_FLAG;
+                let base64data = resultSet[0].COUNTRY_FLAG;
+                if (base64data != null)
+                    myImage.src = 'data:;base64,' + base64data;
             });
 
             /* Select new image */
@@ -1487,24 +1485,98 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_FLAG) VALUES('AU', 'Aus
                 var input = event.target;
                 var reader = new FileReader();
                 reader.onload = function() {
-                    //let arrayBuffer = arrayBufferToBase64(reader.result); // BINARY
-                    myImage.src = reader.result;
+                    /* Update image */
+                    psUpdate.executeUpdate({country_flag: reader.result})
+                    .then(result => {
+                        /* Load image from database */
+                        return psSelect.executeQuery();
+                    })
+                    .then(resultSet => {
+                        console.log(`${reader.result.byteLength} byte(s) stored in database as VARBINARY and readed back.`);
+                        let base64data = resultSet[0].COUNTRY_FLAG;
+                        if (base64data != null)
+                            myImage.src = 'data:;base64,' + base64data;
+                    });
                 };
-                //reader.readAsArrayBuffer(input.files[0]); // BINARY
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsArrayBuffer(input.files[0]);
             };
+        </script>
+    </body>
+</html>
+```
 
-            /* Store image in the database as BLOB */
-            btnSave.onclick = function() {
-            	psUpdate.executeUpdate({country_flag: myImage.src})
+<a id="date_type"></a>
+<h2>Date and Time</h2>
+<p><i>
+In this chapter we will learn how to work with DATE, TIME and TIMESTAMP types.
+</i></p>
+
+<strong>Backend:</strong><br>
+
+```sql
+CONNECT TO 'jdbc:sqlite:sample';
+
+DROP TABLE IF EXISTS COUNTRIES;
+CREATE TABLE IF NOT EXISTS COUNTRIES (
+    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
+    COUNTRY_NAME VARCHAR(40) NOT NULL,
+    COUNTRY_DATE DATE,
+    COUNTRY_TIME TIME,
+    COUNTRY_TIMESTAMP TIMESTAMP
+);
+
+INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME, COUNTRY_TIMESTAMP) VALUES('AU', 'Australia', '2014-12-27', '17:45:53', '2014-12-27 17:45:53');
+
+```
+<strong>Frontend:</strong><br>
+
+```html
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="http://localhost:8080/fbsql.min.js"></script>
+    </head>
+
+    <body>
+        <button id="myInput">Update</button>
+
+        <script type="text/javascript">
+            let myInput = document.getElementById("myInput");
+
+            const conn = new Connection('my-sqlite');
+            let psSelect = conn.prepareStatement("SELECT * FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
+            let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_DATE = :country_date, COUNTRY_TIME = :country_time, COUNTRY_TIMESTAMP = :country_timestamp WHERE COUNTRY_ID = 'AU'");
+
+            psSelect.executeQuery()
+            .then(resultSet => {
+                console.log('*** read from database ***');
+                console.log(`COUNTRY_DATE: ${resultSet[0].COUNTRY_DATE}`);
+                console.log(`COUNTRY_TIME: ${resultSet[0].COUNTRY_TIME}`);
+                console.log(`COUNTRY_TIMESTAMP: ${resultSet[0].COUNTRY_TIMESTAMP}`);
+            });
+
+            myInput.onclick = function(event) {
+                var input = event.target;
+                let date = new Date();
+                console.log('*** update database ***');
+                psUpdate.executeUpdate({country_date: date, country_time: date, country_timestamp: date})
                 .then(result => {
-                    alert("Image stored in database as BLOB.");
+                    /* Load image from database */
+                    return psSelect.executeQuery();
+                })
+                .then(resultSet => {
+                    console.log('*** read updated values ***');
+                    console.log(`COUNTRY_DATE: ${resultSet[0].COUNTRY_DATE}`);
+                    console.log(`COUNTRY_TIME: ${resultSet[0].COUNTRY_TIME}`);
+                    console.log(`COUNTRY_TIMESTAMP: ${resultSet[0].COUNTRY_TIMESTAMP}`);
                 });
             };
         </script>
     </body>
 </html>
 ```
+
 <h3>Contacts and support:</h3>
 <ul>
 	<li>Home: <a href="https://fbsql.github.io" target="_blank">https://fbsql.github.io</a></li>

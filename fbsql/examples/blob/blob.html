@@ -5,46 +5,38 @@
     </head>
 
     <body>
-        <img id="myImage"><br><br>
-        <input id="myInput" type="file" accept="image/*"><br><br>
+        <button id="myInput">Update</button>
 
         <script type="text/javascript">
-            let myImage = document.getElementById("myImage");
             let myInput = document.getElementById("myInput");
 
-            const conn = new Connection('my-h2');
-            let psSelect = conn.prepareStatement("SELECT COUNTRY_FLAG FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
-            let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_FLAG = :country_flag WHERE COUNTRY_ID = 'AU'");
+            const conn = new Connection('my-sqlite');
+            let psSelect = conn.prepareStatement("SELECT * FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
+            let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_DATE = :country_date, COUNTRY_TIME = :country_time, COUNTRY_TIMESTAMP = :country_timestamp WHERE COUNTRY_ID = 'AU'");
 
-            var reader;
-
-            /* Load image from database */
             psSelect.executeQuery()
             .then(resultSet => {
-            	let base64data = resultSet[0].COUNTRY_FLAG;
-            	if (base64data != null)
-            		myImage.src = 'data:;base64,' + base64data;
+                console.log('*** read from database ***');
+                console.log(`COUNTRY_DATE: ${resultSet[0].COUNTRY_DATE}`);
+                console.log(`COUNTRY_TIME: ${resultSet[0].COUNTRY_TIME}`);
+                console.log(`COUNTRY_TIMESTAMP: ${resultSet[0].COUNTRY_TIMESTAMP}`);
             });
 
-            /* Select new image */
-            myInput.onchange = function(event) {
+            myInput.onclick = function(event) {
                 var input = event.target;
-                reader = new FileReader();
-                reader.onload = function() {
-                	psUpdate.executeUpdate({country_flag: reader.result})
-                    .then(result => {
-                    	return psSelect.executeQuery();
-                    })
-                    .then(resultSet => {
-                    	myImage.onload = function(event) {
-                    		console.log(`${reader.result.byteLength} byte(s) stored in database as VARBINARY and readed back.`);
-                    	}
-                    	let base64data = resultSet[0].COUNTRY_FLAG;
-                    	if (base64data != null)
-                    		myImage.src = 'data:;base64,' + base64data;
-                    });
-                };
-                reader.readAsArrayBuffer(input.files[0]); // BINARY
+                let date = new Date();
+                console.log('*** update database ***');
+                psUpdate.executeUpdate({country_date: date, country_time: date, country_timestamp: date})
+                .then(result => {
+                    /* Load image from database */
+                    return psSelect.executeQuery();
+                })
+                .then(resultSet => {
+                    console.log('*** read updated values ***');
+                    console.log(`COUNTRY_DATE: ${resultSet[0].COUNTRY_DATE}`);
+                    console.log(`COUNTRY_TIME: ${resultSet[0].COUNTRY_TIME}`);
+                    console.log(`COUNTRY_TIMESTAMP: ${resultSet[0].COUNTRY_TIMESTAMP}`);
+                });
             };
         </script>
     </body>

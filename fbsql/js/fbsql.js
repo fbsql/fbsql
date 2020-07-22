@@ -375,6 +375,8 @@ class PreparedStatement {
 			for (const [key, value] of Object.entries(parameters))
 				if (value instanceof ArrayBuffer)
 					parameters[key] = arrayBufferToBase64(value);
+				else if (value instanceof Date)
+					parameters[key] = value.toISOString();
 
 			json['parameters'] = parameters;
 
@@ -450,6 +452,8 @@ class PreparedStatement {
 			for (const [key, value] of Object.entries(parameters))
 				if (value instanceof ArrayBuffer)
 					parameters[key] = arrayBufferToBase64(value);
+				else if (value instanceof Date)
+					parameters[key] = value.toISOString();
 
 			json['parameters'] = parameters;
 
@@ -516,7 +520,7 @@ function arrayBufferToBase64(arrayBuffer) {
  */
 function pivot(records) {
     return records.reduce((result, record) => {
-	    for ( let key in record) {
+	    for (let key in record) {
 		    if (!result[key])
 			    result[key] = []
 		    result[key].push(record[key])

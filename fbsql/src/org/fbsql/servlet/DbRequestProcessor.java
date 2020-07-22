@@ -55,7 +55,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Calendar;
 import java.util.Collection;
@@ -179,13 +178,28 @@ public class DbRequestProcessor implements Runnable {
 		browsCapFieldInfoMap.put(BrowsCapField.RENDERING_ENGINE_MAKER, String.class);
 	}
 
-	private static final String IN_ROLE_FUNCTION_TOKEN                    = "IN_ROLE(";
-	private static final String GET_COOKIE_FUNCTION_TOKEN                 = "COOKIE(";
-	private static final String GET_HTTP_HEADER_AS_CHAR_FUNCTION_TOKEN    = "GET_HTTP_HEADER_AS_CHAR(";
-	private static final String GET_HTTP_HEADER_AS_DATE_FUNCTION_TOKEN    = "GET_HTTP_HEADER_AS_DATE(";
-	private static final String GET_HTTP_HEADER_AS_INTEGER_FUNCTION_TOKEN = "GET_HTTP_HEADER_AS_INTEGER(";
-	private static final String SESSION_ATTRIBUTE_SESSION_JSON            = "SESSION_JSON";
-	//
+	private static final String SESSION_ATTRIBUTE_SESSION_JSON = "SESSION_JSON";
+
+	/*
+	 * Built-in functions
+	 */
+
+	/* functions with parameter */
+	private static final String FUT_IN_ROLE                    = "IN_ROLE(";
+	private static final String FUT_GET_COOKIE                 = "COOKIE(";
+	private static final String FUT_GET_HTTP_HEADER_AS_CHAR    = "GET_HTTP_HEADER_AS_CHAR(";
+	private static final String FUT_GET_HTTP_HEADER_AS_DATE    = "GET_HTTP_HEADER_AS_DATE(";
+	private static final String FUT_GET_HTTP_HEADER_AS_INTEGER = "GET_HTTP_HEADER_AS_INTEGER(";
+
+	/* functions without parameters */
+	private static final String FUN_REMOTE_USER                       = "REMOTE_USER()";
+	private static final String FUN_REMOTE_ROLE                       = "REMOTE_ROLE()";
+	private static final String FUN_REMOTE_SESSION_ID                 = "REMOTE_SESSION_ID()";
+	private static final String FUN_REMOTE_SESSION_CREATION_TIME      = "REMOTE_SESSION_CREATION_TIME()";
+	private static final String FUN_REMOTE_SESSION_LAST_ACCESSED_TIME = "REMOTE_SESSION_LAST_ACCESSED_TIME()";
+	private static final String FUN_REMOTE_SESSION_ATTRIBUTES         = "REMOTE_SESSION_ATTRIBUTES()";
+	private static final String FUN_USER_INFO                         = "USER_INFO()";
+
 	private String       instanceName;
 	private AsyncContext asyncContext;
 
@@ -492,33 +506,23 @@ public class DbRequestProcessor implements Runnable {
 			//
 			// Replace built-in functions with values
 			//
-			preparedStatement = preparedStatement.replace("REMOTE_USER()", remoteUser == null ? SQL_NULL : SQL_QUOTE_CHAR + remoteUser + SQL_QUOTE_CHAR);
-			preparedStatement = preparedStatement.replace("REMOTE_ROLE()", remoteRole == null ? SQL_NULL : SQL_QUOTE_CHAR + remoteRole + SQL_QUOTE_CHAR);
-
-			preparedStatement = preparedStatement.replace("REMOTE_SESSION_ID()", sessionId == null ? SQL_NULL : SQL_QUOTE_CHAR + sessionId + SQL_QUOTE_CHAR);
-			preparedStatement = preparedStatement.replace("REMOTE_SESSION_CREATION_TIME()", sessionCreationTime == null ? SQL_NULL : Long.toString(sessionCreationTime));
-			preparedStatement = preparedStatement.replace("REMOTE_SESSION_LAST_ACCESSED_TIME()", sessionLastAccessedTime == null ? SQL_NULL : Long.toString(sessionLastAccessedTime));
-			preparedStatement = preparedStatement.replace("REMOTE_SESSION_ATTRIBUTES()", sessionAttributesJson == null ? SQL_NULL : SQL_QUOTE_CHAR + sessionAttributesJson + SQL_QUOTE_CHAR);
-
-			preparedStatement = preparedStatement.replace("USER_INFO()", userInfoJson == null ? SQL_NULL : SQL_QUOTE_CHAR + userInfoJson + SQL_QUOTE_CHAR);
-
-			//			preparedStatement = preparedStatement.replace("REMOTE_INFO()", SQL_QUOTE_CHAR + remoteInfoJson + SQL_QUOTE_CHAR);
-			//			preparedStatement = preparedStatement.replace("CLIENT_INFO()", SQL_QUOTE_CHAR + clientInfoJson + SQL_QUOTE_CHAR);
-			//			preparedStatement = preparedStatement.replace("COOKIES()", SQL_QUOTE_CHAR + cookiesJson + SQL_QUOTE_CHAR);
-
-			//
-			// TODO Implement COOKIE('name') function
-			//
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_USER, remoteUser == null ? SQL_NULL : SQL_QUOTE_CHAR + remoteUser + SQL_QUOTE_CHAR);
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_ROLE, remoteRole == null ? SQL_NULL : SQL_QUOTE_CHAR + remoteRole + SQL_QUOTE_CHAR);
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_ID, sessionId == null ? SQL_NULL : SQL_QUOTE_CHAR + sessionId + SQL_QUOTE_CHAR);
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_CREATION_TIME, sessionCreationTime == null ? SQL_NULL : Long.toString(sessionCreationTime));
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_LAST_ACCESSED_TIME, sessionLastAccessedTime == null ? SQL_NULL : Long.toString(sessionLastAccessedTime));
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_ATTRIBUTES, sessionAttributesJson == null ? SQL_NULL : SQL_QUOTE_CHAR + sessionAttributesJson + SQL_QUOTE_CHAR);
+			preparedStatement = preparedStatement.replace(FUN_USER_INFO, userInfoJson == null ? SQL_NULL : SQL_QUOTE_CHAR + userInfoJson + SQL_QUOTE_CHAR);
 
 			//
 			// Replace IN_ROLE() built-in function with value
 			//
 			while (true) {
-				int offset = SqlParseUtils.indexOf(preparedStatement, IN_ROLE_FUNCTION_TOKEN);
+				int offset = SqlParseUtils.indexOf(preparedStatement, FUT_IN_ROLE);
 				if (offset == -1)
 					break;
-				int     pos1   = offset + IN_ROLE_FUNCTION_TOKEN.length();
-				char    quote  = preparedStatement.charAt(pos1);          // get single «'» or double «"» quote
+				int     pos1   = offset + FUT_IN_ROLE.length();
+				char    quote  = preparedStatement.charAt(pos1);       // get single «'» or double «"» quote
 				String  s      = preparedStatement.substring(pos1 + 1);
 				int     pos2   = s.indexOf(quote);
 				String  role   = s.substring(0, pos2);
@@ -532,11 +536,11 @@ public class DbRequestProcessor implements Runnable {
 			// Replace COOKIE() built-in function with value
 			//
 			while (true) {
-				int offset = SqlParseUtils.indexOf(preparedStatement, GET_COOKIE_FUNCTION_TOKEN);
+				int offset = SqlParseUtils.indexOf(preparedStatement, FUT_GET_COOKIE);
 				if (offset == -1)
 					break;
-				int    pos1       = offset + GET_COOKIE_FUNCTION_TOKEN.length();
-				char   quote      = preparedStatement.charAt(pos1);             // get single «'» or double «"» quote
+				int    pos1       = offset + FUT_GET_COOKIE.length();
+				char   quote      = preparedStatement.charAt(pos1);       // get single «'» or double «"» quote
 				String s          = preparedStatement.substring(pos1 + 1);
 				int    pos2       = s.indexOf(quote);
 				String cookieName = s.substring(0, pos2);
@@ -554,11 +558,11 @@ public class DbRequestProcessor implements Runnable {
 			// Replace GET_HTTP_HEADER_AS_CHAR() built-in function with value
 			//
 			while (true) {
-				int offset = SqlParseUtils.indexOf(preparedStatement, GET_HTTP_HEADER_AS_CHAR_FUNCTION_TOKEN);
+				int offset = SqlParseUtils.indexOf(preparedStatement, FUT_GET_HTTP_HEADER_AS_CHAR);
 				if (offset == -1)
 					break;
-				int    pos1       = offset + GET_HTTP_HEADER_AS_CHAR_FUNCTION_TOKEN.length();
-				char   quote      = preparedStatement.charAt(pos1);                          // get single «'» or double «"» quote
+				int    pos1       = offset + FUT_GET_HTTP_HEADER_AS_CHAR.length();
+				char   quote      = preparedStatement.charAt(pos1);               // get single «'» or double «"» quote
 				String s          = preparedStatement.substring(pos1 + 1);
 				int    pos2       = s.indexOf(quote);
 				String headerName = s.substring(0, pos2);
@@ -570,11 +574,11 @@ public class DbRequestProcessor implements Runnable {
 			// Replace GET_HTTP_HEADER_AS_INTEGER() built-in function with value
 			//
 			while (true) {
-				int offset = SqlParseUtils.indexOf(preparedStatement, GET_HTTP_HEADER_AS_INTEGER_FUNCTION_TOKEN);
+				int offset = SqlParseUtils.indexOf(preparedStatement, FUT_GET_HTTP_HEADER_AS_INTEGER);
 				if (offset == -1)
 					break;
-				int    pos1       = offset + GET_HTTP_HEADER_AS_INTEGER_FUNCTION_TOKEN.length();
-				char   quote      = preparedStatement.charAt(pos1);                             // get single «'» or double «"» quote
+				int    pos1       = offset + FUT_GET_HTTP_HEADER_AS_INTEGER.length();
+				char   quote      = preparedStatement.charAt(pos1);                  // get single «'» or double «"» quote
 				String s          = preparedStatement.substring(pos1 + 1);
 				int    pos2       = s.indexOf(quote);
 				String headerName = s.substring(0, pos2);
@@ -586,11 +590,11 @@ public class DbRequestProcessor implements Runnable {
 			// Replace GET_HTTP_HEADER_AS_DATE() built-in function with value
 			//
 			while (true) {
-				int offset = SqlParseUtils.indexOf(preparedStatement, GET_HTTP_HEADER_AS_DATE_FUNCTION_TOKEN);
+				int offset = SqlParseUtils.indexOf(preparedStatement, FUT_GET_HTTP_HEADER_AS_DATE);
 				if (offset == -1)
 					break;
-				int    pos1       = offset + GET_HTTP_HEADER_AS_DATE_FUNCTION_TOKEN.length();
-				char   quote      = preparedStatement.charAt(pos1);                          // get single «'» or double «"» quote
+				int    pos1       = offset + FUT_GET_HTTP_HEADER_AS_DATE.length();
+				char   quote      = preparedStatement.charAt(pos1);               // get single «'» or double «"» quote
 				String s          = preparedStatement.substring(pos1 + 1);
 				int    pos2       = s.indexOf(quote);
 				String headerName = s.substring(0, pos2);
@@ -871,7 +875,7 @@ public class DbRequestProcessor implements Runnable {
 													long      time    = ts.getTime();
 													ps.setDate(n, new Date(time));
 												} else if (pvalue.contains("-")) // JavaScript String
-													ps.setString(n, pvalue);
+													ps.setString(n, pvalue); // JavaScript Number
 												else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
 													ps.setDate(n, new Date(Long.parseLong(pvalue)));
 												else
@@ -896,11 +900,9 @@ public class DbRequestProcessor implements Runnable {
 													ps.setTime(n, new Time(Long.parseLong(pvalue)));
 												else
 													ps.setString(n, pvalue);
-											} else if (parameterType == Types.BINARY || parameterType == Types.VARBINARY || parameterType == Types.LONGVARBINARY) { // JavaScript ArrayBuffer
-												pvalue = extractData(pvalue);
+											} else if (parameterType == Types.BINARY || parameterType == Types.VARBINARY || parameterType == Types.LONGVARBINARY) // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
 												ps.setBytes(n, sharedCoder.decoder.decode(pvalue));
-											} else if (parameterType == Types.BLOB) { // JavaScript ArrayBuffer converted to BASE64 at client side and stored in BLOB "AS IS" (as BASE64 string)
-												pvalue = extractData(pvalue);
+											else if (parameterType == Types.BLOB) { // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
 												Blob blob = ps.getConnection().createBlob();
 												blob.setBytes(1L, sharedCoder.decoder.decode(pvalue));
 												ps.setBlob(n, blob);
@@ -1041,9 +1043,6 @@ public class DbRequestProcessor implements Runnable {
 										}
 									} catch (Exception e) {
 										e.printStackTrace();
-										//									} finally {
-										//										if (dbConnection != null)
-										//											connectionPoolManager.releaseConnection(dbConnection);
 									}
 								}
 							}
@@ -1113,21 +1112,6 @@ public class DbRequestProcessor implements Runnable {
 				t.printStackTrace();
 			}
 		}
-	}
-
-	/**
-	 * This method extracts data part from data URI
-	 *
-	 * @param s
-	 * @return
-	 */
-	private static String extractData(String s) {
-		if (s.startsWith("data:")) { // data URI
-			int pos = s.indexOf(";base64,"); // The data, separated from the preceding part by a comma (,)
-			if (pos != -1)
-				return s.substring(pos + 8);
-		}
-		return s;
 	}
 
 	private static String getClientInfo(HttpServletRequest request, Decoder decoder) throws IOException {

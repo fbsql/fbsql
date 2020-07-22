@@ -10,6 +10,10 @@
         <button id="btnSave">Store in database</button>
 
         <script type="text/javascript">
+        function dataURItoBlob(dataURI) {
+            var arr = dataURI.split(','), mime = arr[0].match(/:(.*?);/)[1];
+            return new Blob([atob(arr[1])], {type:mime});
+        }
             let myImage = document.getElementById("myImage");
             let myInput = document.getElementById("myInput");
             let btnSave = document.getElementById('btnSave');
@@ -24,7 +28,7 @@
 //                myImage.src = resultSet[0].COUNTRY_FLAG;
             	let base64data = resultSet[0].COUNTRY_FLAG;
             	if (base64data != null)
-            		myImage.src = 'data:;base64,' + base64data;
+            		myImage.src = base64data;
 
             });
 
@@ -42,7 +46,7 @@
 
             /* Store image in the database as BLOB */
             btnSave.onclick = function() {
-            	psUpdate.executeUpdate({country_flag: myImage.src})
+            	psUpdate.executeUpdate({country_flag: dataURItoBlob(myImage.src)})
                 .then(result => {
                     alert("Image stored in database as BLOB.");
                 });
