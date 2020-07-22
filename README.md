@@ -157,7 +157,7 @@ Start FBSQL server:<br><br>
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql.min.js" async></script>
+        <script src="http://localhost:8080/fbsql.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
@@ -1424,6 +1424,81 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
             	]
             )
             .then(result => alert(`${result.rowCount} records added`));
+        </script>
+    </body>
+</html>
+```
+<a id="warmed_up_queries"></a>
+<h2>Binary data</h2>
+<p><i>
+In this chapter we will learn how to work with warmed up queries.
+</i></p>
+
+<strong>Backend:</strong><br>
+
+```sql
+CONNECT TO 'jdbc:sqlite:sample';
+
+DROP TABLE IF EXISTS COUNTRIES;
+CREATE TABLE IF NOT EXISTS COUNTRIES (
+    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
+    COUNTRY_NAME VARCHAR(40) NOT NULL,
+    COUNTRY_FLAG BLOB
+);
+
+SET PREFETCH FOR SELECT * FROM COUNTRIES;
+
+```
+<strong>Frontend:</strong><br>
+
+```html
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="http://localhost:8080/fbsql.min.js"></script>
+    </head>
+
+    <body>
+        <img id="myImage"><br>
+        <input id="myInput" type="file" accept="image/*">
+
+        <script type="text/javascript">
+            let myImage = document.getElementById("myImage");
+            let myInput = document.getElementById("myInput");
+
+            const conn = new Connection('my-sqlite');
+            let psSelect = conn.prepareStatement("SELECT COUNTRY_FLAG FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
+            let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_FLAG = :country_flag WHERE COUNTRY_ID = 'AU'");
+
+            /* Load image from database */
+            psSelect.executeQuery()
+            .then(resultSet => {
+                let base64data = resultSet[0].COUNTRY_FLAG;
+                if (base64data != null)
+                    myImage.src = 'data:;base64,' + base64data;
+            });
+
+            /* Select new image */
+            myInput.onchange = function(event) {
+                var input = event.target;
+                var reader = new FileReader();
+                reader.onload = function() {
+                    /* Update image */
+                    psUpdate.executeUpdate({country_flag: reader.result})
+                    .then(result => {
+                        /* Load image from database */
+                        return psSelect.executeQuery();
+                    })
+                    .then(resultSet => {
+                        console.log(`${reader.result.byteLength} byte(s) stored in database as VARBINARY and readed back.`);
+                        let base64data = resultSet[0].COUNTRY_FLAG;
+                        if (base64data != null)
+                            myImage.src = 'data:;base64,' + base64data;
+                    });
+                };
+                reader.readAsArrayBuffer(input.files[0]);
+            };
         </script>
     </body>
 </html>

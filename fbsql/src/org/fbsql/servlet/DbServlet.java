@@ -478,40 +478,81 @@ public class DbServlet extends HttpServlet {
 					SqlParseUtils.parseScheduleStatement(servletConfig, statement, schedulersMap);
 			}
 
-			if (whiteList != null) {
+			for (String stm : prefetchStatements) {
+				String sql = null;
+				if (stm.startsWith("#")) {
+					if (whiteList != null)
+						for (int i = 0; i < whiteList.size(); i++) {
+							String statement_name = whiteListNames.get(i);
+							if (statement_name.equals(stm.substring(1))) {
+								sql = whiteList.get(i);
+								break;
+							}
+						}
+				} else
+					sql = stm;
+
 				//
-				// Execute all static = true statements from 'white-list.sql' file
-				// to load immutable static data. (only if optional 'white-list.sql' file is present)
-				// In this case we ignore user defined compression level and use maximal compression level
-				// because we prepare result offline.
+				// prefetch:
+				// «warmed up» static queries with no interaction with underlying database
 				//
-				for (int i = 0; i < whiteList.size(); i++) {
-					String statement_name = whiteListNames.get(i);
-					String sql            = whiteList.get(i);
+				try (ResultSet rs = st.executeQuery(sql)) {
+					List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+					List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
 
-					if (!prefetchStatements.contains(statement_name))
-						continue;
+					//
+					// cover all possible result set output formats
+					//
 
-					try (ResultSet rs = st.executeQuery(sql)) {
-						List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-						List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+					// In this case we ignore user defined compression level and use maximal compression level
+					// because we prepare result offline.
 
-						//
-						// cover all possible result set output formats
-						//
+					// array of objects
+					StaticStatement staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_OBJECTS);
+					ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
+					mapReadyResults.put(staticStatement, readyResult);
 
-						// array of objects
-						StaticStatement staticStatement = new StaticStatement(whiteList.get(i), QueryUtils.RESULT_FORMAT_ARRAY_OF_OBJECTS);
-						ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
-						mapReadyResults.put(staticStatement, readyResult);
-
-						// array of arrays
-						staticStatement = new StaticStatement(whiteList.get(i), QueryUtils.RESULT_FORMAT_ARRAY_OF_ARRAYS);
-						readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
-						mapReadyResults.put(staticStatement, readyResult);
-					}
+					// array of arrays
+					staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_ARRAYS);
+					readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
+					mapReadyResults.put(staticStatement, readyResult);
 				}
 			}
+
+//			if (whiteList != null) {
+//				//
+//				// Execute all static = true statements from 'white-list.sql' file
+//				// to load immutable static data. (only if optional 'white-list.sql' file is present)
+//				// In this case we ignore user defined compression level and use maximal compression level
+//				// because we prepare result offline.
+//				//
+//				for (int i = 0; i < whiteList.size(); i++) {
+//					String statement_name = whiteListNames.get(i);
+//					String sql            = whiteList.get(i);
+//
+//					if (!prefetchStatements.contains(statement_name))
+//						continue;
+//
+//					try (ResultSet rs = st.executeQuery(sql)) {
+//						List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+//						List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+//
+//						//
+//						// cover all possible result set output formats
+//						//
+//
+//						// array of objects
+//						StaticStatement staticStatement = new StaticStatement(whiteList.get(i), QueryUtils.RESULT_FORMAT_ARRAY_OF_OBJECTS);
+//						ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
+//						mapReadyResults.put(staticStatement, readyResult);
+//
+//						// array of arrays
+//						staticStatement = new StaticStatement(whiteList.get(i), QueryUtils.RESULT_FORMAT_ARRAY_OF_ARRAYS);
+//						readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
+//						mapReadyResults.put(staticStatement, readyResult);
+//					}
+//				}
+//			}
 		}
 
 		//
@@ -531,7 +572,7 @@ public class DbServlet extends HttpServlet {
 							try {
 								dbConnection0 = connectionPoolManager.getConnection();
 
-								String outEvent = null;
+								String outEvent   = null;
 								String javaMethod = proceduresMap.get(storedProcedureName);
 								if (javaMethod == null) {
 									CallableStatement cs = dbConnection0.getCallableStatement("{call " + storedProcedureName + "(?)}");
