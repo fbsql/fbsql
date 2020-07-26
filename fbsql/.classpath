@@ -20,11 +20,10 @@
 	<classpathentry kind="lib" path="WEB-INF/lib/quartz-jobs-2.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/slf4j-api-1.7.7.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/slf4j-log4j12-1.7.7.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/browscap-java-1.2.17.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/commons-csv-1.8.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/rhino-runtime-1.7.12.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/spring-jdbc-5.2.7.RELEASE.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/spring-dao-2.0.8.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/spring-core-5.2.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="WEB-INF/lib/antlr-4.8-complete.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

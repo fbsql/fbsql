@@ -10,20 +10,18 @@ Work (secure) with your backend database within HTML<br>
 	</ul>	
 
 <h3>F.A.Q.</h3>
-<ul>
-	<li><strong>Q.</strong> What is FBSQL?</li>
-	<li><strong>A.</strong> FBSQL is a server that transparently yet secure connects your frontend to the remote database.</li>
+	<strong>What is FBSQL?</strong><br>
+	FBSQL is a server that transparently yet secure connects your frontend to the remote database.<br>
 	<br>
-	<li><strong>Q.</strong> Is it really two-tier architecture?</li>
-	<li><strong>A.</strong> Well, yes and no. Look at the FBSQL as two-tier architecture with third tier under the hood.</li>
+	<strong>Is it really two-tier architecture?</strong><br>
+	Well, yes and no. Look at the FBSQL as two-tier architecture with third tier under the hood.<br>
 	<br>
-	<li><strong>Q.</strong> Which databases are supported?</li>
-	<li><strong>A.</strong> FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, Microsoft SQL Server, IBM Db2 etc.
-	All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.</li>
+	<strong>Which databases are supported?</strong><br>
+	FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, Microsoft SQL Server, IBM Db2 etc.
+	All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.<br>
 	<br>
-	<li><strong>Q.</strong> What about performance?</li>
-	<li><strong>A.</strong> FBSQL was designed with performance in mind and supports out of the box connection pooling, ETag-optimization, response compression and static queries «warming up» with no interaction with underlying database.</li>
-</ul>
+	<strong>What about performance?</strong><br>
+	FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimization and response compression.<br>
 
 <h3>FBSQL distributions</h3>
 <table>
@@ -318,7 +316,6 @@ SET ALLOW LOGIN IF EXISTS (
 <p><i>
 In this chapter we will learn how to secure our backend with whitelists with ADD WHITELIST statement.
 </i></p>
-
 
 <strong>Backend:</strong><br>
 

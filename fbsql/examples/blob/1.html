@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('my-sqlite');
+
+            const ps   = conn.prepareStatement("CALL GET_EMPLOYEES(:nameStartsWith)");
+            ps.executeQuery({nameStartsWith: 'Lor'})
+            .then(resultSet => console.log(JSON.stringify(resultSet)));
+            /*
+             * Output:
+             *
+             *    [
+             *        {
+             *            "ID": 152,
+             *            "NAME": "Loren"
+             *        },
+             *        {
+             *            "ID": 751,
+             *            "NAME": "Lora"
+             *        }
+             *    ]
+             */
+        </script>
+    </body>
+</html>

@@ -89,11 +89,6 @@ public class ConnectionInfo {
 	Integer compressionLevel;
 
 	/**
-	 * Value from "ADD WHITELIST" statement
-	 */
-	List<String> whiteListFiles;
-
-	/**
 	 * Value from "SET AUTHORIZE USERS IF EXISTS" statement
 	 */
 	String authenticationQuery;
@@ -110,7 +105,7 @@ public class ConnectionInfo {
 
 	@Override
 	public String toString() {
-		return "ConnectionInfo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", systemPropertiesFile=" + systemPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", compressionLevel=" + compressionLevel + ", whiteListFiles=" + whiteListFiles + ", authenticationQuery=" + authenticationQuery + ", allowStatementsQuery=" + allowStatementsQuery + ", debug=" + debug + "]";
+		return "ConnectionInfo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", systemPropertiesFile=" + systemPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", compressionLevel=" + compressionLevel + ", authenticationQuery=" + authenticationQuery + ", allowStatementsQuery=" + allowStatementsQuery + ", debug=" + debug + "]";
 	}
 
 }

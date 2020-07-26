@@ -43,6 +43,10 @@ import java.util.Map;
 
 import javax.servlet.ServletConfig;
 
+import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure;
+import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure.StmtDeclareProcedure;
+import org.fbsql.antlr4.parser.ParseStmtExpose;
+import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
 import org.h2.util.ScriptReader;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -62,12 +66,11 @@ public class SqlParseUtils {
 	 * Special FBSQL statements
 	 */
 	public static final String SPECIAL_STATEMENT_CONNECT_TO                    = "CONNECT TO";                    // Connect to database instance (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE             = "DECLARE PROCEDURE";             // Declare stored procedure or function (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_ADD_WHITELIST                 = "ADD WHITELIST";                 // Add whitelist to database instance (can be used only in «init.sql» script)
+	//public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE             = "DECLAREPROCEDURE";              // Declare stored procedure or function (can be used only in «init.sql» script)
+	//public static final String SPECIAL_STATEMENT_EXPOSE                        = "EXPOSE";                        // Expose particular SQL statement to frontend (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_SET_VALIDATOR                 = "SET VALIDATOR";                 // Set validator stored procedure to SQL statement (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_ADD_NOTIFIER                  = "ADD NOTIFIER";                  // Add notifier stored procedure to SQL statement (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_SCHEDULE                      = "SCHEDULE";                      // Add scheduled stored procedure (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_SET_PREFETCH_FOR              = "SET PREFETCH FOR";              // Set prefetch mode to SQL statement (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS     = "SET ALLOW LOGIN IF EXISTS";     // Authenticate/Authorize users (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_SET_ALLOW_STATEMENT_IF_EXISTS = "SET ALLOW STATEMENT IF EXISTS"; // Allow statements (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_CREATE_SESSION                = "CREATE SESSION";                // Session management: Create session
@@ -86,17 +89,16 @@ public class SqlParseUtils {
 			SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES //
 	};
 
-	private static final String[] SPECIAL_SERVER_STATEMENTS = { //
-			SPECIAL_STATEMENT_CONNECT_TO, //
-			SPECIAL_STATEMENT_DECLARE_PROCEDURE, //
-			SPECIAL_STATEMENT_ADD_WHITELIST, //
-			SPECIAL_STATEMENT_SET_VALIDATOR, //
-			SPECIAL_STATEMENT_ADD_NOTIFIER, //
-			SPECIAL_STATEMENT_SCHEDULE, //
-			SPECIAL_STATEMENT_SET_PREFETCH_FOR, //
-			SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS, //
-			SPECIAL_STATEMENT_SET_ALLOW_STATEMENT_IF_EXISTS //
-	};
+//	private static final String[] SPECIAL_SERVER_STATEMENTS = { //
+//			SPECIAL_STATEMENT_CONNECT_TO, //
+//			SPECIAL_STATEMENT_DECLARE_PROCEDURE, //
+//			SPECIAL_STATEMENT_EXPOSE, //
+//			SPECIAL_STATEMENT_SET_VALIDATOR, //
+//			SPECIAL_STATEMENT_ADD_NOTIFIER, //
+//			SPECIAL_STATEMENT_SCHEDULE, //
+//			SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS, //
+//			SPECIAL_STATEMENT_SET_ALLOW_STATEMENT_IF_EXISTS //
+//	};
 
 	/**
 	 * SQL statement separator: «;»
@@ -253,22 +255,6 @@ public class SqlParseUtils {
 	}
 
 	/**
-	 * Parse SET PREFETCH FOR statement
-	 *
-	 * @param sql                - SET PREFETCH FOR statement
-	 * @param prefetchStatements - Prefetch set for specific SQL statement name
-	 */
-	public static void parseSetPrefetchStatement(ServletConfig servletConfig, String sql, Collection<String /* SQL statement name */ > prefetchStatements) {
-		sql = stripComments(sql).trim();
-		sql = sql.replace('\n', ' ');
-		sql = sql.replace('\r', ' ');
-		sql = processStatement(sql);
-
-		String sqlStatementName = extractClause(servletConfig, sql, SPECIAL_STATEMENT_SET_PREFETCH_FOR);
-		prefetchStatements.add(sqlStatementName);
-	}
-
-	/**
 	 * Parse SET VALIDATOR statement
 	 *
 	 * @param sql           - SET VALIDATOR statement
@@ -298,8 +284,11 @@ public class SqlParseUtils {
 		sql = sql.replace('\r', ' ');
 		sql = processStatement(sql);
 
-		String storedProcedureName = extractClause(servletConfig, sql, SPECIAL_STATEMENT_DECLARE_PROCEDURE).toUpperCase(Locale.ENGLISH);
-		String javaMethod          = extractClauseAsString(servletConfig, sql, "FOR");                                                  // <class name> + <.> + <method name>
+		StmtDeclareProcedure stmtDeclareProcedure = new ParseStmtDeclareProcedure().parse(sql);
+		stmtDeclareProcedure.procedure = stmtDeclareProcedure.procedure.toUpperCase(Locale.ENGLISH);
+
+		String storedProcedureName = stmtDeclareProcedure.procedure.toUpperCase(Locale.ENGLISH);
+		String javaMethod          = stmtDeclareProcedure.javaMethod;                           // <class name> + <::> + <method name>
 
 		proceduresMap.put(storedProcedureName, javaMethod);
 	}
@@ -328,19 +317,24 @@ public class SqlParseUtils {
 	}
 
 	/**
-	 * Parse ADD WHITELIST statement
+	 * Parse EXPOSE statement
 	 *
-	 * @param sql          - ADD WHITELIST statement
-	 * @param notifiersMap - Notifiers Map for specific SQL statement name
+	 * @param sql - EXPOSE statement
+	 * @throws NoSuchAlgorithmException 
 	 */
-	public static void parseAddWhitelistStatement(ServletConfig servletConfig, String sql, Collection<String /* whitelist file names */ > whiteListFileNames) {
+	public static StmtExpose parseExposeStatement(ServletConfig servletConfig, String sql) throws NoSuchAlgorithmException {
 		sql = stripComments(sql).trim();
 		sql = sql.replace('\n', ' ');
 		sql = sql.replace('\r', ' ');
 		sql = processStatement(sql);
 
-		String whiteListFileName = extractClauseAsString(servletConfig, sql, SPECIAL_STATEMENT_ADD_WHITELIST);
-		whiteListFileNames.add(whiteListFileName);
+		ParseStmtExpose parseStmtExpose = new ParseStmtExpose();
+		StmtExpose      stmtExpose      = parseStmtExpose.parse(sql);
+
+		if (stmtExpose.alias == null)
+			stmtExpose.alias = calcSha256(stmtExpose.statement);
+		stmtExpose.statement = processStatement(stmtExpose.statement);
+		return stmtExpose;
 	}
 
 	/**
@@ -586,65 +580,65 @@ public class SqlParseUtils {
 		return sql.trim();
 	}
 
-	/**
-	 * Parse SQL script by splitting it on SQL statements
-	 * Standard semicolon character «;» is used as statement separator.
-	 *
-	 * This method also:
-	 * - compress row(s) of each SQL statement by removing
-	 * ambiguous  trailing white spaces characters.
-	 * - remove trailing statement separator «;»
-	 *
-	 * @param sqlScript  - SQL script to parse
-	 * @param list       - list of all presented in script SQL statements
-	 * @param names      - list of names presented in script SQL statements (null entry if name was not specified)
-	 * @param roles      - list of roles presented in script SQL statements (null entry if name was not specified)
-	 * @param statics    - list of immutable SQL statements presented in script (null entry if name was not specified)
-	 * @param validators - list of JavaScript validator function name
-	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
-	 */
-	static void parseScript(String sqlScript, List<String /* SQL statements */> list, List<String /* SQL statement name */> $names) throws IOException, NoSuchAlgorithmException {
-		try (ScriptReader scriptReader = new ScriptReader(new StringReader(sqlScript))) {
-			while (true) {
-				/**
-				 * Trimmed SQL statement
-				 */
-				String stat = scriptReader.readStatement();
-				if (stat == null)
-					break;
-				stat = stat.trim();
-
-				/**
-				 * SQL statement name
-				 */
-				String $name = null;
-
-				/* Search for provided SQL statement name */
-				String[] lines = stat.split("\n");
-				for (int i = 0; i < lines.length; i++) {
-					String line = lines[i].trim();
-					if (line.startsWith("-- #")) { // name declaration found («#» - statement name prefix)
-						$name = line.substring(4).trim(); // $name («#» character is not included)
-						int pos = $name.indexOf(' ');
-						if (pos == -1)
-							pos = $name.indexOf('\t');
-						if (pos != -1)
-							$name = $name.substring(0, pos).trim();
-						break;
-					}
-				}
-				if ($name == null) // name not provided, create default
-					$name = calcSha256(stat);
-
-				String sql = processStatement(stat);
-				if (!sql.isEmpty()) {
-					list.add(sql);
-					$names.add($name);
-				}
-			}
-		}
-	}
+	//	/**
+	//	 * Parse SQL script by splitting it on SQL statements
+	//	 * Standard semicolon character «;» is used as statement separator.
+	//	 *
+	//	 * This method also:
+	//	 * - compress row(s) of each SQL statement by removing
+	//	 * ambiguous  trailing white spaces characters.
+	//	 * - remove trailing statement separator «;»
+	//	 *
+	//	 * @param sqlScript  - SQL script to parse
+	//	 * @param list       - list of all presented in script SQL statements
+	//	 * @param names      - list of names presented in script SQL statements (null entry if name was not specified)
+	//	 * @param roles      - list of roles presented in script SQL statements (null entry if name was not specified)
+	//	 * @param statics    - list of immutable SQL statements presented in script (null entry if name was not specified)
+	//	 * @param validators - list of JavaScript validator function name
+	//	 * @throws IOException
+	//	 * @throws NoSuchAlgorithmException
+	//	 */
+	//	static void parseScript(String sqlScript, List<String /* SQL statements */> list, List<String /* SQL statement name */> $names) throws IOException, NoSuchAlgorithmException {
+	//		try (ScriptReader scriptReader = new ScriptReader(new StringReader(sqlScript))) {
+	//			while (true) {
+	//				/**
+	//				 * Trimmed SQL statement
+	//				 */
+	//				String stat = scriptReader.readStatement();
+	//				if (stat == null)
+	//					break;
+	//				stat = stat.trim();
+	//
+	//				/**
+	//				 * SQL statement name
+	//				 */
+	//				String $name = null;
+	//
+	//				/* Search for provided SQL statement name */
+	//				String[] lines = stat.split("\n");
+	//				for (int i = 0; i < lines.length; i++) {
+	//					String line = lines[i].trim();
+	//					if (line.startsWith("-- #")) { // name declaration found («#» - statement name prefix)
+	//						$name = line.substring(4).trim(); // $name («#» character is not included)
+	//						int pos = $name.indexOf(' ');
+	//						if (pos == -1)
+	//							pos = $name.indexOf('\t');
+	//						if (pos != -1)
+	//							$name = $name.substring(0, pos).trim();
+	//						break;
+	//					}
+	//				}
+	//				if ($name == null) // name not provided, create default
+	//					$name = calcSha256(stat);
+	//
+	//				String sql = processStatement(stat);
+	//				if (!sql.isEmpty()) {
+	//					list.add(sql);
+	//					$names.add($name);
+	//				}
+	//			}
+	//		}
+	//	}
 
 	/**
 	 * Calculate SHA-256 hash of string
@@ -767,17 +761,17 @@ public class SqlParseUtils {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param s
-	 * @return
-	 */
-	public static boolean isSpecialServerStatement(String s) {
-		for (String st : SPECIAL_SERVER_STATEMENTS)
-			if (indexOf(s, st) == 0)
-				return true;
-		return false;
-	}
+//	/**
+//	 * 
+//	 * @param s
+//	 * @return
+//	 */
+//	public static boolean isSpecialServerStatement(String s) {
+//		for (String st : SPECIAL_SERVER_STATEMENTS)
+//			if (indexOf(s, st) == 0)
+//				return true;
+//		return false;
+//	}
 
 }
 /*

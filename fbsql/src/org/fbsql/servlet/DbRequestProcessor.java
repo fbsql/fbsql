@@ -74,13 +74,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
 import org.fbsql.connection_pool.ConnectionPoolManager;
 import org.fbsql.connection_pool.DbConnection;
 import org.fbsql.json.parser.JsonUtils;
-
-import com.blueconic.browscap.BrowsCapField;
-import com.blueconic.browscap.Capabilities;
-import com.blueconic.browscap.UserAgentParser;
 
 /**
  * <p><strong>DbRequestProcessor</strong> contains the processing logic that
@@ -122,62 +119,6 @@ public class DbRequestProcessor implements Runnable {
 	 */
 	private static final String EXEC_TYPE_UPDATE = "U";
 
-	private static Map<BrowsCapField, Class<?>> browsCapFieldInfoMap;
-
-	static {
-		browsCapFieldInfoMap = new HashMap<>();
-		browsCapFieldInfoMap.put(BrowsCapField.IS_MASTER_PARENT, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_LITE_MODE, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.PARENT, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.COMMENT, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.BROWSER, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.BROWSER_TYPE, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.BROWSER_BITS, Number.class);
-		browsCapFieldInfoMap.put(BrowsCapField.BROWSER_MAKER, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.BROWSER_MODUS, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.BROWSER_VERSION, Number.class);
-		browsCapFieldInfoMap.put(BrowsCapField.BROWSER_MAJOR_VERSION, Number.class);
-		browsCapFieldInfoMap.put(BrowsCapField.BROWSER_MINOR_VERSION, Number.class);
-		browsCapFieldInfoMap.put(BrowsCapField.PLATFORM, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.PLATFORM_VERSION, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.PLATFORM_DESCRIPTION, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.PLATFORM_BITS, Number.class);
-		browsCapFieldInfoMap.put(BrowsCapField.PLATFORM_MAKER, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_ALPHA, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_BETA, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_WIN16, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_WIN32, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_WIN64, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_IFRAMES, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_FRAMES, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_TABLES, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_COOKIES, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_BACKGROUND_SOUNDS, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_JAVASCRIPT, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_VBSCRIPT, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_JAVA_APPLETS, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_ACTIVEX_CONTROLS, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_MOBILE_DEVICE, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_TABLET, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_SYNDICATION_READER, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_CRAWLER, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_FAKE, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_ANONYMIZED, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.IS_MODIFIED, Boolean.class);
-		browsCapFieldInfoMap.put(BrowsCapField.CSS_VERSION, Number.class);
-		browsCapFieldInfoMap.put(BrowsCapField.AOL_VERSION, Number.class);
-		browsCapFieldInfoMap.put(BrowsCapField.DEVICE_NAME, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.DEVICE_MAKER, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.DEVICE_TYPE, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.DEVICE_POINTING_METHOD, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.DEVICE_CODE_NAME, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.DEVICE_BRAND_NAME, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.RENDERING_ENGINE_NAME, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.RENDERING_ENGINE_VERSION, Number.class);
-		browsCapFieldInfoMap.put(BrowsCapField.RENDERING_ENGINE_DESCRIPTION, String.class);
-		browsCapFieldInfoMap.put(BrowsCapField.RENDERING_ENGINE_MAKER, String.class);
-	}
-
 	private static final String SESSION_ATTRIBUTE_SESSION_JSON = "SESSION_JSON";
 
 	/*
@@ -206,15 +147,13 @@ public class DbRequestProcessor implements Runnable {
 	private ConnectionInfo        connectionInfo;
 	private ConnectionPoolManager connectionPoolManager;
 
-	private List<String /* SQL statement */>                                                               whiteList;      // list of SQL statements
-	private List<String /* SQL statement name */>                                                          whiteListNames; // list of SQL statements names
+	private Collection<StmtExpose>                                                                         whiteList;      // list of SQL statements
 	private Map<String /* stored procedure name */, String /* java method */>                              proceduresMap;
 	private Map<String /* SQL statement name */, String /* Validator stored procedure name */ >            validatorsMap;  //
 	private Map<String /* SQL statement name */, Collection<String /* Notifier stored procedure name */ >> notifiersMap;   //
 	private Map<StaticStatement, ReadyResult>                                                              mapJson;
 	private Queue<AsyncContext>                                                                            ongoingRequests;
 	private DbServlet.SharedCoder                                                                          sharedCoder;
-	private UserAgentParser                                                                                userAgentParser;
 
 	/**
 	 * Constructs DbRequestProcessor object
@@ -224,7 +163,6 @@ public class DbRequestProcessor implements Runnable {
 	 * @param connectionInfo
 	 * @param connectionPoolManager
 	 * @param whiteList
-	 * @param whiteListNames
 	 * @param validatorsMap
 	 * @param notifiersMap
 	 * @param mapJson
@@ -236,29 +174,25 @@ public class DbRequestProcessor implements Runnable {
 			AsyncContext asyncCtx, //
 			ConnectionInfo connectionInfo, //
 			ConnectionPoolManager connectionPoolManager, //
-			List<String /* SQL statement */> whiteList, // list of SQL statements
-			List<String /* SQL statement name */> whiteListNames, // list of SQL statements names
+			Collection<StmtExpose> whiteList, // list of SQL statements
 			Map<String /* stored procedure name */, String /* java method */> proceduresMap, //
 			Map<String /* SQL statement name */, String /* Validator stored procedure name */ > validatorsMap, //
 			Map<String /* SQL statement name */, Collection<String /* Notifier stored procedure name */ >> notifiersMap, //
 			Map<StaticStatement, ReadyResult> mapJson, //
 			Queue<AsyncContext> ongoingRequests, //
-			DbServlet.SharedCoder sharedCoder, //
-			UserAgentParser userAgentParser //
+			DbServlet.SharedCoder sharedCoder //
 	) {
 		this.instanceName          = instanceName;
 		this.asyncContext          = asyncCtx;
 		this.connectionInfo        = connectionInfo;
 		this.connectionPoolManager = connectionPoolManager;
 		this.whiteList             = whiteList;            // list of SQL statements
-		this.whiteListNames        = whiteListNames;       // list of SQL statements names
 		this.proceduresMap         = proceduresMap;
 		this.validatorsMap         = validatorsMap;
 		this.notifiersMap          = notifiersMap;
 		this.mapJson               = mapJson;
 		this.ongoingRequests       = ongoingRequests;
 		this.sharedCoder           = sharedCoder;
-		this.userAgentParser       = userAgentParser;
 	}
 
 	/**
@@ -318,7 +252,6 @@ public class DbRequestProcessor implements Runnable {
 			String              parameters      = bodyMap.get("parameters");
 			String              userInfoJson    = generateUserInfoJson(                                    //
 					request,                                                                               //
-					userAgentParser,                                                                       //
 					clientInfoJson                                                                         //
 			);
 
@@ -361,25 +294,32 @@ public class DbRequestProcessor implements Runnable {
 				}
 				unprocessedNamedPreparedStatement = unprocessedNamedPreparedStatementSb.toString().trim();
 				namedPreparedStatement            = SqlParseUtils.processStatement(unprocessedNamedPreparedStatement);
-				if (whiteList == null)
+				if (whiteList.isEmpty())
 					reject = false;
 				else {
-					int sqlIndex = whiteList.indexOf(namedPreparedStatement);
-					reject = sqlIndex == -1;
+					for (StmtExpose stmtExpose : whiteList) {
+						if (stmtExpose.statement.equals(namedPreparedStatement)) {
+							statementId = stmtExpose.alias;
+							break;
+						}
+					}
+					reject = statementId == null;
 					if (reject)
 						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not found in white list", namedPreparedStatement));
-					else
-						statementId = whiteListNames.get(sqlIndex);
 				}
 			} else { // SQL statement name provided
-				reject = whiteListNames == null || !whiteListNames.contains(statementId);
+				for (StmtExpose stmtExpose : whiteList) {
+					if (statementId.equals(stmtExpose.alias)) {
+						namedPreparedStatement = stmtExpose.statement;
+						break;
+					}
+				}
+				reject = whiteList.isEmpty() || namedPreparedStatement == null;
+
 				if (reject)
 					rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement name: ''{0}'' not found", statementId));
-				else {
-					int sqlIndex = whiteListNames.indexOf(statementId);
-					namedPreparedStatement            = whiteList.get(sqlIndex);
+				else
 					unprocessedNamedPreparedStatement = namedPreparedStatement;
-				}
 			}
 			if (connectionInfo.allowStatementsQuery != null) {
 				//
@@ -984,7 +924,6 @@ public class DbRequestProcessor implements Runnable {
 
 											String selfUserInfoJson = generateUserInfoJson( //
 													selfRequest, //
-													userAgentParser, //
 													selfClientInfoJson //
 											);
 
@@ -1095,9 +1034,7 @@ public class DbRequestProcessor implements Runnable {
 				os.write(bs);
 				os.flush();
 			}
-		} catch (
-
-		Throwable e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			try (OutputStream os = response.getOutputStream()) {
 				os.write(("{" + q("message") + ":" + q(e.getMessage()) + "}").getBytes(StandardCharsets.UTF_8));
@@ -1159,7 +1096,6 @@ public class DbRequestProcessor implements Runnable {
 	 * Generate User Info JSON-formatted string
 	 * 
 	 * @param request
-	 * @param userAgentParser
 	 * @param clientInfoJson
 	 * @return
 	 * @throws IOException
@@ -1167,19 +1103,17 @@ public class DbRequestProcessor implements Runnable {
 	 */
 	private static String generateUserInfoJson( //
 			HttpServletRequest request, //
-			UserAgentParser userAgentParser, //
 			String clientInfoJson //
 	) throws IOException, ParseException {
-		String      remoteAddr        = request.getRemoteAddr();
-		String      remoteHost        = request.getRemoteHost();
-		Integer     remotePort        = request.getRemotePort();
-		String      remoteUser        = (String) request.getAttribute(DbServlet.REQUEST_ATTRIBUTE_USER);
-		String      remoteRole        = request.getHeader(DbServlet.CUSTOM_HTTP_HEADER_ROLE);
-		Cookie[]    cookies           = request.getCookies();
-		String      cookiesJson       = getCookiesJson(cookies);
-		HttpSession session           = request.getSession(false);
-		String      headersJson       = getHttpHeadersJson(request);
-		String      userAgentInfoJson = getUserAgentInfo(request, userAgentParser);
+		String      remoteAddr  = request.getRemoteAddr();
+		String      remoteHost  = request.getRemoteHost();
+		Integer     remotePort  = request.getRemotePort();
+		String      remoteUser  = (String) request.getAttribute(DbServlet.REQUEST_ATTRIBUTE_USER);
+		String      remoteRole  = request.getHeader(DbServlet.CUSTOM_HTTP_HEADER_ROLE);
+		Cookie[]    cookies     = request.getCookies();
+		String      cookiesJson = getCookiesJson(cookies);
+		HttpSession session     = request.getSession(false);
+		String      headersJson = getHttpHeadersJson(request);
 
 		String sessionId;
 		Long   sessionCreationTime;
@@ -1214,7 +1148,6 @@ public class DbRequestProcessor implements Runnable {
 		sb.append(q("remotePort")).append(COLON).append(remotePort == null ? NULL : Integer.toString(remotePort)).append(COMMA);
 		sb.append(q("client")).append(COLON).append(clientInfoJson).append(COMMA);
 		sb.append(q("headers")).append(COLON).append(headersJson).append(COMMA);
-		sb.append(q("userAgentInfo")).append(COLON).append(userAgentInfoJson).append(COMMA);
 		sb.append(q("cookies")).append(COLON).append("[]".equals(cookiesJson) ? NULL : cookiesJson).append(COMMA);
 		sb.append(q("httpSession")).append(COLON);
 		if (sessionId == null)
@@ -1325,42 +1258,6 @@ public class DbRequestProcessor implements Runnable {
 			sb.append("}");
 		}
 		sb.append(']');
-		return sb.toString();
-	}
-
-	private static String getUserAgentInfo(HttpServletRequest request, UserAgentParser userAgentParser) throws IOException, ParseException {
-		String userAgent = request.getHeader("User-Agent");
-
-		final Capabilities         capabilities = userAgentParser.parse(userAgent);
-		Map<BrowsCapField, String> map          = capabilities.getValues();
-		StringBuilder              sb           = new StringBuilder();
-		boolean                    first        = true;
-		sb.append("{");
-		for (Map.Entry<BrowsCapField, String> entry : map.entrySet()) {
-			BrowsCapField key   = entry.getKey();
-			Class<?>      type  = browsCapFieldInfoMap.get(key);
-			String        value = entry.getValue().trim();
-			if (type == Boolean.class) {
-				if (!"true".equals(value) && !"false".equals(value))
-					value = "null";
-			} else if (type == Number.class)
-				try {
-					Double.parseDouble(value);
-				} catch (NumberFormatException e) {
-					value = "null";
-				}
-			else if (type == String.class)
-				value = q(value);
-			String name = key.name().toLowerCase(Locale.ENGLISH);
-			if (name.startsWith("is_"))
-				name = name.substring(3);
-			if (first)
-				first = false;
-			else
-				sb.append(',');
-			sb.append(q(name) + ':' + value);
-		}
-		sb.append("}");
 		return sb.toString();
 	}
 
