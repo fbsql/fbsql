@@ -33,6 +33,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 
+import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_urlContext;
+
 public class StringUtils {
 
 	/**
@@ -128,6 +130,18 @@ public class StringUtils {
 		} catch (IOException e) {
 			return "";
 		}
+	}
+
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String unquote(String s) {
+		char quote = s.charAt(0);
+		if (quote == '\'' || quote == '"')
+			return s.substring(1, s.length() - 1).trim();
+		return s;
 	}
 
 }

@@ -30,70 +30,74 @@ package org.fbsql.antlr4.parser;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
-import org.fbsql.antlr4.generated.FbsqlParser.Declare_procedure_stmtContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
 
-public class ParseStmtDeclareProcedure {
+public class ParseStmtSetAllowLoginIfExists {
 	/**
-	 * DECLARE PROCEDURE statement transfer object
-	 * Declare stored procedure or function (can be used only in «init.sql» script)
+	 * EXPOSE statement transfer object
+	 * Expose particular SQL statement to frontend (can be used only in «init.sql» script)
 	 */
-	public class StmtDeclareProcedure {
-		public String procedure;
-		public String javaMethod;
+	public class StmtSetAllowLoginIfExists {
+		public String authenticationQuery;
 
 		@Override
 		public String toString() {
-			return "DeclareProcedure [procedure=" + procedure + ", javaMethod=" + javaMethod + "]";
+			return "StmtExpose [authenticationQuery=" + authenticationQuery + "]";
 		}
-
 	}
 
 	/**
-	 * StmtDeclareProcedure transfer object
+	 * StmtSetAllowLoginIfExists transfer object
 	 */
-	private StmtDeclareProcedure st;
+	private StmtSetAllowLoginIfExists st;
 
-	public ParseStmtDeclareProcedure() {
-		st = new StmtDeclareProcedure();
+	public ParseStmtSetAllowLoginIfExists() {
+		st = new StmtSetAllowLoginIfExists();
 	}
 
 	/**
-	 * DECLARE PROCEDURE Statement parser
+	 * EXPOSE Statement parser
 	 *
-	 * E.g.: DECLARE PROCEDURE GET_EMPLOYEES FOR "org.fbsql.examples.StoredProcedures::getEmployees";
+	 * E.g.: EXPOSE PREFETCH ( SELECT * FROM MYTABLE ) ROLES (aamin, manager) AS myselect
 	 *
 	 * @param sql
 	 * @return
 	 */
-	public StmtDeclareProcedure parse(String sql) {
+	public StmtSetAllowLoginIfExists parse(String sql) {
 		Lexer       lexer  = new FbsqlLexer(CharStreams.fromString(sql));
 		FbsqlParser parser = new FbsqlParser(new CommonTokenStream(lexer));
-		ParseTree   tree   = parser.declare_procedure_stmt();
+		ParseTree   tree   = parser.set_allow_login_if_exists();
 
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
 
 			@Override
-			public void enterDeclare_procedure_stmt(Declare_procedure_stmtContext ctx) {
-				st.procedure  = ctx.getChild(2).getText();
-				st.javaMethod = ctx.getChild(4).getText();
-				st.javaMethod = st.javaMethod.substring(1, st.javaMethod.length() - 1);
+			public void enterNative_sql(Native_sqlContext ctx) {
+				int      startIndex = ctx.start.getStartIndex();
+				int      stopIndex  = ctx.stop.getStopIndex();
+				Interval interval   = new Interval(startIndex, stopIndex);
+				st.authenticationQuery = ctx.start.getInputStream().getText(interval);
 			}
+
 		}, tree);
 
 		return st;
 	}
 
-	public static void main(String[] args) {
-		String                                         sql = "DECLARE PROCEDURE GET_EMPLOYEES FOR 'org.fbsql.examples.StoredProcedures::getEmployees';";
-		ParseStmtDeclareProcedure                      p   = new ParseStmtDeclareProcedure();
-		ParseStmtDeclareProcedure.StmtDeclareProcedure se  = p.parse(sql);
-		System.out.println(se);
-	}
+//	public static void main(String[] args) {
+//		String                                    sql = "EXPOSE  ( SELECT log AS x FROM t1 \n" +                                                         //
+//				"GROUP BY x /* aaaa */ \n" +                                                                                                             //
+//				"HAVING count(*) >= 4 \n" +                                                                                                              //
+//				"ORDER BY max(n) + 0 ) prefetch ON COMPRESSION BEST COMPRESSION TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
+//		ParseStmtSetAllowLoginIfExists            p   = new ParseStmtSetAllowLoginIfExists();
+//		ParseStmtSetAllowLoginIfExists.StmtExpose se  = p.parse(sql);
+//		System.out.println(se);
+//	}
 }
 
 /*

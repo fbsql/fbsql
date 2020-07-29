@@ -27,8 +27,8 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.antlr4.parser;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -36,14 +36,17 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
-import org.fbsql.antlr4.generated.FbsqlParser.Expose_stmtContext;
+import org.fbsql.antlr4.generated.FbsqlParser.CompressionContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
+import org.fbsql.antlr4.generated.FbsqlParser.PrefetchContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Role_nameContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Statement_aliasContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Trigger_after_procedure_nameContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Trigger_before_procedure_nameContext;
+import org.fbsql.servlet.CompressionLevel;
 
 public class ParseStmtExpose {
 	/**
@@ -51,15 +54,23 @@ public class ParseStmtExpose {
 	 * Expose particular SQL statement to frontend (can be used only in «init.sql» script)
 	 */
 	public class StmtExpose {
-		public boolean      prefetch;
-		public List<String> roles;
-		public String       statement;
-		public String       alias;
+		public boolean            prefetch;
+		public String             statement;
+		public Collection<String> roles;
+		public String             trigger_before_procedure_name;
+		public String             trigger_after_procedure_name;
+		public String             alias;
+
+		/**
+		 * Results compression mode (0 - no compression, 1 - compression with best speed strategy, 2 - compression with best compression strategy (default))
+		 */
+		public int compressionLevel;
 
 		@Override
 		public String toString() {
-			return "StmtExpose [prefetch=" + prefetch + ", roles=" + roles + ", statement=" + statement + ", alias=" + alias + "]";
+			return "StmtExpose [prefetch=" + prefetch + ", statement=" + statement + ", roles=" + roles + ", trigger_before_procedure_name=" + trigger_before_procedure_name + ", trigger_after_procedure_name=" + trigger_after_procedure_name + ", alias=" + alias + ", compressionLevel=" + compressionLevel + "]";
 		}
+
 	}
 
 	/**
@@ -69,7 +80,7 @@ public class ParseStmtExpose {
 
 	public ParseStmtExpose() {
 		st       = new StmtExpose();
-		st.roles = new ArrayList<>();
+		st.roles = new HashSet<>();
 	}
 
 	/**
@@ -97,16 +108,25 @@ public class ParseStmtExpose {
 			}
 
 			@Override
-			public void enterExpose_stmt(Expose_stmtContext ctx) {
-				TerminalNode prefetchNode = ctx.K_PREFETCH();
-				st.prefetch = prefetchNode != null;
+			public void enterPrefetch(PrefetchContext ctx) {
+				st.prefetch = ctx.getText().equalsIgnoreCase(ctx.K_ON().getText());
+			}
+
+			@Override
+			public void enterCompression(CompressionContext ctx) {
+				if (ctx.getText().equalsIgnoreCase(ctx.K_BEST().getText() + ctx.K_COMPRESSION().getText()))
+					st.compressionLevel = CompressionLevel.BEST_COMPRESSION;
+				else if (ctx.getText().equalsIgnoreCase(ctx.K_BEST().getText() + ctx.K_SPEED().getText()))
+					st.compressionLevel = CompressionLevel.BEST_COMPRESSION;
+				else
+					st.compressionLevel = CompressionLevel.NONE;
 			}
 
 			@Override
 			public void enterNative_sql(Native_sqlContext ctx) {
-				int      a        = ctx.start.getStartIndex();
-				int      b        = ctx.stop.getStopIndex();
-				Interval interval = new Interval(a, b);
+				int      startIndex = ctx.start.getStartIndex();
+				int      stopIndex  = ctx.stop.getStopIndex();
+				Interval interval   = new Interval(startIndex, stopIndex);
 				st.statement = ctx.start.getInputStream().getText(interval);
 			}
 
@@ -114,16 +134,26 @@ public class ParseStmtExpose {
 			public void enterRole_name(Role_nameContext ctx) {
 				st.roles.add(ctx.getText());
 			}
+
+			@Override
+			public void enterTrigger_before_procedure_name(Trigger_before_procedure_nameContext ctx) {
+				st.trigger_before_procedure_name = ctx.getText();
+			}
+
+			@Override
+			public void enterTrigger_after_procedure_name(Trigger_after_procedure_nameContext ctx) {
+				st.trigger_after_procedure_name = ctx.getText();
+			}
 		}, tree);
 
 		return st;
 	}
 
 	public static void main(String[] args) {
-		String                     sql = "EXPOSE prefetch ( SELECT log AS x FROM t1 \n" +   //
-				"GROUP BY x /* aaaa */ \n" +                                                //
-				"HAVING count(*) >= 4 \n" +                                                 //
-				"ORDER BY max(n) + 0 ) ROLES(aaa, bbb) AS kkk";                             //
+		String                     sql = "EXPOSE  ( SELECT log AS x FROM t1 \n" +                                                                        //
+				"GROUP BY x /* aaaa */ \n" +                                                                                                             //
+				"HAVING count(*) >= 4 \n" +                                                                                                              //
+				"ORDER BY max(n) + 0 ) prefetch ON COMPRESSION BEST COMPRESSION TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
 		ParseStmtExpose            p   = new ParseStmtExpose();
 		ParseStmtExpose.StmtExpose se  = p.parse(sql);
 		System.out.println(se);

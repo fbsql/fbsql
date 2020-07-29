@@ -27,9 +27,6 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql_server;
 
-import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO;
-import static org.fbsql.servlet.SqlParseUtils.parseSqlFile;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -44,8 +41,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
+
+import org.fbsql.servlet.SqlParseUtils;
 
 public class Main {
 	private static final String USER_HOME_DIR = System.getProperty("user.home");
@@ -140,12 +140,15 @@ public class Main {
 										File   initSqlFile  = new File(file, "init.sql");
 										if (file.isDirectory() && initSqlFile.exists()) {
 											try {
-												List<String> initList = parseSqlFile(initSqlFile.toPath());
-												for (String statement : initList)
-													if (statement.startsWith(SPECIAL_STATEMENT_CONNECT_TO)) {
+												List<String /* SQL statements */> initList = new ArrayList<>();
+												SqlParseUtils.processIncludes(initSqlFile.toPath(), initList);
+												for (String statement : initList) {
+													String text = SqlParseUtils.canonizeSql(statement);
+													if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO)) {
 														System.out.println("      • " + instanceName + (instanceName.equals(defaultConnectorName) ? " (DEFAULT)" : ""));
 														return true;
 													}
+												}
 											} catch (IOException e) {
 												e.printStackTrace();
 											}

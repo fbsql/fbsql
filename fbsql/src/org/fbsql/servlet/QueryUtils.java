@@ -53,13 +53,6 @@ import org.fbsql.json.parser.JsonUtils;
 */
 public class QueryUtils {
 	//
-	// Results compression mode (0 - none, 1 - best speed, 2 - best compression)
-	//
-	public static final int COMPRESSION_NONE             = 0; // no compression
-	public static final int COMPRESSION_BEST_SPEED       = 1; // best speed strategy
-	public static final int COMPRESSION_BEST_COMPRESSION = 2; // best compression strategy
-
-	//
 	// The format constants
 	// This constants used in client side JavaScript
 	//
@@ -124,18 +117,18 @@ public class QueryUtils {
 		// so, we override user-declared compression mode with COMPRESSION_NONE value
 		//
 		if (json.length() == 2) // empty result set case: []
-			compressionMode = COMPRESSION_NONE;
+			compressionMode = CompressionLevel.NONE;
 
 		ReadyResult readyResult = new ReadyResult();
 
 		readyResult.bs = json.getBytes(StandardCharsets.UTF_8);
-		if (compressionMode == COMPRESSION_BEST_SPEED) {
+		if (compressionMode == CompressionLevel.BEST_SPEED) {
 			readyResult.compressed = true;
 			readyResult.bs         = compress(readyResult.bs, Deflater.BEST_SPEED);
-		} else if (compressionMode == COMPRESSION_BEST_COMPRESSION) {
+		} else if (compressionMode == CompressionLevel.BEST_COMPRESSION) {
 			readyResult.compressed = true;
 			readyResult.bs         = compress(readyResult.bs, Deflater.BEST_COMPRESSION);
-		} else if (compressionMode == COMPRESSION_NONE)
+		} else if (compressionMode == CompressionLevel.NONE)
 			readyResult.compressed = false;
 		else
 			throw new IllegalArgumentException(Integer.toString(compressionMode));

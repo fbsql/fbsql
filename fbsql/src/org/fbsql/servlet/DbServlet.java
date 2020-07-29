@@ -28,19 +28,10 @@ E-Mail: fbsql.team.team@gmail.com
 package org.fbsql.servlet;
 
 import static org.fbsql.servlet.SqlParseUtils.JAVA_METHOD_SEPARATOR;
-import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_ADD_NOTIFIER;
-import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO;
-//import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_DECLARE_PROCEDURE;
-//import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_EXPOSE;
-import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_SCHEDULE;
-import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS;
-import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_STATEMENT_IF_EXISTS;
-import static org.fbsql.servlet.SqlParseUtils.SPECIAL_STATEMENT_SET_VALIDATOR;
 import static org.fbsql.servlet.SqlParseUtils.parseConnectStatement;
 import static org.fbsql.servlet.SqlParseUtils.parseExposeStatement;
 import static org.fbsql.servlet.SqlParseUtils.parseNamedPreparedStatement;
 import static org.fbsql.servlet.SqlParseUtils.parseSetIfExistsStatement;
-import static org.fbsql.servlet.SqlParseUtils.parseSqlFile;
 import static org.fbsql.servlet.StringUtils.q;
 
 import java.io.File;
@@ -77,7 +68,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
-import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -91,7 +81,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.fbsql.antlr4.parser.ParseStmt;
+import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
 import org.fbsql.connection_pool.ConnectionPoolManager;
 import org.fbsql.connection_pool.DbConnection;
@@ -174,15 +164,14 @@ public class DbServlet extends HttpServlet {
 	public static final String DB_CONNECTORS_DIR = "DB_CONNECTORS_DIR";
 	public static final String CORS_ALLOW_ORIGIN = "CORS_ALLOW_ORIGIN";
 
-	private Map<String /* instance name */, ConnectionInfo>                                                                                 connectionInfoMap;
-	private Map<String /* instance name */, ConnectionPoolManager>                                                                          connectionPoolManagerMap;
-	private Map<String /* instance name */, Collection<StmtExpose>>                                                                         whiteListMap;
-	private Map<String /* instance name */, Map<StaticStatement, ReadyResult>>                                                              staticJsonsMap;
-	private Map<String /* instance name */, Queue<AsyncContext>>                                                                            ongoingRequestsMap;
-	private Map<String /* instance name */, Connection>                                                                                     connectionMap;
-	private Map<String /* instance name */, Map<String /* stored procedure name */, String /* java method */>>                              instancesProceduresMap;
-	private Map<String /* instance name */, Map<String /* SQL statement name */, String /* Validator stored procedure name */ >>            instancesValidatorsMap;
-	private Map<String /* instance name */, Map<String /* SQL statement name */, Collection<String /* Notifier stored procedure name */ >>> instancesNotifiersMap;
+	private Map<String /* instance name */, StmtConnectTo>                                                     connectionInfoMap;
+	private Map<String /* instance name */, String /* authentication query SQL */>                             authenticationQueryMap;
+	private Map<String /* instance name */, ConnectionPoolManager>                                             connectionPoolManagerMap;
+	private Map<String /* instance name */, Map<String /* SQL statement name */, StmtExpose>>                  whiteListMap;
+	private Map<String /* instance name */, Map<StaticStatement, ReadyResult>>                                 staticJsonsMap;
+	private Map<String /* instance name */, Queue<AsyncContext>>                                               ongoingRequestsMap;
+	private Map<String /* instance name */, Connection>                                                        connectionMap;
+	private Map<String /* instance name */, Map<String /* stored procedure name */, String /* java method */>> instancesProceduresMap;
 
 	private Collection<String> instances;
 
@@ -281,11 +270,10 @@ public class DbServlet extends HttpServlet {
 			whiteListMap             = new HashMap<>(instancesCount);
 			staticJsonsMap           = new HashMap<>(instancesCount);
 			connectionInfoMap        = new HashMap<>(instancesCount);
+			authenticationQueryMap   = new HashMap<>(instancesCount);
 			ongoingRequestsMap       = new HashMap<>(instancesCount);
 			connectionMap            = new HashMap<>(instancesCount);
 			instancesProceduresMap   = new HashMap<>(instancesCount);
-			instancesValidatorsMap   = new HashMap<>(instancesCount);
-			instancesNotifiersMap    = new HashMap<>(instancesCount);
 
 			instances = new ArrayList<>(instancesCount);
 
@@ -311,73 +299,37 @@ public class DbServlet extends HttpServlet {
 	 */
 	private String openInstance(File instanceDir) throws Exception {
 		String instanceName = instanceDir.getName();
-		//
+
 		Logger.out(Severity.INFO, MessageFormat.format("Instance found: ''{0}''", instanceName));
-		//
+
 		Path initSqlPath = Paths.get(instanceDir.toPath().toString(), "init.sql");
-		//
-		List<String /* SQL statements */> initList = parseSqlFile(initSqlPath);
-		//
+
+		List<String /* SQL statements */> initList = new ArrayList<>();
+		SqlParseUtils.processIncludes(initSqlPath, initList);
+
 		if (initList.isEmpty())
 			return instanceName;
 
-		ConnectionInfo info = new ConnectionInfo();
+		StmtConnectTo info = null;
 		for (String statement : initList) {
-			String statementUpperCase = statement.toUpperCase(Locale.ENGLISH);
-
-			if (statementUpperCase.startsWith(SPECIAL_STATEMENT_CONNECT_TO)) {
-				parseConnectStatement(servletConfig, statement, info);
+			String text = SqlParseUtils.canonizeSql(statement);
+			if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO)) {
+				info = parseConnectStatement(servletConfig, statement);
 				if (info.jdbcUrl == null) {
 					Logger.out(Severity.INFO, MessageFormat.format("Can't connect to ''{0}''. Bad 'CONNECT TO' statement in file: ''{1}''", instanceName, initSqlPath));
 					return instanceName;
 				}
-			} else if (statementUpperCase.startsWith(SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS))
-				info.authenticationQuery = parseSetIfExistsStatement(servletConfig, SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS, statement);
-			else if (statementUpperCase.startsWith(SPECIAL_STATEMENT_SET_ALLOW_STATEMENT_IF_EXISTS))
-				info.allowStatementsQuery = parseSetIfExistsStatement(servletConfig, SPECIAL_STATEMENT_SET_ALLOW_STATEMENT_IF_EXISTS, statement);
+			} else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS)) {
+				String authenticationQuery = parseSetIfExistsStatement(servletConfig, statement);
+				authenticationQueryMap.put(instanceName, authenticationQuery);
+			}
 		}
 
-		if (DEBUG)
+		final boolean debug = info.debug;
+		if (debug)
 			System.out.println(info);
 
 		connectionInfoMap.put(instanceName, info);
-
-		//		List<String /* SQL statements */>     whiteList;
-		//		List<String /* SQL statement name */> whiteListNames;
-		//
-		//		if (info.whiteListFiles == null) { // WARNING! No white list declared => ALL statements allowed!
-		//			whiteList      = null;
-		//			whiteListNames = null;
-		//		} else { // active white list SQL
-		//			whiteList      = new ArrayList<>();
-		//			whiteListNames = new ArrayList<>();
-		//
-		//			for (String whiteListFile : info.whiteListFiles) {
-		//				Path whiteListSqlPath;
-		//				if (whiteListFile.startsWith("/"))
-		//					whiteListSqlPath = Paths.get(whiteListFile);
-		//				else
-		//					whiteListSqlPath = Paths.get(instanceDir.getAbsolutePath(), whiteListFile);
-		//				if (Files.exists(whiteListSqlPath)) {
-		//					if (DEBUG)
-		//						System.out.println("Whitelist file: " + whiteListSqlPath);
-		//					String whiteListSqlContent = readAsText(whiteListSqlPath).trim();
-		//					if (!whiteListSqlContent.isEmpty())
-		//						parseScript(whiteListSqlContent, whiteList, whiteListNames);
-		//				}
-		//			}
-		//			if (DEBUG) {
-		//				System.out.println("=== WHITELIST BEGIN ===");
-		//				System.out.println();
-		//				for (int i = 0; i < whiteList.size(); i++) {
-		//					System.out.println("INDEX:  " + i);
-		//					System.out.println("SQL:    " + whiteList.get(i));
-		//					System.out.println("NAME:   " + whiteListNames.get(i));
-		//					System.out.println();
-		//				}
-		//				System.out.println("=== WHITELIST END   ===");
-		//			}
-		//		}
 		Queue<AsyncContext> ongoingRequests = new ConcurrentLinkedQueue<>();
 
 		ongoingRequestsMap.put(instanceName, ongoingRequests);
@@ -394,6 +346,7 @@ public class DbServlet extends HttpServlet {
 					jdbcProperties.load(is);
 				}
 		}
+
 		ConnectionPoolManager connectionPoolManager = new ConnectionPoolManager(jdbcUrl, info.user, info.password, jdbcProperties, info.connectionPoolSizeMin, info.connectionPoolSizeMax);
 		try {
 			connectionPoolManager.init();
@@ -415,11 +368,9 @@ public class DbServlet extends HttpServlet {
 
 		connectionMap.put(instanceName, connection);
 
-		Map<String /* stored procedure name */, String /* java method */>                             proceduresMap     = new HashMap<>();
-		Map<String /* SQL statement name */, String /* Validator stored procedure name */>            validatorsMap     = new HashMap<>();
-		Map<String /* SQL statement name */, Collection<String /* Notifier stored procedure name */>> notifiersMap      = new HashMap<>();
-		Map<String /* Cron expression */, List<String /* SQL statement name */>>                      schedulersMap     = new HashMap<>();
-		Collection<StmtExpose>                                                                        exposedStatements = new ArrayList<>();
+		Map<String /* stored procedure name */, String /* java method */>        proceduresMap     = new HashMap<>();
+		Map<String /* Cron expression */, List<String /* SQL statement name */>> schedulersMap     = new HashMap<>();
+		Map<String /* SQL statement name */, StmtExpose>                         exposedStatements = new HashMap<>();
 
 		whiteListMap.put(instanceName, exposedStatements);
 		try (Statement st = connection.createStatement()) {
@@ -429,14 +380,11 @@ public class DbServlet extends HttpServlet {
 			//
 
 			instancesProceduresMap.put(instanceName, proceduresMap);
-			instancesValidatorsMap.put(instanceName, validatorsMap);
-			instancesNotifiersMap.put(instanceName, notifiersMap);
 
 			for (String statement : initList) {
 				if (DEBUG)
 					System.out.println("init.sql: -->" + statement + "<--");
-				String statementUpperCase = statement.toUpperCase(Locale.ENGLISH);
-				String text               = ParseStmt.getText(statement).toUpperCase(Locale.ENGLISH); // statement without whitespaces
+				String text = SqlParseUtils.canonizeSql(statement);
 
 				Method method = CallUtils.getCallStatementMethod(statement, proceduresMap);
 				if (method != null) { // Process CALL statement
@@ -447,24 +395,22 @@ public class DbServlet extends HttpServlet {
 				} //
 					//				else if (!SqlParseUtils.isSpecialServerStatement(statementUpperCase)) // Not a special statements => native SQL
 					//					st.execute(statement);
-				else if (text.startsWith("CONNECTTO"))
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO))
 					; // ignore
-				else if (text.startsWith("DECLAREPROCEDURE")) // Process DECLARE PROCEDURE statement
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS))
+					; // ignore
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_DECLARE_PROCEDURE)) // Process DECLARE PROCEDURE statement
 					SqlParseUtils.parseDeclareProcedureStatement(servletConfig, statement, proceduresMap);
-				else if (statementUpperCase.startsWith(SPECIAL_STATEMENT_SET_VALIDATOR))
-					SqlParseUtils.parseSetValidatorStatement(servletConfig, statement, validatorsMap);
-				else if (statementUpperCase.startsWith(SPECIAL_STATEMENT_ADD_NOTIFIER))
-					SqlParseUtils.parseAddNotifierStatement(servletConfig, statement, notifiersMap);
-				else if (statementUpperCase.startsWith(SPECIAL_STATEMENT_SCHEDULE))
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SCHEDULE))
 					SqlParseUtils.parseScheduleStatement(servletConfig, statement, schedulersMap);
-				else if (text.startsWith("EXPOSE")) {
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_EXPOSE)) {
 					StmtExpose stmtExpose = parseExposeStatement(servletConfig, statement);
-					exposedStatements.add(stmtExpose);
+					exposedStatements.put(stmtExpose.alias, stmtExpose);
 				} else // Not a special statements => native SQL
 					st.execute(statement);
 			}
 
-			for (StmtExpose stmtExpose : exposedStatements) {
+			for (StmtExpose stmtExpose : exposedStatements.values()) {
 				if (!stmtExpose.prefetch)
 					continue;
 
@@ -486,50 +432,15 @@ public class DbServlet extends HttpServlet {
 
 					// array of objects
 					StaticStatement staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_OBJECTS);
-					ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
+					ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION, sharedCoder.encoder);
 					mapReadyResults.put(staticStatement, readyResult);
 
 					// array of arrays
 					staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_ARRAYS);
-					readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
+					readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION, sharedCoder.encoder);
 					mapReadyResults.put(staticStatement, readyResult);
 				}
 			}
-
-			//			if (whiteList != null) {
-			//				//
-			//				// Execute all static = true statements from 'white-list.sql' file
-			//				// to load immutable static data. (only if optional 'white-list.sql' file is present)
-			//				// In this case we ignore user defined compression level and use maximal compression level
-			//				// because we prepare result offline.
-			//				//
-			//				for (int i = 0; i < whiteList.size(); i++) {
-			//					String statement_name = whiteListNames.get(i);
-			//					String sql            = whiteList.get(i);
-			//
-			//					if (!prefetchStatements.contains(statement_name))
-			//						continue;
-			//
-			//					try (ResultSet rs = st.executeQuery(sql)) {
-			//						List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-			//						List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
-			//
-			//						//
-			//						// cover all possible result set output formats
-			//						//
-			//
-			//						// array of objects
-			//						StaticStatement staticStatement = new StaticStatement(whiteList.get(i), QueryUtils.RESULT_FORMAT_ARRAY_OF_OBJECTS);
-			//						ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
-			//						mapReadyResults.put(staticStatement, readyResult);
-			//
-			//						// array of arrays
-			//						staticStatement = new StaticStatement(whiteList.get(i), QueryUtils.RESULT_FORMAT_ARRAY_OF_ARRAYS);
-			//						readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, QueryUtils.COMPRESSION_BEST_COMPRESSION, sharedCoder.encoder);
-			//						mapReadyResults.put(staticStatement, readyResult);
-			//					}
-			//				}
-			//			}
 		}
 
 		//
@@ -552,8 +463,9 @@ public class DbServlet extends HttpServlet {
 								String outEvent   = null;
 								String javaMethod = proceduresMap.get(storedProcedureName);
 								if (javaMethod == null) {
-									CallableStatement cs = dbConnection0.getCallableStatement("{call " + storedProcedureName + "(?)}");
-									cs.setString(1, cronExpression);
+									CallableStatement cs = dbConnection0.getCallableStatement("{call " + storedProcedureName + "(?,?)}");
+									cs.setString(1, instanceName);
+									cs.setString(2, cronExpression);
 									boolean b = cs.execute();
 									if (b) // first result is a ResultSet object
 										try (ResultSet rs = cs.getResultSet()) {
@@ -566,8 +478,8 @@ public class DbServlet extends HttpServlet {
 									String   methodName = array[1];
 
 									Class<?> clazz  = Class.forName(className);
-									Method   method = clazz.getMethod(methodName, Connection.class, String.class);
-									Object   result = method.invoke(null, dbConnection0.getConnection(), cronExpression);
+									Method   method = clazz.getMethod(methodName, Connection.class, String.class, String.class);
+									Object   result = method.invoke(null, dbConnection0.getConnection(), instanceName, cronExpression);
 									if (result instanceof String)
 										outEvent = (String) result;
 									else if (result instanceof ResultSet)
@@ -582,7 +494,7 @@ public class DbServlet extends HttpServlet {
 										Writer writer = ac.getResponse().getWriter();
 										writer.append(outEvent + '\n');
 										writer.flush();
-										if (info.debug) {
+										if (debug) {
 											System.out.println("Background job event was delivered to client:");
 											System.out.println(outEvent);
 										}
@@ -676,14 +588,6 @@ public class DbServlet extends HttpServlet {
 		}
 	}
 
-	public static void generateRandomString(Random random, char[] chars, char[] allowedChars) {
-		for (int i = 0; i < chars.length; i++) {
-			int  rndCharAt = random.nextInt(allowedChars.length);
-			char rndChar   = allowedChars[rndCharAt];
-			chars[i] = rndChar;
-		}
-	}
-
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String[] inst_and_oper = getInstanceAndOperation(request);
@@ -730,8 +634,8 @@ public class DbServlet extends HttpServlet {
 						CUSTOM_HTTP_HEADER_ROLE //
 		);
 
-		ConnectionInfo info = connectionInfoMap.get(instanceName);
-		if (info.authenticationQuery != null) {
+		String authenticationQuery = authenticationQueryMap.get(instanceName);
+		if (authenticationQuery != null) {
 			String authorization = request.getHeader(HTTP_HEADER_AUTHORIZATION);
 			if (authorization != null && authorization.toLowerCase(Locale.ENGLISH).startsWith("basic")) {
 				String base64Credentials = authorization.substring("Basic".length()).trim();
@@ -755,7 +659,7 @@ public class DbServlet extends HttpServlet {
 					Connection    connection          = connectionMap.get(instanceName);
 					StringBuilder preparedStatementSb = new StringBuilder();
 
-					Map<String /* name */, List<Integer /* index */>> paramsIndexes = parseNamedPreparedStatement(info.authenticationQuery, preparedStatementSb);
+					Map<String /* name */, List<Integer /* index */>> paramsIndexes = parseNamedPreparedStatement(authenticationQuery, preparedStatementSb);
 					PreparedStatement                                 ps            = connection.prepareStatement(preparedStatementSb.toString());
 					ParameterMetaData                                 pmd           = ps.getParameterMetaData();
 
@@ -886,13 +790,11 @@ public class DbServlet extends HttpServlet {
 	private void doDbRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String[] inst_and_oper = getInstanceAndOperation(request);
 
-		String                                                                                         instanceName          = inst_and_oper[0];
-		ConnectionInfo                                                                                 connectionInfo        = connectionInfoMap.get(instanceName);
-		ConnectionPoolManager                                                                          connectionPoolManager = connectionPoolManagerMap.get(instanceName);
-		Collection<StmtExpose>                                                                         whiteList             = whiteListMap.get(instanceName);
-		Map<String /* stored procedure name */, String /* java method */>                              proceduresMap         = instancesProceduresMap.get(instanceName);
-		Map<String /* SQL statement name */, String /* Validator stored procedure name */ >            validatorsMap         = instancesValidatorsMap.get(instanceName);
-		Map<String /* SQL statement name */, Collection<String /* Notifier stored procedure name */ >> notifiersMap          = instancesNotifiersMap.get(instanceName);
+		String                                                            instanceName          = inst_and_oper[0];
+		StmtConnectTo                                                     connectionInfo        = connectionInfoMap.get(instanceName);
+		ConnectionPoolManager                                             connectionPoolManager = connectionPoolManagerMap.get(instanceName);
+		Map<String /* SQL statement name */, StmtExpose>                  whiteList             = whiteListMap.get(instanceName);
+		Map<String /* stored procedure name */, String /* java method */> proceduresMap         = instancesProceduresMap.get(instanceName);
 
 		Queue<AsyncContext> ongoingRequests = ongoingRequestsMap.get(instanceName);
 
@@ -938,12 +840,10 @@ public class DbServlet extends HttpServlet {
 		new DbRequestProcessor( //
 				instanceName, //
 				asyncCtx, //
-				connectionInfo, //
+				connectionInfo.debug, //
 				connectionPoolManager, //
 				whiteList, //
 				proceduresMap, //
-				validatorsMap, //
-				notifiersMap, //
 				mapJson, //
 				ongoingRequests, //
 				sharedCoder //

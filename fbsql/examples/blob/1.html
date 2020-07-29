@@ -6,9 +6,10 @@
     <body>
         <script type="text/javascript">
             const conn = new Connection('my-sqlite');
-
-            const ps   = conn.prepareStatement("CALL GET_EMPLOYEES(:nameStartsWith)");
-            ps.executeQuery({nameStartsWith: 'Lor'})
+            conn.logDatabaseEvents(document.body, true);
+            //const ps   = conn.prepareStatement("CALL GET_EMPLOYEES(:nameStartsWith)");
+            const ps   = conn.prepareStatement("#ee");
+            ps.executeUpdate({nameStartsWith: 'Lor'})
             .then(resultSet => console.log(JSON.stringify(resultSet)));
             /*
              * Output:

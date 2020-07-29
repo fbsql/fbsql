@@ -27,8 +27,6 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.antlr4.parser;
 
-import java.util.Locale;
-
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
@@ -37,35 +35,62 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
-import org.fbsql.antlr4.generated.FbsqlParser.Fbsql_stmtContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Cron_expressionContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Procedure_nameContext;
+import org.fbsql.servlet.StringUtils;
 
-public class ParseStmt {
-	private static String text;
+public class ParseStmtScheduleAt {
+	/**
+	 * DECLARE PROCEDURE statement transfer object
+	 * Declare stored procedure or function (can be used only in «init.sql» script)
+	 */
+	public class StmtScheduleAt {
+		public String procedure;
+		public String cronExpression;
+
+		@Override
+		public String toString() {
+			return "StmtScheduleAt [procedure=" + procedure + ", cronExpression=" + cronExpression + "]";
+		}
+	}
 
 	/**
-	 * Statement parser
+	 * StmtScheduleAt transfer object
+	 */
+	private StmtScheduleAt st;
+
+	public ParseStmtScheduleAt() {
+		st = new StmtScheduleAt();
+	}
+
+	/**
+	 * SCHEDULE Statement parser
 	 *
-	 * E.g.: DECLARE PROCEDURE GET_EMPLOYEES FOR "org.fbsql.examples.StoredProcedures::getEmployees";
+	 * E.g.: SCHEDULE MY_PERIODIC_RUN AT "0/5 * * * * ?"
 	 *
 	 * @param sql
 	 * @return
 	 */
-	public static String getText(String sql) {
+	public StmtScheduleAt parse(String sql) {
 		Lexer       lexer  = new FbsqlLexer(CharStreams.fromString(sql));
 		FbsqlParser parser = new FbsqlParser(new CommonTokenStream(lexer));
-		ParseTree   tree   = parser.fbsql_stmt();
+		ParseTree   tree   = parser.schedule_stmt();
 
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
 
 			@Override
-			public void enterFbsql_stmt(Fbsql_stmtContext ctx) {
-				text = ctx.getText().toUpperCase(Locale.ENGLISH);
+			public void enterProcedure_name(Procedure_nameContext ctx) {
+				st.procedure = StringUtils.unquote(ctx.getText());
+			}
+
+			@Override
+			public void enterCron_expression(Cron_expressionContext ctx) {
+				st.cronExpression = StringUtils.unquote(ctx.getText());
 			}
 		}, tree);
 
-		return text;
+		return st;
 	}
-
 }
 
 /*

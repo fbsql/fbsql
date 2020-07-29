@@ -58,6 +58,30 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitRole_name(FbsqlParser.Role_nameContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#trigger_before_procedure_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTrigger_before_procedure_name(FbsqlParser.Trigger_before_procedure_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#trigger_after_procedure_name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTrigger_after_procedure_name(FbsqlParser.Trigger_after_procedure_nameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#compression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCompression(FbsqlParser.CompressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#prefetch}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrefetch(FbsqlParser.PrefetchContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#statement_alias}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -87,4 +111,94 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#jdbc_url}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJdbc_url(FbsqlParser.Jdbc_urlContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#jdbc_user}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJdbc_user(FbsqlParser.Jdbc_userContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#jdbc_password}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJdbc_password(FbsqlParser.Jdbc_passwordContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#jdbc_properties}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJdbc_properties(FbsqlParser.Jdbc_propertiesContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#jdbc_driver}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJdbc_driver(FbsqlParser.Jdbc_driverContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#jdbc_driver_jar}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJdbc_driver_jar(FbsqlParser.Jdbc_driver_jarContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#connection_pool_size_min}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConnection_pool_size_min(FbsqlParser.Connection_pool_size_minContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#connection_pool_size_max}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConnection_pool_size_max(FbsqlParser.Connection_pool_size_maxContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#debug}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDebug(FbsqlParser.DebugContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#connect_to_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConnect_to_stmt(FbsqlParser.Connect_to_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#file}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFile(FbsqlParser.FileContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#include_script_file_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInclude_script_file_stmt(FbsqlParser.Include_script_file_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#set_allow_login_if_exists}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSet_allow_login_if_exists(FbsqlParser.Set_allow_login_if_existsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#cron_expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCron_expression(FbsqlParser.Cron_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#schedule_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSchedule_stmt(FbsqlParser.Schedule_stmtContext ctx);
 }

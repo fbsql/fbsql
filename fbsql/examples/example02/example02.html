@@ -8,7 +8,7 @@ to access our backend SQL database.
 
 <head>
 <title>Example 02. FBSQL: Using promise API</title>
-<script src="http://localhost:8080/fbsql.min.js"></script>
+<script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
 </head>
 
 <body>
@@ -46,13 +46,13 @@ to access our backend SQL database.
 
 		conn.prepareStatement("SELECT * FROM employees")
 		.logExecuteQuery(document.body, false)
-		.then(result => {
-			return conn.prepareStatement("CALL TESTRUN(:price, 'xyz,XYZppp', :name)")
-			.setResultSetFormat(PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
-			.logExecuteQuery(document.body, false,
-				{name: 'Billy', price: 724}
-			);
-		})
+// 		.then(result => {
+// 			return conn.prepareStatement("CALL TESTRUN(:price, 'xyz,XYZppp', :name)")
+// 			.setResultSetFormat(PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
+// 			.logExecuteQuery(document.body, false,
+// 				{name: 'Billy', price: 724}
+// 			);
+// 		})
 		.then(resultSet => {
 			return conn.prepareStatement("DELETE FROM employees")
 			.logExecuteUpdate(document.body, false);

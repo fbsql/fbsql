@@ -30,23 +30,29 @@ package org.fbsql.servlet;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
 
+import org.fbsql.antlr4.parser.ParseStmtConnectTo;
+import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure;
 import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure.StmtDeclareProcedure;
 import org.fbsql.antlr4.parser.ParseStmtExpose;
 import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
+import org.fbsql.antlr4.parser.ParseStmtIncludeScriptFile;
+import org.fbsql.antlr4.parser.ParseStmtScheduleAt;
+import org.fbsql.antlr4.parser.ParseStmtScheduleAt.StmtScheduleAt;
+import org.fbsql.antlr4.parser.ParseStmtSetAllowLoginIfExists;
 import org.h2.util.ScriptReader;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -63,23 +69,26 @@ public class SqlParseUtils {
 	public static final String JAVA_METHOD_SEPARATOR = "::"; // Lambda static method notation: className::methodName
 
 	/**
-	 * Special FBSQL statements
+	 * Special FBSQL statements that
+	 * can be used only in «init.sql» script
 	 */
-	public static final String SPECIAL_STATEMENT_CONNECT_TO                    = "CONNECT TO";                    // Connect to database instance (can be used only in «init.sql» script)
-	//public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE             = "DECLAREPROCEDURE";              // Declare stored procedure or function (can be used only in «init.sql» script)
-	//public static final String SPECIAL_STATEMENT_EXPOSE                        = "EXPOSE";                        // Expose particular SQL statement to frontend (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_SET_VALIDATOR                 = "SET VALIDATOR";                 // Set validator stored procedure to SQL statement (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_ADD_NOTIFIER                  = "ADD NOTIFIER";                  // Add notifier stored procedure to SQL statement (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_SCHEDULE                      = "SCHEDULE";                      // Add scheduled stored procedure (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS     = "SET ALLOW LOGIN IF EXISTS";     // Authenticate/Authorize users (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_SET_ALLOW_STATEMENT_IF_EXISTS = "SET ALLOW STATEMENT IF EXISTS"; // Allow statements (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_CREATE_SESSION                = "CREATE SESSION";                // Session management: Create session
-	public static final String SPECIAL_STATEMENT_INVALIDATE_SESSION            = "INVALIDATE SESSION";            // Session management: Invalidate session
-	public static final String SPECIAL_STATEMENT_GET_SESSION_INFO              = "GET SESSION INFO";              // Session management: Get session information (session ID, creation time, last accessed time)
-	public static final String SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES        = "SET SESSION ATTRIBUTES";        // Session management: Set custom session attributes
-	public static final String SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES        = "GET SESSION ATTRIBUTES";        // Session management: Get custom session attributes
-	public static final String SPECIAL_STATEMENT_ADD_COOKIES                   = "ADD COOKIES";                   // Add cookies
-	public static final String SPECIAL_STATEMENT_GET_COOKIES                   = "GET COOKIES";                   // Get cookies
+	public static final String SPECIAL_STATEMENT_CONNECT_TO                = canonizeSql("CONNECT TO");                // Connect to database instance (can be used only in «init.sql» script)
+	public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE         = canonizeSql("DECLARE PROCEDURE");         // Declare non native stored procedure written in one of JVM languages
+	public static final String SPECIAL_STATEMENT_SCHEDULE                  = canonizeSql("SCHEDULE");                  // Add scheduled stored procedure (can be used only in «init.sql» script)
+	public static final String SPECIAL_STATEMENT_EXPOSE                    = canonizeSql("EXPOSE");                    // Expose corresponding native SQL statement to frontend
+	public static final String SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS = canonizeSql("SET ALLOW LOGIN IF EXISTS"); // Authenticate/Authorize users (can be used only in «init.sql» script)
+
+	/**
+	 * Special FBSQL statements that
+	 * can be used only in frontend
+	 */
+	public static final String SPECIAL_STATEMENT_CREATE_SESSION         = "CREATE SESSION";         // Session management: Create session
+	public static final String SPECIAL_STATEMENT_INVALIDATE_SESSION     = "INVALIDATE SESSION";     // Session management: Invalidate session
+	public static final String SPECIAL_STATEMENT_GET_SESSION_INFO       = "GET SESSION INFO";       // Session management: Get session information (session ID, creation time, last accessed time)
+	public static final String SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES = "SET SESSION ATTRIBUTES"; // Session management: Set custom session attributes
+	public static final String SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES = "GET SESSION ATTRIBUTES"; // Session management: Get custom session attributes
+	public static final String SPECIAL_STATEMENT_ADD_COOKIES            = "ADD COOKIES";            // Add cookies
+	public static final String SPECIAL_STATEMENT_GET_COOKIES            = "GET COOKIES";            // Get cookies
 
 	private static final String[] SPECIAL_CLIENT_STATEMENTS = { //
 			SPECIAL_STATEMENT_CREATE_SESSION, //
@@ -88,17 +97,6 @@ public class SqlParseUtils {
 			SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES, //
 			SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES //
 	};
-
-//	private static final String[] SPECIAL_SERVER_STATEMENTS = { //
-//			SPECIAL_STATEMENT_CONNECT_TO, //
-//			SPECIAL_STATEMENT_DECLARE_PROCEDURE, //
-//			SPECIAL_STATEMENT_EXPOSE, //
-//			SPECIAL_STATEMENT_SET_VALIDATOR, //
-//			SPECIAL_STATEMENT_ADD_NOTIFIER, //
-//			SPECIAL_STATEMENT_SCHEDULE, //
-//			SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS, //
-//			SPECIAL_STATEMENT_SET_ALLOW_STATEMENT_IF_EXISTS //
-//	};
 
 	/**
 	 * SQL statement separator: «;»
@@ -219,14 +217,13 @@ public class SqlParseUtils {
 	 * @param info          - ConnectionInfo Transfer object
 	 * @return              - internal SQL statement
 	 */
-	public static String parseSetIfExistsStatement(ServletConfig servletConfig, String prefix, String sql) {
+	public static String parseSetIfExistsStatement(ServletConfig servletConfig, String sql) {
 		sql = stripComments(sql).trim();
 		sql = sql.replace('\n', ' ');
 		sql = sql.replace('\r', ' ');
 		sql = processStatement(sql);
 
-		String s = sql.substring(prefix.length()).trim();
-		return s.substring(1, s.length() - 1).trim();
+		return new ParseStmtSetAllowLoginIfExists().parse(sql).authenticationQuery;
 	}
 
 	/**
@@ -235,41 +232,13 @@ public class SqlParseUtils {
 	 * @param sql  - CONNECT statement
 	 * @param info - ConnectionInfo Transfer object
 	 */
-	public static void parseConnectStatement(ServletConfig servletConfig, String sql, ConnectionInfo info) {
+	public static StmtConnectTo parseConnectStatement(ServletConfig servletConfig, String sql) {
 		sql = stripComments(sql).trim();
 		sql = sql.replace('\n', ' ');
 		sql = sql.replace('\r', ' ');
 		sql = processStatement(sql);
 
-		info.jdbcUrl               = extractClauseAsString(servletConfig, sql, SPECIAL_STATEMENT_CONNECT_TO); // string
-		info.user                  = extractClauseAsString(servletConfig, sql, "USER");                       // string
-		info.driverClassName       = extractClauseAsString(servletConfig, sql, "JDBC DRIVER CLASS");          // string
-		info.driverJars            = extractClauseAsListOfStrings(servletConfig, sql, "JAR FILES");           // list of strings
-		info.password              = extractClauseAsString(servletConfig, sql, "PASSWORD");                   // string
-		info.jdbcPropertiesFile    = extractClauseAsString(servletConfig, sql, "JDBC PROPERTIES FILE");       // string
-		info.systemPropertiesFile  = extractClauseAsString(servletConfig, sql, "SYSTEM PROPERTIES FILE");     // string   // TODO: Not yet implemented
-		info.connectionPoolSizeMin = extractClauseAsInt(servletConfig, sql, "CONNECTION_POOL_SIZE_MIN");      // integer
-		info.connectionPoolSizeMax = extractClauseAsInt(servletConfig, sql, "CONNECTION_POOL_SIZE_MAX");      // integer
-		info.compressionLevel      = extractClauseAsInt(servletConfig, sql, "COMPRESSION_LEVEL");             // integer
-		info.debug                 = extractClauseAsBoolean(servletConfig, sql, "DEBUG");                     // boolean
-	}
-
-	/**
-	 * Parse SET VALIDATOR statement
-	 *
-	 * @param sql           - SET VALIDATOR statement
-	 * @param validatorsMap - Validators Map for specific SQL statement name
-	 */
-	public static void parseSetValidatorStatement(ServletConfig servletConfig, String sql, Map<String /* SQL statement name */, String /* Validator stored procedure name */> validatorsMap) {
-		sql = stripComments(sql).trim();
-		sql = sql.replace('\n', ' ');
-		sql = sql.replace('\r', ' ');
-		sql = processStatement(sql);
-
-		String storedProcedureName = extractClause(servletConfig, sql, SPECIAL_STATEMENT_SET_VALIDATOR);
-		String sqlStatementName    = extractClauseAsString(servletConfig, sql, "TO");
-
-		validatorsMap.put(sqlStatementName, storedProcedureName);
+		return new ParseStmtConnectTo().parse(servletConfig, sql);
 	}
 
 	/**
@@ -294,35 +263,12 @@ public class SqlParseUtils {
 	}
 
 	/**
-	 * Parse ADD NOTIFIER statement
-	 *
-	 * @param sql          - ADD NOTIFIER statement
-	 * @param notifiersMap - Notifiers Map for specific SQL statement name
-	 */
-	public static void parseAddNotifierStatement(ServletConfig servletConfig, String sql, Map<String /* SQL statement name */, Collection<String /* Notifier stored procedure name */>> notifiersMap) {
-		sql = stripComments(sql).trim();
-		sql = sql.replace('\n', ' ');
-		sql = sql.replace('\r', ' ');
-		sql = processStatement(sql);
-
-		String storedProcedureName = extractClause(servletConfig, sql, SPECIAL_STATEMENT_ADD_NOTIFIER);
-		String sqlStatementName    = extractClauseAsString(servletConfig, sql, "TO");
-
-		Collection<String /* Notifier stored procedure name */> notifiers = notifiersMap.get(sqlStatementName);
-		if (notifiers == null) {
-			notifiers = new LinkedHashSet<>();
-			notifiersMap.put(sqlStatementName, notifiers);
-		}
-		notifiers.add(storedProcedureName);
-	}
-
-	/**
 	 * Parse EXPOSE statement
 	 *
 	 * @param sql - EXPOSE statement
 	 * @throws NoSuchAlgorithmException 
 	 */
-	public static StmtExpose parseExposeStatement(ServletConfig servletConfig, String sql) throws NoSuchAlgorithmException {
+	public static StmtExpose parseExposeStatement(ServletConfig servletConfig, String sql) {
 		sql = stripComments(sql).trim();
 		sql = sql.replace('\n', ' ');
 		sql = sql.replace('\r', ' ');
@@ -349,8 +295,9 @@ public class SqlParseUtils {
 		sql = sql.replace('\r', ' ');
 		sql = processStatement(sql);
 
-		String storedProcedureName = extractClauseAsString(servletConfig, sql, SPECIAL_STATEMENT_SCHEDULE);
-		String cronExpression      = extractClauseAsString(servletConfig, sql, "AT");
+		StmtScheduleAt scheduleAt          = new ParseStmtScheduleAt().parse(sql);
+		String         storedProcedureName = scheduleAt.procedure;
+		String         cronExpression      = scheduleAt.cronExpression;
 
 		List<String /* Scheduled stored procedure name */> sqlStatementNames = schedulersMap.get(cronExpression);
 		if (sqlStatementNames == null) {
@@ -580,66 +527,6 @@ public class SqlParseUtils {
 		return sql.trim();
 	}
 
-	//	/**
-	//	 * Parse SQL script by splitting it on SQL statements
-	//	 * Standard semicolon character «;» is used as statement separator.
-	//	 *
-	//	 * This method also:
-	//	 * - compress row(s) of each SQL statement by removing
-	//	 * ambiguous  trailing white spaces characters.
-	//	 * - remove trailing statement separator «;»
-	//	 *
-	//	 * @param sqlScript  - SQL script to parse
-	//	 * @param list       - list of all presented in script SQL statements
-	//	 * @param names      - list of names presented in script SQL statements (null entry if name was not specified)
-	//	 * @param roles      - list of roles presented in script SQL statements (null entry if name was not specified)
-	//	 * @param statics    - list of immutable SQL statements presented in script (null entry if name was not specified)
-	//	 * @param validators - list of JavaScript validator function name
-	//	 * @throws IOException
-	//	 * @throws NoSuchAlgorithmException
-	//	 */
-	//	static void parseScript(String sqlScript, List<String /* SQL statements */> list, List<String /* SQL statement name */> $names) throws IOException, NoSuchAlgorithmException {
-	//		try (ScriptReader scriptReader = new ScriptReader(new StringReader(sqlScript))) {
-	//			while (true) {
-	//				/**
-	//				 * Trimmed SQL statement
-	//				 */
-	//				String stat = scriptReader.readStatement();
-	//				if (stat == null)
-	//					break;
-	//				stat = stat.trim();
-	//
-	//				/**
-	//				 * SQL statement name
-	//				 */
-	//				String $name = null;
-	//
-	//				/* Search for provided SQL statement name */
-	//				String[] lines = stat.split("\n");
-	//				for (int i = 0; i < lines.length; i++) {
-	//					String line = lines[i].trim();
-	//					if (line.startsWith("-- #")) { // name declaration found («#» - statement name prefix)
-	//						$name = line.substring(4).trim(); // $name («#» character is not included)
-	//						int pos = $name.indexOf(' ');
-	//						if (pos == -1)
-	//							pos = $name.indexOf('\t');
-	//						if (pos != -1)
-	//							$name = $name.substring(0, pos).trim();
-	//						break;
-	//					}
-	//				}
-	//				if ($name == null) // name not provided, create default
-	//					$name = calcSha256(stat);
-	//
-	//				String sql = processStatement(stat);
-	//				if (!sql.isEmpty()) {
-	//					list.add(sql);
-	//					$names.add($name);
-	//				}
-	//			}
-	//		}
-	//	}
-
 	/**
 	 * Calculate SHA-256 hash of string
 	 *
@@ -647,17 +534,22 @@ public class SqlParseUtils {
 	 * @return  - lower case SHA-256 hash of source string
 	 * @throws NoSuchAlgorithmException
 	 */
-	private static String calcSha256(String s) throws NoSuchAlgorithmException {
-		MessageDigest digest    = MessageDigest.getInstance("SHA-256");
-		byte[]        bs        = digest.digest(s.getBytes(StandardCharsets.UTF_8));
-		StringBuffer  hexString = new StringBuffer();
-		for (int i = 0; i < bs.length; i++) {
-			String hex = Integer.toHexString(0xff & bs[i]).toLowerCase(Locale.ENGLISH);
-			if (hex.length() == 1)
-				hexString.append('0');
-			hexString.append(hex);
+	public static String calcSha256(String s) {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+			byte[]       bs        = digest.digest(s.getBytes(StandardCharsets.UTF_8));
+			StringBuffer hexString = new StringBuffer();
+			for (int i = 0; i < bs.length; i++) {
+				String hex = Integer.toHexString(0xff & bs[i]).toLowerCase(Locale.ENGLISH);
+				if (hex.length() == 1)
+					hexString.append('0');
+				hexString.append(hex);
+			}
+			return hexString.toString();
+		} catch (NoSuchAlgorithmException e) {
+			throw new Error(e);
 		}
-		return hexString.toString();
 	}
 
 	/**
@@ -742,11 +634,34 @@ public class SqlParseUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static List<String> parseSqlFile(Path path) throws IOException {
+	private static List<String> parseSqlFile(Path path) throws IOException {
 		List<String> list = new ArrayList<>();
-		String       s    = StringUtils.readAsText(path);
-		parseScript(s, list);
+		parseScript(StringUtils.readAsText(path), list);
 		return list;
+	}
+
+	/**
+	 * Recursive method to process "INCLUDE SCRIPT FILE" statement
+	 *
+	 * @param path
+	 * @param list
+	 * @throws Exception
+	 */
+	public static void processIncludes(Path path, List<String /* SQL statements */> list) throws IOException {
+		List<String /* SQL statements */> initList = parseSqlFile(path);
+		for (String statement : initList) {
+			String statementUpperCase = statement.toUpperCase(Locale.ENGLISH);
+			if (statementUpperCase.startsWith("INCLUDE")) {
+				String fileName = new ParseStmtIncludeScriptFile().parse(statement).fileName;
+				if (fileName.startsWith("/"))
+					path = Paths.get(fileName);
+				else
+					path = Paths.get(path.getParent().toString(), fileName);
+				if (Files.exists(path))
+					processIncludes(path, list); // recursive call
+			} else
+				list.add(statement);
+		}
 	}
 
 	/**
@@ -761,18 +676,22 @@ public class SqlParseUtils {
 		return false;
 	}
 
-//	/**
-//	 * 
-//	 * @param s
-//	 * @return
-//	 */
-//	public static boolean isSpecialServerStatement(String s) {
-//		for (String st : SPECIAL_SERVER_STATEMENTS)
-//			if (indexOf(s, st) == 0)
-//				return true;
-//		return false;
-//	}
-
+	/**
+	 * Canonize SQL statement for compare (startsWith)
+	 * 
+	 * E.g. "connect to" - > "CONNECTTO"
+	 * @param sql
+	 * @return
+	 */
+	public static String canonizeSql(String sql) {
+		sql = stripComments(sql).trim();
+		sql = sql.replace("\n", "");
+		sql = sql.replace("\r", "");
+		sql = sql.replace("\t", "");
+		sql = sql.replace(" ", "");
+		sql = sql.toUpperCase(Locale.ENGLISH);
+		return sql;
+	}
 }
 /*
 Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com

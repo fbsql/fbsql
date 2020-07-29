@@ -28,7 +28,6 @@ E-Mail: fbsql.team.team@gmail.com
 package org.fbsql.servlet;
 
 import static org.fbsql.servlet.SqlParseUtils.JAVA_METHOD_SEPARATOR;
-import static org.fbsql.servlet.SqlParseUtils.parseNamedPreparedStatement;
 import static org.fbsql.servlet.StringUtils.q;
 
 import java.io.BufferedReader;
@@ -60,7 +59,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -144,16 +142,14 @@ public class DbRequestProcessor implements Runnable {
 	private String       instanceName;
 	private AsyncContext asyncContext;
 
-	private ConnectionInfo        connectionInfo;
+	private boolean               debug;
 	private ConnectionPoolManager connectionPoolManager;
 
-	private Collection<StmtExpose>                                                                         whiteList;      // list of SQL statements
-	private Map<String /* stored procedure name */, String /* java method */>                              proceduresMap;
-	private Map<String /* SQL statement name */, String /* Validator stored procedure name */ >            validatorsMap;  //
-	private Map<String /* SQL statement name */, Collection<String /* Notifier stored procedure name */ >> notifiersMap;   //
-	private Map<StaticStatement, ReadyResult>                                                              mapJson;
-	private Queue<AsyncContext>                                                                            ongoingRequests;
-	private DbServlet.SharedCoder                                                                          sharedCoder;
+	private Map<String /* SQL statement name */, StmtExpose>                  whiteList;      // list of SQL statements
+	private Map<String /* stored procedure name */, String /* java method */> proceduresMap;
+	private Map<StaticStatement, ReadyResult>                                 mapJson;
+	private Queue<AsyncContext>                                               ongoingRequests;
+	private DbServlet.SharedCoder                                             sharedCoder;
 
 	/**
 	 * Constructs DbRequestProcessor object
@@ -172,24 +168,20 @@ public class DbRequestProcessor implements Runnable {
 	public DbRequestProcessor( //
 			String instanceName, //
 			AsyncContext asyncCtx, //
-			ConnectionInfo connectionInfo, //
+			boolean debug, //
 			ConnectionPoolManager connectionPoolManager, //
-			Collection<StmtExpose> whiteList, // list of SQL statements
+			Map<String /* SQL statement name */, StmtExpose> whiteList, // list of SQL statements
 			Map<String /* stored procedure name */, String /* java method */> proceduresMap, //
-			Map<String /* SQL statement name */, String /* Validator stored procedure name */ > validatorsMap, //
-			Map<String /* SQL statement name */, Collection<String /* Notifier stored procedure name */ >> notifiersMap, //
 			Map<StaticStatement, ReadyResult> mapJson, //
 			Queue<AsyncContext> ongoingRequests, //
 			DbServlet.SharedCoder sharedCoder //
 	) {
 		this.instanceName          = instanceName;
 		this.asyncContext          = asyncCtx;
-		this.connectionInfo        = connectionInfo;
+		this.debug                 = debug;
 		this.connectionPoolManager = connectionPoolManager;
 		this.whiteList             = whiteList;            // list of SQL statements
 		this.proceduresMap         = proceduresMap;
-		this.validatorsMap         = validatorsMap;
-		this.notifiersMap          = notifiersMap;
 		this.mapJson               = mapJson;
 		this.ongoingRequests       = ongoingRequests;
 		this.sharedCoder           = sharedCoder;
@@ -282,8 +274,9 @@ public class DbRequestProcessor implements Runnable {
 				return;
 			}
 			//
-			String unprocessedNamedPreparedStatement = null;
-			String namedPreparedStatement            = null;
+			StmtExpose stmtExpose                        = null;
+			String     unprocessedNamedPreparedStatement = null;
+			String     namedPreparedStatement            = null;
 			if (statementId == null) { // SQL statement provided
 				StringBuilder unprocessedNamedPreparedStatementSb = new StringBuilder();
 				while (true) {
@@ -297,9 +290,10 @@ public class DbRequestProcessor implements Runnable {
 				if (whiteList.isEmpty())
 					reject = false;
 				else {
-					for (StmtExpose stmtExpose : whiteList) {
-						if (stmtExpose.statement.equals(namedPreparedStatement)) {
-							statementId = stmtExpose.alias;
+					for (StmtExpose curStmtExpose : whiteList.values()) {
+						if (curStmtExpose.statement.equals(namedPreparedStatement)) {
+							statementId = curStmtExpose.alias;
+							stmtExpose  = whiteList.get(statementId);
 							break;
 						}
 					}
@@ -308,113 +302,74 @@ public class DbRequestProcessor implements Runnable {
 						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not found in white list", namedPreparedStatement));
 				}
 			} else { // SQL statement name provided
-				for (StmtExpose stmtExpose : whiteList) {
-					if (statementId.equals(stmtExpose.alias)) {
-						namedPreparedStatement = stmtExpose.statement;
-						break;
-					}
-				}
-				reject = whiteList.isEmpty() || namedPreparedStatement == null;
+				stmtExpose = whiteList.get(statementId);
+				if (stmtExpose != null)
+					namedPreparedStatement = stmtExpose.statement;
+				reject = whiteList.isEmpty() || stmtExpose == null;
 
 				if (reject)
 					rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement name: ''{0}'' not found", statementId));
 				else
 					unprocessedNamedPreparedStatement = namedPreparedStatement;
 			}
-			if (connectionInfo.allowStatementsQuery != null) {
-				//
-				// parameters of custom "SET ALLOW STATEMENTS IF EXISTS" SQL statement
-				//
-				Map<String, Object> paramsMap = new HashMap<>();
-				paramsMap.put("statement_id", statementId); // :statement_id parameter
-				paramsMap.put("statement", unprocessedNamedPreparedStatement); // :statement parameter
-				paramsMap.put("user", remoteUser); // :user parameter
-				paramsMap.put("role", remoteRole); // :role parameter
 
-				DbConnection dbConnection = null;
-				try {
-					dbConnection = connectionPoolManager.getConnection();
-					StringBuilder preparedStatementSb = new StringBuilder();
-
-					Map<String /* name */, List<Integer /* index */>> paramsIndexes        = parseNamedPreparedStatement(connectionInfo.allowStatementsQuery, preparedStatementSb);
-					String                                            preparedStatementSql = preparedStatementSb.toString();
-					PreparedStatement                                 ps;
-					if (preparedStatementSql.startsWith("{") && preparedStatementSql.endsWith("}"))
-						ps = dbConnection.getCallableStatement(preparedStatementSql);
-					else
-						ps = dbConnection.getPreparedStatement(preparedStatementSql);
-					ParameterMetaData pmd = ps.getParameterMetaData();
-
-					for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
-						String                    name    = entry.getKey();
-						Object                    value   = entry.getValue();
-						List<Integer /* index */> indexes = paramsIndexes.get(name);
-						if (indexes != null)
-							for (int n : indexes) {
-								int parameterType = pmd.getParameterType(n);
-								if (value == null)
-									ps.setNull(n, parameterType);
-								else
-									ps.setString(n, value.toString());
-							}
+			if (stmtExpose != null) {
+				Collection<String> allowedRoles = stmtExpose.roles;
+				if (!allowedRoles.isEmpty())
+					if (!allowedRoles.contains(remoteRole)) {
+						reject        = true;
+						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not allowed for role \"{1}\"", namedPreparedStatement, remoteRole));
 					}
-					boolean allow = false;
-					try (ResultSet rs = ps.executeQuery()) {
-						allow = rs.next();
-					} finally {
-						if (!allow) {
-							reject        = true;
-							rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not allowed for role \"{1}\"", namedPreparedStatement, remoteRole));
-						}
-					}
-				} finally {
-					if (dbConnection != null)
-						connectionPoolManager.releaseConnection(dbConnection);
-				}
 			}
+
+			//
+			// validate
+			//
 			List<Map<String, Object>> parametersListOfMaps = new ArrayList<>(paramJsons.size());
 			for (String paramJson : paramJsons) {
-				String validatorStoredProcedureName = validatorsMap.get(statementId);
-				if (validatorStoredProcedureName != null) {
-					String statementInfoJson = generateStatementInfoJson( //
-							instanceName, //
-							statementId, //
-							unprocessedNamedPreparedStatement, //
-							paramJson //
-					);
+				if (stmtExpose != null) {
+					String validatorStoredProcedureName = stmtExpose.trigger_before_procedure_name;
+					if (validatorStoredProcedureName != null) {
+						String statementInfoJson = generateStatementInfoJson( //
+								instanceName, //
+								statementId, //
+								unprocessedNamedPreparedStatement, //
+								paramJson //
+						);
 
-					DbConnection dbConnection0      = null;
-					String       modifiedParamsJson = null;
-					try {
-						dbConnection0 = connectionPoolManager.getConnection();
+						DbConnection dbConnection0      = null;
+						String       modifiedParamsJson = null;
+						try {
+							dbConnection0 = connectionPoolManager.getConnection();
 
-						String javaMethod = proceduresMap.get(validatorStoredProcedureName);
-						if (javaMethod == null) {
-							CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
-							cs.setString(1, userInfoJson);
-							cs.setString(2, statementInfoJson);
+							String javaMethod = proceduresMap.get(validatorStoredProcedureName);
+							if (javaMethod == null) {
+								CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
+								cs.setString(1, userInfoJson);
+								cs.setString(2, statementInfoJson);
 
-							try (ResultSet rs = cs.executeQuery()) {
-								if (rs.next())
-									modifiedParamsJson = rs.getString(1);
+								try (ResultSet rs = cs.executeQuery()) {
+									if (rs.next())
+										modifiedParamsJson = rs.getString(1);
+								}
+							} else {
+								String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
+								String   className  = array[0];
+								String   methodName = array[1];
+
+								Class<?> clazz  = Class.forName(className);
+								Method   method = clazz.getMethod(methodName, HttpServletRequest.class, Connection.class, String.class, String.class);
+								modifiedParamsJson = (String) method.invoke(null, request, dbConnection0.getConnection(), userInfoJson, statementInfoJson);
 							}
-						} else {
-							String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
-							String   className  = array[0];
-							String   methodName = array[1];
-
-							Class<?> clazz  = Class.forName(className);
-							Method   method = clazz.getMethod(methodName, Connection.class, String.class, String.class);
-							modifiedParamsJson = (String) method.invoke(null, request, dbConnection0.getConnection(), userInfoJson, statementInfoJson);
+						} finally {
+							if (dbConnection0 != null)
+								connectionPoolManager.releaseConnection(dbConnection0);
+							if (modifiedParamsJson == null) { // reject if stored procedure return null
+								reject        = true;
+								rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\". Bad parameters: \"{1}\"", namedPreparedStatement, paramJson));
+							} else
+								paramJson = modifiedParamsJson.trim();
 						}
-					} finally {
-						if (dbConnection0 != null)
-							connectionPoolManager.releaseConnection(dbConnection0);
-						if (modifiedParamsJson == null) { // reject if stored procedure return null
-							reject        = true;
-							rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\". Bad parameters: \"{1}\"", namedPreparedStatement, paramJson));
-						} else
-							paramJson = modifiedParamsJson.trim();
 					}
 				}
 
@@ -548,42 +503,7 @@ public class DbRequestProcessor implements Runnable {
 			byte[]      bs          = null;
 
 			if (readyResult == null) {
-				DbConnection dbConnection = connectionPoolManager.getConnection();
-
-				Method method = CallUtils.getCallStatementMethod(unprocessedNamedPreparedStatement, proceduresMap);
-				if (method != null) {
-					if (executeTypeUpdate) {
-						int rowCount = 0;
-						for (Map<String, Object> parametersMap : parametersListOfMaps) {
-							List<Object> parameterValues = new ArrayList<>();
-							parameterValues.add(request);
-							parameterValues.add(dbConnection.getConnection());
-							CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
-							method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
-							rowCount++;
-						}
-						bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
-					} else if (executeTypeQuery) {
-						Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
-						List<Object>        parameterValues = new ArrayList<>();
-						parameterValues.add(request);
-						parameterValues.add(dbConnection.getConnection());
-						CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
-						try (ResultSet rs = (ResultSet) method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]))) {
-							Integer                                                        compression       = connectionInfo.compressionLevel == null ? QueryUtils.COMPRESSION_NONE : connectionInfo.compressionLevel;
-							List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-							List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
-
-							ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-							bs         = rr.bs;
-							etag       = rr.etag;
-							compressed = rr.compressed;
-						} finally {
-							if (dbConnection != null)
-								connectionPoolManager.releaseConnection(dbConnection);
-						}
-					}
-				} else if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_CREATE_SESSION) == 0) {
+				if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_CREATE_SESSION) == 0) {
 					if (executeTypeUpdate) { // Execute Update
 						int rowCount;
 						if (session == null) {
@@ -656,7 +576,7 @@ public class DbRequestProcessor implements Runnable {
 								sessionJson = "{}";
 						}
 						String                                                       sessionJsons = '[' + sessionJson + ']';
-						Integer                                                      compression  = connectionInfo.compressionLevel == null ? QueryUtils.COMPRESSION_NONE : connectionInfo.compressionLevel;
+						Integer                                                      compression  = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
 						List<String /* JSON object */ >                              jsonObjStrs  = JsonUtils.parseJsonArray(sessionJsons);
 						List<Map<String /* column name */, String /* JSON value */>> list         = new ArrayList<>(jsonObjStrs.size());
 						for (String jsonObjStr : jsonObjStrs) {
@@ -689,7 +609,7 @@ public class DbRequestProcessor implements Runnable {
 									'}';
 						}
 						String                                                       sessionJsons = '[' + sessionJson + ']';
-						Integer                                                      compression  = connectionInfo.compressionLevel == null ? QueryUtils.COMPRESSION_NONE : connectionInfo.compressionLevel;
+						Integer                                                      compression  = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
 						List<String /* JSON object */ >                              jsonObjStrs  = JsonUtils.parseJsonArray(sessionJsons);
 						List<Map<String /* column name */, String /* JSON value */>> list         = new ArrayList<>(jsonObjStrs.size());
 						for (String jsonObjStr : jsonObjStrs) {
@@ -755,7 +675,7 @@ public class DbRequestProcessor implements Runnable {
 					}
 				} else if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_GET_COOKIES) == 0) {
 					if (executeTypeQuery) { // Execute Query
-						Integer                                                      compression = connectionInfo.compressionLevel == null ? QueryUtils.COMPRESSION_NONE : connectionInfo.compressionLevel;
+						Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
 						List<String /* JSON object */ >                              jsonObjStrs = JsonUtils.parseJsonArray(cookiesJson);
 						List<Map<String /* column name */, String /* JSON value */>> list        = new ArrayList<>(jsonObjStrs.size());
 						for (String jsonObjStr : jsonObjStrs) {
@@ -776,218 +696,177 @@ public class DbRequestProcessor implements Runnable {
 						return;
 					}
 				} else {
+					if (debug) {
+						System.out.println("Statement was delegated to underlying database:");
+						System.out.println(unprocessedNamedPreparedStatement);
+					}
+					DbConnection dbConnection = connectionPoolManager.getConnection();
 					try {
-						if (connectionInfo.debug) {
-							System.out.println("Statement was delegated to underlying database:");
-							System.out.println(unprocessedNamedPreparedStatement);
-						}
-						PreparedStatement ps  = dbConnection.getPreparedStatement(preparedStatement);
-						ParameterMetaData pmd = ps.getParameterMetaData();
-						for (Map<String, Object> parametersMap : parametersListOfMaps) {
-							for (Map.Entry<String, Object> parameterMapEntry : parametersMap.entrySet()) {
-								String pname     = parameterMapEntry.getKey();
-								Object pvalueObj = parameterMapEntry.getValue();
-								String pvalue    = pvalueObj == null ? null : pvalueObj.toString();
+						Method method = CallUtils.getCallStatementMethod(unprocessedNamedPreparedStatement, proceduresMap);
+						if (method != null) {
+							if (executeTypeUpdate) {
+								int rowCount = 0;
+								for (Map<String, Object> parametersMap : parametersListOfMaps) {
+									List<Object> parameterValues = new ArrayList<>();
+									parameterValues.add(request);
+									parameterValues.add(dbConnection.getConnection());
+									CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+									method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
+									rowCount++;
+								}
+								bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
+							} else if (executeTypeQuery) {
+								Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
+								List<Object>        parameterValues = new ArrayList<>();
+								parameterValues.add(request);
+								parameterValues.add(dbConnection.getConnection());
+								CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+								try (ResultSet rs = (ResultSet) method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]))) {
+									Integer                                                        compression       = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+									List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+									List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
 
-								List<Integer /* index */> indexes = mapParams.get(pname);
-								if (indexes != null)
-									for (int n : indexes) {
-										int parameterType = pmd.getParameterType(n);
-										if (pvalue == null) // JavaScript null
-											ps.setNull(n, parameterType);
-										else {
-											if (parameterType == Types.SMALLINT) // JavaScript Number
-												ps.setShort(n, Short.parseShort(pvalue));
-											else if (parameterType == Types.INTEGER) // JavaScript Number
-												ps.setInt(n, Integer.parseInt(pvalue));
-											else if (parameterType == Types.BIGINT) // JavaScript Number
-												ps.setLong(n, Long.parseLong(pvalue));
-											else if (parameterType == Types.FLOAT) // JavaScript Number
-												ps.setFloat(n, Float.parseFloat(pvalue));
-											else if (parameterType == Types.DOUBLE) // JavaScript Number
-												ps.setDouble(n, Double.parseDouble(pvalue));
-											else if (parameterType == Types.BOOLEAN || parameterType == Types.BIT) // JavaScript Boolean
-												ps.setBoolean(n, Boolean.parseBoolean(pvalue));
-											else if (parameterType == Types.DATE) {
-												if (pvalue.contains("T")) { // JavaScript Date
-													Instant   instant = Instant.parse(pvalue);
-													Timestamp ts      = Timestamp.from(instant);
-													long      time    = ts.getTime();
-													ps.setDate(n, new Date(time));
-												} else if (pvalue.contains("-")) // JavaScript String
-													ps.setString(n, pvalue); // JavaScript Number
-												else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
-													ps.setDate(n, new Date(Long.parseLong(pvalue)));
-												else
-													ps.setString(n, pvalue);
-											} else if (parameterType == Types.TIME) {
-												if (pvalue.contains("T")) { // JavaScript Date
-													Instant   instant = Instant.parse(pvalue);
-													Timestamp ts      = Timestamp.from(instant);
-													ps.setTime(n, new Time(ts.getTime()));
-												} else if (pvalue.contains(":")) // JavaScript String
-													ps.setString(n, pvalue);
-												else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
-													ps.setTime(n, new Time(Long.parseLong(pvalue)));
-												else
-													ps.setString(n, pvalue);
-											} else if (parameterType == Types.TIMESTAMP) {
-												if (pvalue.contains("T")) { // JavaScript Date
-													Instant   instant = Instant.parse(pvalue);
-													Timestamp ts      = Timestamp.from(instant);
-													ps.setTimestamp(n, ts);
-												} else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
-													ps.setTime(n, new Time(Long.parseLong(pvalue)));
-												else
-													ps.setString(n, pvalue);
-											} else if (parameterType == Types.BINARY || parameterType == Types.VARBINARY || parameterType == Types.LONGVARBINARY) // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
-												ps.setBytes(n, sharedCoder.decoder.decode(pvalue));
-											else if (parameterType == Types.BLOB) { // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
-												Blob blob = ps.getConnection().createBlob();
-												blob.setBytes(1L, sharedCoder.decoder.decode(pvalue));
-												ps.setBlob(n, blob);
-											} else if (parameterType == Types.CLOB) { // JavaScript string stored in CLOB "AS IS" (as String)
-												Clob clob = ps.getConnection().createClob();
-												clob.setString(1L, pvalue);
-												ps.setClob(n, clob);
-											} else // unknown
-												ps.setString(n, pvalue);
-										}
-									}
-							}
-							if (executeTypeUpdate)
-								ps.addBatch();
-						}
-						//
-						if (executeTypeQuery) { // Execute Query
-							try (ResultSet rs = ps.executeQuery()) {
-								Integer                                                        compression       = connectionInfo.compressionLevel == null ? QueryUtils.COMPRESSION_NONE : connectionInfo.compressionLevel;
-								List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-								List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
-
-								ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-								bs         = rr.bs;
-								etag       = rr.etag;
-								compressed = rr.compressed;
-							} finally {
-								if (dbConnection != null)
-									connectionPoolManager.releaseConnection(dbConnection);
-							}
-
-						} else if (executeTypeUpdate) { // Execute Update
-							List<Map<String /* column name */, Object /* JSON value */>> gkList;
-							int[]                                                        rowCounts = ps.executeBatch();
-							try (ResultSet rsgk = ps.getGeneratedKeys()) {
-								if (rsgk == null)
-									gkList = Collections.emptyList();
-								else
-									gkList = QueryUtils.resutlSetToListOfMaps(rsgk);
-							} catch (Throwable e) {
-								e.printStackTrace();
-								gkList = Collections.emptyList();
-							} finally {
-								if (dbConnection != null)
-									connectionPoolManager.releaseConnection(dbConnection);
-							}
-
-							List<Map<String /* column name */, String /* JSON value */>> generatedKeys = QueryUtils.listOfMapsToListOfMapsJsonValues(gkList, sharedCoder.encoder);
-
-							//
-							// Build executeUpdate result JSON
-							//
-
-							StringBuilder resultSb = new StringBuilder();
-							resultSb.append('{');
-							resultSb.append(q("rowCount"));
-							resultSb.append(':');
-							resultSb.append(batch ? Arrays.toString(rowCounts).replace(" ", "") : Integer.toString(rowCounts[0])); // JavaScript array of numbers (batch) or number
-							resultSb.append(',');
-							resultSb.append(q("generatedKeys"));
-							resultSb.append(':');
-							resultSb.append(QueryUtils.convertToJsonArray(generatedKeys, resultSetFormat));
-							resultSb.append('}');
-
-							updateResultJson = resultSb.toString();
-							bs               = updateResultJson.getBytes(StandardCharsets.UTF_8);
-							//
-							//
-							if (!ongoingRequests.isEmpty()) {
-								long timestamp = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
-								for (AsyncContext ac : ongoingRequests) {
-									try {
-										HttpServletRequest selfRequest = (HttpServletRequest) ac.getRequest();
-
-										Collection<String /* Notifier stored procedure name */ > notifiers = notifiersMap.get(statementId);
-										if (notifiers != null) {
-
-											String selfClientInfoJson = getClientInfo(selfRequest, sharedCoder.decoder);
-
-											String selfUserInfoJson = generateUserInfoJson( //
-													selfRequest, //
-													selfClientInfoJson //
-											);
-
-											String statementInfoJson = generateStatementInfoJson( //
-													instanceName, //
-													statementId, //
-													unprocessedNamedPreparedStatement, //
-													paramJsonArray //
-											);
-
-											String executionResultJson = generateExecutionResultJson( //
-													timestamp, //
-													updateResultJson);
-
-											for (String notifierStoredProcedureName : notifiers) {
-
-												String       outEvent      = null;
-												DbConnection dbConnection0 = null;
-												try {
-													dbConnection0 = connectionPoolManager.getConnection();
-													String javaMethod = proceduresMap.get(notifierStoredProcedureName);
-													if (javaMethod == null) {
-														CallableStatement cs = dbConnection0.getCallableStatement("{call " + notifierStoredProcedureName + "(?,?,?,?)}");
-														cs.setString(1, userInfoJson);
-														cs.setString(2, selfUserInfoJson);
-														cs.setString(3, statementInfoJson);
-														cs.setString(4, executionResultJson);
-
-														try (ResultSet rs = cs.executeQuery()) {
-															if (rs.next())
-																outEvent = rs.getString(1);
-														}
-													} else {
-														String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
-														String   className  = array[0];
-														String   methodName = array[1];
-
-														Class<?> clazz        = Class.forName(className);
-														Method   notifyMethod = clazz.getMethod(methodName, Connection.class, String.class, String.class, String.class, String.class);
-														outEvent = (String) notifyMethod.invoke(null, selfRequest, dbConnection0.getConnection(), userInfoJson, selfUserInfoJson, statementInfoJson, executionResultJson);
-													}
-												} finally {
-													if (dbConnection0 != null)
-														connectionPoolManager.releaseConnection(dbConnection0);
-													if (outEvent != null) { // send if outEvent is not null
-														Writer writer = ac.getResponse().getWriter();
-														writer.append(outEvent + '\n');
-														writer.flush();
-														if (connectionInfo.debug) {
-															System.out.println("Event was delivered to client:");
-															System.out.println(outEvent);
-														}
-													}
-												}
-											}
-										}
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
+									ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+									bs         = rr.bs;
+									etag       = rr.etag;
+									compressed = rr.compressed;
+								} finally {
+									if (dbConnection != null)
+										connectionPoolManager.releaseConnection(dbConnection);
 								}
 							}
+						} else {
+							PreparedStatement ps  = dbConnection.getPreparedStatement(preparedStatement);
+							ParameterMetaData pmd = ps.getParameterMetaData();
+							for (Map<String, Object> parametersMap : parametersListOfMaps) {
+								for (Map.Entry<String, Object> parameterMapEntry : parametersMap.entrySet()) {
+									String pname     = parameterMapEntry.getKey();
+									Object pvalueObj = parameterMapEntry.getValue();
+									String pvalue    = pvalueObj == null ? null : pvalueObj.toString();
 
-						} else
-							throw new IllegalArgumentException(execType);
+									List<Integer /* index */> indexes = mapParams.get(pname);
+									if (indexes != null)
+										for (int n : indexes) {
+											int parameterType = pmd.getParameterType(n);
+											if (pvalue == null) // JavaScript null
+												ps.setNull(n, parameterType);
+											else {
+												if (parameterType == Types.SMALLINT) // JavaScript Number
+													ps.setShort(n, Short.parseShort(pvalue));
+												else if (parameterType == Types.INTEGER) // JavaScript Number
+													ps.setInt(n, Integer.parseInt(pvalue));
+												else if (parameterType == Types.BIGINT) // JavaScript Number
+													ps.setLong(n, Long.parseLong(pvalue));
+												else if (parameterType == Types.FLOAT) // JavaScript Number
+													ps.setFloat(n, Float.parseFloat(pvalue));
+												else if (parameterType == Types.DOUBLE) // JavaScript Number
+													ps.setDouble(n, Double.parseDouble(pvalue));
+												else if (parameterType == Types.BOOLEAN || parameterType == Types.BIT) // JavaScript Boolean
+													ps.setBoolean(n, Boolean.parseBoolean(pvalue));
+												else if (parameterType == Types.DATE) {
+													if (pvalue.contains("T")) { // JavaScript Date
+														Instant   instant = Instant.parse(pvalue);
+														Timestamp ts      = Timestamp.from(instant);
+														long      time    = ts.getTime();
+														ps.setDate(n, new Date(time));
+													} else if (pvalue.contains("-")) // JavaScript String
+														ps.setString(n, pvalue); // JavaScript Number
+													else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
+														ps.setDate(n, new Date(Long.parseLong(pvalue)));
+													else
+														ps.setString(n, pvalue);
+												} else if (parameterType == Types.TIME) {
+													if (pvalue.contains("T")) { // JavaScript Date
+														Instant   instant = Instant.parse(pvalue);
+														Timestamp ts      = Timestamp.from(instant);
+														ps.setTime(n, new Time(ts.getTime()));
+													} else if (pvalue.contains(":")) // JavaScript String
+														ps.setString(n, pvalue);
+													else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
+														ps.setTime(n, new Time(Long.parseLong(pvalue)));
+													else
+														ps.setString(n, pvalue);
+												} else if (parameterType == Types.TIMESTAMP) {
+													if (pvalue.contains("T")) { // JavaScript Date
+														Instant   instant = Instant.parse(pvalue);
+														Timestamp ts      = Timestamp.from(instant);
+														ps.setTimestamp(n, ts);
+													} else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
+														ps.setTime(n, new Time(Long.parseLong(pvalue)));
+													else
+														ps.setString(n, pvalue);
+												} else if (parameterType == Types.BINARY || parameterType == Types.VARBINARY || parameterType == Types.LONGVARBINARY) // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
+													ps.setBytes(n, sharedCoder.decoder.decode(pvalue));
+												else if (parameterType == Types.BLOB) { // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
+													Blob blob = ps.getConnection().createBlob();
+													blob.setBytes(1L, sharedCoder.decoder.decode(pvalue));
+													ps.setBlob(n, blob);
+												} else if (parameterType == Types.CLOB) { // JavaScript string stored in CLOB "AS IS" (as String)
+													Clob clob = ps.getConnection().createClob();
+													clob.setString(1L, pvalue);
+													ps.setClob(n, clob);
+												} else // unknown
+													ps.setString(n, pvalue);
+											}
+										}
+								}
+								if (executeTypeUpdate)
+									ps.addBatch();
+							}
+
+							if (executeTypeQuery) { // Execute Query
+								try (ResultSet rs = ps.executeQuery()) {
+									Integer                                                        compression       = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+									List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+									List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+
+									ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+									bs         = rr.bs;
+									etag       = rr.etag;
+									compressed = rr.compressed;
+								} finally {
+									if (dbConnection != null)
+										connectionPoolManager.releaseConnection(dbConnection);
+								}
+
+							} else if (executeTypeUpdate) { // Execute Update
+								List<Map<String /* column name */, Object /* JSON value */>> gkList;
+								int[]                                                        rowCounts = ps.executeBatch();
+								try (ResultSet rsgk = ps.getGeneratedKeys()) {
+									if (rsgk == null)
+										gkList = Collections.emptyList();
+									else
+										gkList = QueryUtils.resutlSetToListOfMaps(rsgk);
+								} catch (Throwable e) {
+									e.printStackTrace();
+									gkList = Collections.emptyList();
+								} finally {
+									if (dbConnection != null)
+										connectionPoolManager.releaseConnection(dbConnection);
+								}
+
+								List<Map<String /* column name */, String /* JSON value */>> generatedKeys = QueryUtils.listOfMapsToListOfMapsJsonValues(gkList, sharedCoder.encoder);
+
+								//
+								// Build executeUpdate result JSON
+								//
+
+								StringBuilder resultSb = new StringBuilder();
+								resultSb.append('{');
+								resultSb.append(q("rowCount"));
+								resultSb.append(':');
+								resultSb.append(batch ? Arrays.toString(rowCounts).replace(" ", "") : Integer.toString(rowCounts[0])); // JavaScript array of numbers (batch) or number
+								resultSb.append(',');
+								resultSb.append(q("generatedKeys"));
+								resultSb.append(':');
+								resultSb.append(QueryUtils.convertToJsonArray(generatedKeys, resultSetFormat));
+								resultSb.append('}');
+
+								updateResultJson = resultSb.toString();
+								bs               = updateResultJson.getBytes(StandardCharsets.UTF_8);
+							} else
+								throw new IllegalArgumentException(execType);
+						}
 					} catch (SQLException e) {
 						e.printStackTrace();
 						try (OutputStream os = response.getOutputStream()) {
@@ -1004,6 +883,78 @@ public class DbRequestProcessor implements Runnable {
 					} finally {
 						if (dbConnection != null)
 							connectionPoolManager.releaseConnection(dbConnection);
+					}
+
+					if (!ongoingRequests.isEmpty()) {
+						long timestamp = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
+						if (stmtExpose != null) {
+							String notifierStoredProcedureName = stmtExpose.trigger_after_procedure_name;
+							for (AsyncContext ac : ongoingRequests) {
+								try {
+									HttpServletRequest selfRequest = (HttpServletRequest) ac.getRequest();
+									if (notifierStoredProcedureName != null) {
+										String selfClientInfoJson = getClientInfo(selfRequest, sharedCoder.decoder);
+
+										String selfUserInfoJson = generateUserInfoJson( //
+												selfRequest, //
+												selfClientInfoJson //
+										);
+
+										String statementInfoJson = generateStatementInfoJson( //
+												instanceName, //
+												statementId, //
+												unprocessedNamedPreparedStatement, //
+												paramJsonArray //
+										);
+
+										String executionResultJson = generateExecutionResultJson( //
+												timestamp, //
+												updateResultJson);
+
+										String       outEvent      = null;
+										DbConnection dbConnection0 = null;
+										try {
+											dbConnection0 = connectionPoolManager.getConnection();
+											String javaMethod = proceduresMap.get(notifierStoredProcedureName);
+											if (javaMethod == null) {
+												CallableStatement cs = dbConnection0.getCallableStatement("{call " + notifierStoredProcedureName + "(?,?,?,?)}");
+												cs.setString(1, userInfoJson);
+												cs.setString(2, selfUserInfoJson);
+												cs.setString(3, statementInfoJson);
+												cs.setString(4, executionResultJson);
+
+												try (ResultSet rs = cs.executeQuery()) {
+													if (rs.next())
+														outEvent = rs.getString(1);
+												}
+											} else {
+												String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
+												String   className  = array[0];
+												String   methodName = array[1];
+
+												Class<?> clazz        = Class.forName(className);
+												Method   notifyMethod = clazz.getMethod(methodName, HttpServletRequest.class, Connection.class, String.class, String.class, String.class, String.class);
+												outEvent = (String) notifyMethod.invoke(null, selfRequest, dbConnection0.getConnection(), userInfoJson, selfUserInfoJson, statementInfoJson, executionResultJson);
+											}
+										} finally {
+											if (dbConnection0 != null)
+												connectionPoolManager.releaseConnection(dbConnection0);
+											if (outEvent != null) { // send if outEvent is not null
+												Writer writer = ac.getResponse().getWriter();
+												writer.append(outEvent + '\n');
+												writer.flush();
+												if (debug) {
+													System.out.println("Event was delivered to client:");
+													System.out.println(outEvent);
+												}
+											}
+										}
+									}
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						}
 					}
 				}
 			} else {

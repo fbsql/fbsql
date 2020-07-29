@@ -35,31 +35,30 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
-import org.fbsql.antlr4.generated.FbsqlParser.Declare_procedure_stmtContext;
+import org.fbsql.antlr4.generated.FbsqlParser.FileContext;
+import org.fbsql.servlet.StringUtils;
 
-public class ParseStmtDeclareProcedure {
+public class ParseStmtIncludeScriptFile {
 	/**
 	 * DECLARE PROCEDURE statement transfer object
 	 * Declare stored procedure or function (can be used only in «init.sql» script)
 	 */
-	public class StmtDeclareProcedure {
-		public String procedure;
-		public String javaMethod;
+	public class StmtIncludeScriptFile {
+		public String fileName;
 
 		@Override
 		public String toString() {
-			return "DeclareProcedure [procedure=" + procedure + ", javaMethod=" + javaMethod + "]";
+			return "StmtInclude [fileName=" + fileName + "]";
 		}
-
 	}
 
 	/**
-	 * StmtDeclareProcedure transfer object
+	 * StmtInclude transfer object
 	 */
-	private StmtDeclareProcedure st;
+	private StmtIncludeScriptFile st;
 
-	public ParseStmtDeclareProcedure() {
-		st = new StmtDeclareProcedure();
+	public ParseStmtIncludeScriptFile() {
+		st = new StmtIncludeScriptFile();
 	}
 
 	/**
@@ -70,29 +69,20 @@ public class ParseStmtDeclareProcedure {
 	 * @param sql
 	 * @return
 	 */
-	public StmtDeclareProcedure parse(String sql) {
+	public StmtIncludeScriptFile parse(String sql) {
 		Lexer       lexer  = new FbsqlLexer(CharStreams.fromString(sql));
 		FbsqlParser parser = new FbsqlParser(new CommonTokenStream(lexer));
-		ParseTree   tree   = parser.declare_procedure_stmt();
+		ParseTree   tree   = parser.include_script_file_stmt();
 
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
 
 			@Override
-			public void enterDeclare_procedure_stmt(Declare_procedure_stmtContext ctx) {
-				st.procedure  = ctx.getChild(2).getText();
-				st.javaMethod = ctx.getChild(4).getText();
-				st.javaMethod = st.javaMethod.substring(1, st.javaMethod.length() - 1);
+			public void enterFile(FileContext ctx) {
+				st.fileName = StringUtils.unquote(ctx.getText());
 			}
 		}, tree);
 
 		return st;
-	}
-
-	public static void main(String[] args) {
-		String                                         sql = "DECLARE PROCEDURE GET_EMPLOYEES FOR 'org.fbsql.examples.StoredProcedures::getEmployees';";
-		ParseStmtDeclareProcedure                      p   = new ParseStmtDeclareProcedure();
-		ParseStmtDeclareProcedure.StmtDeclareProcedure se  = p.parse(sql);
-		System.out.println(se);
 	}
 }
 
