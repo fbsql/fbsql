@@ -155,49 +155,61 @@ public class QueryUtils {
 				String columnName = entry.getKey();
 				Object value      = entry.getValue();
 
-				String svalue = null;
-				/* NULL */
-				if (value == null) // NULL
-					svalue = "null";
-				else if (value instanceof Blob) {
-					Blob   blob = (Blob) value;
-					byte[] bs   = blob.getBytes(1L, (int) blob.length());
-					svalue = "\"" + encoder.encodeToString(bs) + "\"";
-				}
-				/* BINARY, VARBINARY, LONGVARBINARY, BLOB */
-				else if (value instanceof byte[]) { // value returned as Base64 encoded string
-					byte[] bs = (byte[]) value;
-					svalue = "\"" + encoder.encodeToString(bs) + "\"";
-					/* CHAR, VARCHAR, CLOB && JSON */
-				} else if (value instanceof String) {
-					String strValue = ((String) value).trim();
-					/* JSON Types */
-					if ( //
-					(strValue.startsWith("{") && strValue.endsWith("}")) || // JSON Objecty
-							(strValue.startsWith("[") && strValue.endsWith("]")) || // JSON Array
-							(strValue.startsWith("\"") && strValue.endsWith("\"")) || // JSON String
-							(strValue.equals("null")) || // JSON null
-							(strValue.equals("true")) || // JSON true
-							(strValue.equals("false")) // JSON false
-					)
-						svalue = strValue;
-					/* CHAR, VARCHAR, CLOB etc. */
-					else
-						svalue = "\"" + value + "\"";
-					/* DATE, TIME, TIMESTAMP */
-				} else if (value instanceof Date || value instanceof Time || value instanceof Timestamp)
-					svalue = "\"" + value + "\"";
-				/* NUMBER, BOOLEAN, etc */
-				else if (value instanceof Number || value instanceof Boolean)
-					svalue = value.toString();
-				/* Other types */
-				else
-					svalue = "\"" + value.toString() + "\"";
+				String svalue = valueToJsonString(value, encoder);
 				jmap.put(columnName, svalue);
 			}
 			jlist.add(jmap);
 		}
 		return jlist;
+	}
+
+	/**
+	 * 
+	 * @param value
+	 * @param encoder
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String /* JSON value */ valueToJsonString(Object value, Base64.Encoder encoder) throws SQLException {
+		String svalue = null;
+		/* NULL */
+		if (value == null) // NULL
+			svalue = "null";
+		else if (value instanceof Blob) {
+			Blob   blob = (Blob) value;
+			byte[] bs   = blob.getBytes(1L, (int) blob.length());
+			svalue = "\"" + encoder.encodeToString(bs) + "\"";
+		}
+		/* BINARY, VARBINARY, LONGVARBINARY, BLOB */
+		else if (value instanceof byte[]) { // value returned as Base64 encoded string
+			byte[] bs = (byte[]) value;
+			svalue = "\"" + encoder.encodeToString(bs) + "\"";
+			/* CHAR, VARCHAR, CLOB && JSON */
+		} else if (value instanceof String) {
+			String strValue = ((String) value).trim();
+			/* JSON Types */
+			if ( //
+			(strValue.startsWith("{") && strValue.endsWith("}")) || // JSON Objecty
+					(strValue.startsWith("[") && strValue.endsWith("]")) || // JSON Array
+					(strValue.startsWith("\"") && strValue.endsWith("\"")) || // JSON String
+					(strValue.equals("null")) || // JSON null
+					(strValue.equals("true")) || // JSON true
+					(strValue.equals("false")) // JSON false
+			)
+				svalue = strValue;
+			/* CHAR, VARCHAR, CLOB etc. */
+			else
+				svalue = "\"" + value + "\"";
+			/* DATE, TIME, TIMESTAMP */
+		} else if (value instanceof Date || value instanceof Time || value instanceof Timestamp)
+			svalue = "\"" + value + "\"";
+		/* NUMBER, BOOLEAN, etc */
+		else if (value instanceof Number || value instanceof Boolean)
+			svalue = value.toString();
+		/* Other types */
+		else
+			svalue = "\"" + value.toString() + "\"";
+		return svalue;
 	}
 
 	/**

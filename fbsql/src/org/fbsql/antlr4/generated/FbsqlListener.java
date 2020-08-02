@@ -37,16 +37,6 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface FbsqlListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#fbsql_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterFbsql_stmt(FbsqlParser.Fbsql_stmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#fbsql_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitFbsql_stmt(FbsqlParser.Fbsql_stmtContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#native_sql}.
 	 * @param ctx the parse tree
 	 */
@@ -87,25 +77,25 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitTrigger_after_procedure_name(FbsqlParser.Trigger_after_procedure_nameContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#compression}.
+	 * Enter a parse tree produced by {@link FbsqlParser#compression_level}.
 	 * @param ctx the parse tree
 	 */
-	void enterCompression(FbsqlParser.CompressionContext ctx);
+	void enterCompression_level(FbsqlParser.Compression_levelContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#compression}.
+	 * Exit a parse tree produced by {@link FbsqlParser#compression_level}.
 	 * @param ctx the parse tree
 	 */
-	void exitCompression(FbsqlParser.CompressionContext ctx);
+	void exitCompression_level(FbsqlParser.Compression_levelContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#prefetch}.
+	 * Enter a parse tree produced by {@link FbsqlParser#prefetch_on_off}.
 	 * @param ctx the parse tree
 	 */
-	void enterPrefetch(FbsqlParser.PrefetchContext ctx);
+	void enterPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#prefetch}.
+	 * Exit a parse tree produced by {@link FbsqlParser#prefetch_on_off}.
 	 * @param ctx the parse tree
 	 */
-	void exitPrefetch(FbsqlParser.PrefetchContext ctx);
+	void exitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#statement_alias}.
 	 * @param ctx the parse tree
@@ -116,16 +106,6 @@ public interface FbsqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStatement_alias(FbsqlParser.Statement_aliasContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#expose_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterExpose_stmt(FbsqlParser.Expose_stmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#expose_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitExpose_stmt(FbsqlParser.Expose_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#procedure_name}.
 	 * @param ctx the parse tree
@@ -147,16 +127,6 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitJava_method_name(FbsqlParser.Java_method_nameContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#declare_procedure_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#declare_procedure_stmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_url}.
 	 * @param ctx the parse tree
 	 */
@@ -167,55 +137,55 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitJdbc_url(FbsqlParser.Jdbc_urlContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_user}.
+	 * Enter a parse tree produced by {@link FbsqlParser#user}.
 	 * @param ctx the parse tree
 	 */
-	void enterJdbc_user(FbsqlParser.Jdbc_userContext ctx);
+	void enterUser(FbsqlParser.UserContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#jdbc_user}.
+	 * Exit a parse tree produced by {@link FbsqlParser#user}.
 	 * @param ctx the parse tree
 	 */
-	void exitJdbc_user(FbsqlParser.Jdbc_userContext ctx);
+	void exitUser(FbsqlParser.UserContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_password}.
+	 * Enter a parse tree produced by {@link FbsqlParser#password}.
 	 * @param ctx the parse tree
 	 */
-	void enterJdbc_password(FbsqlParser.Jdbc_passwordContext ctx);
+	void enterPassword(FbsqlParser.PasswordContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#jdbc_password}.
+	 * Exit a parse tree produced by {@link FbsqlParser#password}.
 	 * @param ctx the parse tree
 	 */
-	void exitJdbc_password(FbsqlParser.Jdbc_passwordContext ctx);
+	void exitPassword(FbsqlParser.PasswordContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_properties}.
+	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_connection_properties}.
 	 * @param ctx the parse tree
 	 */
-	void enterJdbc_properties(FbsqlParser.Jdbc_propertiesContext ctx);
+	void enterJdbc_connection_properties(FbsqlParser.Jdbc_connection_propertiesContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#jdbc_properties}.
+	 * Exit a parse tree produced by {@link FbsqlParser#jdbc_connection_properties}.
 	 * @param ctx the parse tree
 	 */
-	void exitJdbc_properties(FbsqlParser.Jdbc_propertiesContext ctx);
+	void exitJdbc_connection_properties(FbsqlParser.Jdbc_connection_propertiesContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_driver}.
+	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_driver_class_name}.
 	 * @param ctx the parse tree
 	 */
-	void enterJdbc_driver(FbsqlParser.Jdbc_driverContext ctx);
+	void enterJdbc_driver_class_name(FbsqlParser.Jdbc_driver_class_nameContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#jdbc_driver}.
+	 * Exit a parse tree produced by {@link FbsqlParser#jdbc_driver_class_name}.
 	 * @param ctx the parse tree
 	 */
-	void exitJdbc_driver(FbsqlParser.Jdbc_driverContext ctx);
+	void exitJdbc_driver_class_name(FbsqlParser.Jdbc_driver_class_nameContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_driver_jar}.
+	 * Enter a parse tree produced by {@link FbsqlParser#jar_file}.
 	 * @param ctx the parse tree
 	 */
-	void enterJdbc_driver_jar(FbsqlParser.Jdbc_driver_jarContext ctx);
+	void enterJar_file(FbsqlParser.Jar_fileContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#jdbc_driver_jar}.
+	 * Exit a parse tree produced by {@link FbsqlParser#jar_file}.
 	 * @param ctx the parse tree
 	 */
-	void exitJdbc_driver_jar(FbsqlParser.Jdbc_driver_jarContext ctx);
+	void exitJar_file(FbsqlParser.Jar_fileContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#connection_pool_size_min}.
 	 * @param ctx the parse tree
@@ -237,15 +207,25 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitConnection_pool_size_max(FbsqlParser.Connection_pool_size_maxContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#debug}.
+	 * Enter a parse tree produced by {@link FbsqlParser#sql_script_file}.
 	 * @param ctx the parse tree
 	 */
-	void enterDebug(FbsqlParser.DebugContext ctx);
+	void enterSql_script_file(FbsqlParser.Sql_script_fileContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#debug}.
+	 * Exit a parse tree produced by {@link FbsqlParser#sql_script_file}.
 	 * @param ctx the parse tree
 	 */
-	void exitDebug(FbsqlParser.DebugContext ctx);
+	void exitSql_script_file(FbsqlParser.Sql_script_fileContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link FbsqlParser#cron_expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterCron_expression(FbsqlParser.Cron_expressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FbsqlParser#cron_expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitCron_expression(FbsqlParser.Cron_expressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#connect_to_stmt}.
 	 * @param ctx the parse tree
@@ -257,15 +237,25 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitConnect_to_stmt(FbsqlParser.Connect_to_stmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#file}.
+	 * Enter a parse tree produced by {@link FbsqlParser#expose_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void enterFile(FbsqlParser.FileContext ctx);
+	void enterExpose_stmt(FbsqlParser.Expose_stmtContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#file}.
+	 * Exit a parse tree produced by {@link FbsqlParser#expose_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void exitFile(FbsqlParser.FileContext ctx);
+	void exitExpose_stmt(FbsqlParser.Expose_stmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link FbsqlParser#declare_procedure_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FbsqlParser#declare_procedure_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#include_script_file_stmt}.
 	 * @param ctx the parse tree
@@ -277,25 +267,15 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitInclude_script_file_stmt(FbsqlParser.Include_script_file_stmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#set_allow_login_if_exists}.
+	 * Enter a parse tree produced by {@link FbsqlParser#login_if_exists}.
 	 * @param ctx the parse tree
 	 */
-	void enterSet_allow_login_if_exists(FbsqlParser.Set_allow_login_if_existsContext ctx);
+	void enterLogin_if_exists(FbsqlParser.Login_if_existsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#set_allow_login_if_exists}.
+	 * Exit a parse tree produced by {@link FbsqlParser#login_if_exists}.
 	 * @param ctx the parse tree
 	 */
-	void exitSet_allow_login_if_exists(FbsqlParser.Set_allow_login_if_existsContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#cron_expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterCron_expression(FbsqlParser.Cron_expressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#cron_expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitCron_expression(FbsqlParser.Cron_expressionContext ctx);
+	void exitLogin_if_exists(FbsqlParser.Login_if_existsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#schedule_stmt}.
 	 * @param ctx the parse tree

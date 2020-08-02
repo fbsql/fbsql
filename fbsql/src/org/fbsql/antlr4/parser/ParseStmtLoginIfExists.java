@@ -38,7 +38,7 @@ import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
 
-public class ParseStmtSetAllowLoginIfExists {
+public class ParseStmtLoginIfExists {
 	/**
 	 * EXPOSE statement transfer object
 	 * Expose particular SQL statement to frontend (can be used only in «init.sql» script)
@@ -57,7 +57,7 @@ public class ParseStmtSetAllowLoginIfExists {
 	 */
 	private StmtSetAllowLoginIfExists st;
 
-	public ParseStmtSetAllowLoginIfExists() {
+	public ParseStmtLoginIfExists() {
 		st = new StmtSetAllowLoginIfExists();
 	}
 
@@ -72,7 +72,7 @@ public class ParseStmtSetAllowLoginIfExists {
 	public StmtSetAllowLoginIfExists parse(String sql) {
 		Lexer       lexer  = new FbsqlLexer(CharStreams.fromString(sql));
 		FbsqlParser parser = new FbsqlParser(new CommonTokenStream(lexer));
-		ParseTree   tree   = parser.set_allow_login_if_exists();
+		ParseTree   tree   = parser.login_if_exists();
 
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
 
@@ -89,15 +89,15 @@ public class ParseStmtSetAllowLoginIfExists {
 		return st;
 	}
 
-//	public static void main(String[] args) {
-//		String                                    sql = "EXPOSE  ( SELECT log AS x FROM t1 \n" +                                                         //
-//				"GROUP BY x /* aaaa */ \n" +                                                                                                             //
-//				"HAVING count(*) >= 4 \n" +                                                                                                              //
-//				"ORDER BY max(n) + 0 ) prefetch ON COMPRESSION BEST COMPRESSION TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
-//		ParseStmtSetAllowLoginIfExists            p   = new ParseStmtSetAllowLoginIfExists();
-//		ParseStmtSetAllowLoginIfExists.StmtExpose se  = p.parse(sql);
-//		System.out.println(se);
-//	}
+	//	public static void main(String[] args) {
+	//		String                                    sql = "EXPOSE  ( SELECT log AS x FROM t1 \n" +                                                         //
+	//				"GROUP BY x /* aaaa */ \n" +                                                                                                             //
+	//				"HAVING count(*) >= 4 \n" +                                                                                                              //
+	//				"ORDER BY max(n) + 0 ) prefetch ON COMPRESSION BEST COMPRESSION TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
+	//		ParseStmtSetAllowLoginIfExists            p   = new ParseStmtSetAllowLoginIfExists();
+	//		ParseStmtSetAllowLoginIfExists.StmtExpose se  = p.parse(sql);
+	//		System.out.println(se);
+	//	}
 }
 
 /*

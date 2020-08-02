@@ -43,13 +43,12 @@ import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Connect_to_stmtContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_maxContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_minContext;
-import org.fbsql.antlr4.generated.FbsqlParser.DebugContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driverContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driver_jarContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_passwordContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_propertiesContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Jar_fileContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_connection_propertiesContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driver_class_nameContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_urlContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_userContext;
+import org.fbsql.antlr4.generated.FbsqlParser.PasswordContext;
+import org.fbsql.antlr4.generated.FbsqlParser.UserContext;
 import org.fbsql.servlet.SqlParseUtils;
 import org.fbsql.servlet.StringUtils;
 
@@ -169,33 +168,28 @@ public class ParseStmtConnectTo {
 			}
 
 			@Override
-			public void enterJdbc_user(Jdbc_userContext ctx) {
+			public void enterUser(UserContext ctx) {
 				st.user = StringUtils.unquote(ctx.getText());
 			}
 
 			@Override
-			public void enterJdbc_password(Jdbc_passwordContext ctx) {
+			public void enterPassword(PasswordContext ctx) {
 				st.password = StringUtils.unquote(ctx.getText());
 			}
 
 			@Override
-			public void enterJdbc_driver(Jdbc_driverContext ctx) {
+			public void enterJdbc_driver_class_name(Jdbc_driver_class_nameContext ctx) {
 				st.driverClassName = StringUtils.unquote(ctx.getText());
 			}
 
 			@Override
-			public void enterJdbc_properties(Jdbc_propertiesContext ctx) {
+			public void enterJdbc_connection_properties(Jdbc_connection_propertiesContext ctx) {
 				st.jdbcPropertiesFile = StringUtils.unquote(ctx.getText());
 			}
 
 			@Override
-			public void enterJdbc_driver_jar(Jdbc_driver_jarContext ctx) {
+			public void enterJar_file(Jar_fileContext ctx) {
 				st.driverJars.add(StringUtils.unquote(ctx.getText()));
-			}
-
-			@Override
-			public void enterDebug(DebugContext ctx) {
-				st.debug = ctx.getText().equalsIgnoreCase(ctx.K_ON().getText());
 			}
 
 			@Override
@@ -238,7 +232,7 @@ public class ParseStmtConnectTo {
 	}
 
 	public static void main(String[] args) {
-		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DEBUG on DRIVER 'org.h2.Driver' PASSWORD 'ppp' USER uuu";
+		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DEBUG on DRIVER 'org.h2.Driver' CONNECTION POOL SIZE MIN 21 MAX 62 PASSWORD 'ppp' USER uuu DEBUG ON";
 		ParseStmtConnectTo p   = new ParseStmtConnectTo();
 		StmtConnectTo      se  = p.parse(null, sql);
 		System.out.println(se);

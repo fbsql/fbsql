@@ -39,9 +39,9 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
-import org.fbsql.antlr4.generated.FbsqlParser.CompressionContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Compression_levelContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
-import org.fbsql.antlr4.generated.FbsqlParser.PrefetchContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Prefetch_on_offContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Role_nameContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Statement_aliasContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Trigger_after_procedure_nameContext;
@@ -108,16 +108,16 @@ public class ParseStmtExpose {
 			}
 
 			@Override
-			public void enterPrefetch(PrefetchContext ctx) {
-				st.prefetch = ctx.getText().equalsIgnoreCase(ctx.K_ON().getText());
+			public void enterPrefetch_on_off(Prefetch_on_offContext ctx) {
+				st.prefetch = ctx.ON() != null;
 			}
 
 			@Override
-			public void enterCompression(CompressionContext ctx) {
-				if (ctx.getText().equalsIgnoreCase(ctx.K_BEST().getText() + ctx.K_COMPRESSION().getText()))
+			public void enterCompression_level(Compression_levelContext ctx) {
+				if (ctx.BEST() != null && ctx.COMPRESSION() != null)
 					st.compressionLevel = CompressionLevel.BEST_COMPRESSION;
-				else if (ctx.getText().equalsIgnoreCase(ctx.K_BEST().getText() + ctx.K_SPEED().getText()))
-					st.compressionLevel = CompressionLevel.BEST_COMPRESSION;
+				else if (ctx.BEST() != null && ctx.SPEED() != null)
+					st.compressionLevel = CompressionLevel.BEST_SPEED;
 				else
 					st.compressionLevel = CompressionLevel.NONE;
 			}
@@ -150,10 +150,10 @@ public class ParseStmtExpose {
 	}
 
 	public static void main(String[] args) {
-		String                     sql = "EXPOSE  ( SELECT log AS x FROM t1 \n" +                                                                        //
-				"GROUP BY x /* aaaa */ \n" +                                                                                                             //
-				"HAVING count(*) >= 4 \n" +                                                                                                              //
-				"ORDER BY max(n) + 0 ) prefetch ON COMPRESSION BEST COMPRESSION TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
+		String                     sql = "EXPOSE  ( SELECT log AS x FROM t1 \n" +                                                                  //
+				"GROUP BY x /* aaaa */ \n" +                                                                                                       //
+				"HAVING count(*) >= 4 \n" +                                                                                                        //
+				"ORDER BY max(n) + 0 ) PREFETCH ON COMPRESSION BEST SPEED TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
 		ParseStmtExpose            p   = new ParseStmtExpose();
 		ParseStmtExpose.StmtExpose se  = p.parse(sql);
 		System.out.println(se);

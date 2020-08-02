@@ -66,62 +66,47 @@ E-Mail: fbsql.team.team@gmail.com
 package org.fbsql.antlr4.generated;
 }
 
-fbsql_stmt
- :
- (
-   connect_to_stmt
- | declare_procedure_stmt
- | expose_stmt
- )
- ;
-
 /* keywords */
 
-K_EXPOSE      : E X P O S E;
-K_PREFETCH    : P R E F E T C H;
-K_ROLES       : R O L E S;
-K_TRIGGER     : T R I G G E R;
-K_BEFORE      : B E F O R E;
-K_AFTER       : A F T E R;
-K_AS          : A S;
-K_COMPRESSION : C O M P R E S S I O N;
-K_NONE        : N O N E;
-K_BEST        : B E S T;
-K_SPEED       : S P E E D;
-K_ON          : O N;
-K_OFF         : O F F;
+EXPOSE      : E X P O S E;
+PREFETCH    : P R E F E T C H;
+ROLES       : R O L E S;
+TRIGGER     : T R I G G E R;
+BEFORE      : B E F O R E;
+AFTER       : A F T E R;
+AS          : A S;
+COMPRESSION : C O M P R E S S I O N;
+NONE        : N O N E;
+BEST        : B E S T;
+SPEED       : S P E E D;
+ON          : O N;
+OFF         : O F F;
 
-K_DECLARE     : D E C L A R E;
-K_PROCEDURE   : P R O C E D U R E;
-K_FOR         : F O R;
+DECLARE     : D E C L A R E;
+PROCEDURE   : P R O C E D U R E;
+FOR         : F O R;
 
-K_CONNECT     : C O N N E C T;
-K_TO          : T O;
-K_USER        : U S E R;
-K_PASSWORD    : P A S S W O R D;
-K_PROPERTIES  : P R O  P E R T I E S;
-K_DRIVER      : D R I V E R;
-K_JAR         : J A R;
-K_FILES       : F I L E S;
-K_CONNECTION  : C O N N E C T I O N;
-K_POOL        : P O O L;
-K_SIZE        : S I Z E;
-K_MIN         : M I N;
-K_MAX         : M A X;
-K_DEBUG       : D E B U G;
+CONNECT     : C O N N E C T;
+TO          : T O;
+USER        : U S E R;
+PASSWORD    : P A S S W O R D;
+PROPERTIES  : P R O  P E R T I E S;
+DRIVER      : D R I V E R;
+LIB         : L I B;
+CONNECTION  : C O N N E C T I O N;
+POOL        : P O O L;
+MIN         : M I N;
+MAX         : M A X;
 
-K_SET         : S E T;
-K_ALLOW       : A L L O W;
-K_LOGIN       : L O G I N;
-K_IF          : I F;
-K_EXISTS      : E X I S T S;
+LOGIN       : L O G I N;
+IF          : I F;
+EXISTS      : E X I S T S;
 
-K_SCHEDULE    : S C H E D U L E;
-K_AT          : A T;
+SCHEDULE    : S C H E D U L E;
+AT          : A T;
 
-K_INCLUDE     : I N C L U D E;
-K_SCRIPT      : S C R I P T;
-K_FILE        : F I L E;
+INCLUDE     : I N C L U D E;
+FILE        : F I L E;
 
 native_sql
  : .*?
@@ -140,33 +125,20 @@ trigger_after_procedure_name
  : IDENTIFIER
  ;
 
-compression
- : K_NONE
- | K_BEST K_COMPRESSION
- | K_BEST K_SPEED
+compression_level
+ : NONE
+ | BEST COMPRESSION
+ | BEST SPEED
  ;
 
-prefetch
- : K_ON
- | K_OFF
+prefetch_on_off
+ : ON
+ | OFF
  ;
 
 statement_alias
  : IDENTIFIER
  | STRING_LITERAL
- ;
-
-expose_stmt
- : K_EXPOSE
-   '(' native_sql ')'
-   (
-    ( K_PREFETCH prefetch) |
-    ( K_COMPRESSION compression) |
-    ( K_ROLES '(' role_name ( ',' role_name )* ')' ) |
-    ( K_TRIGGER K_BEFORE trigger_before_procedure_name ) |
-    ( K_TRIGGER K_AFTER trigger_after_procedure_name )
-   )*
-   K_AS? statement_alias?
  ;
 
 procedure_name
@@ -178,31 +150,28 @@ java_method_name
  : STRING_LITERAL
  ;
 
-declare_procedure_stmt
- : K_DECLARE K_PROCEDURE procedure_name K_FOR java_method_name
- ;
-
 jdbc_url // JDBC URL
  : STRING_LITERAL
  ;
 
-jdbc_user // JDBC username
+user // JDBC username
  : IDENTIFIER
  | STRING_LITERAL
  ;
 
-jdbc_password // JDBC user password
+password // JDBC user password
  :STRING_LITERAL
  ;
 
-jdbc_properties // JDBC connection properties
- : STRING_LITERAL
- ;
-jdbc_driver // JDBC driver class name
+jdbc_connection_properties // JDBC connection properties
  : STRING_LITERAL
  ;
 
-jdbc_driver_jar
+jdbc_driver_class_name // JDBC driver class name
+ : STRING_LITERAL
+ ;
+
+jar_file
  : STRING_LITERAL
  ;
 
@@ -214,44 +183,59 @@ connection_pool_size_max
  : NUMERIC_LITERAL
  ;
 
-debug
- : K_ON
- | K_OFF
- ;
-
-connect_to_stmt
- : K_CONNECT K_TO jdbc_url
-   (
-    (K_USER jdbc_user) |
-    (K_PASSWORD jdbc_password) |
-    (K_PROPERTIES jdbc_properties) |
-    (K_DRIVER jdbc_driver) |
-    (K_JAR K_FILES '(' jdbc_driver_jar ( ',' jdbc_driver_jar )* ')') |
-    (K_CONNECTION K_POOL K_SIZE K_MIN connection_pool_size_min) | 
-    (K_CONNECTION K_POOL K_SIZE K_MAX connection_pool_size_max) |
-    (K_DEBUG debug)
-   )*
- ;
-
-file // file name
+sql_script_file // file name
  : STRING_LITERAL
- ;
-
-include_script_file_stmt
- : K_INCLUDE K_SCRIPT K_FILE file
- ;
-
-set_allow_login_if_exists
- : K_SET K_ALLOW K_LOGIN K_IF K_EXISTS
-   '(' native_sql ')'
  ;
 
 cron_expression
  : STRING_LITERAL
  ;
 
+connect_to_stmt
+ : CONNECT TO jdbc_url
+   (
+    (USER user) |
+    (PASSWORD password) |
+    (PROPERTIES jdbc_connection_properties) |
+    (DRIVER jdbc_driver_class_name) |
+    (LIB jar_file ( ',' jar_file )* ) |
+    (CONNECTION POOL
+     (
+      (MIN connection_pool_size_min) |
+      (MAX connection_pool_size_max)
+     )+
+    )
+   )*
+ ;
+
+expose_stmt
+ : EXPOSE
+   '(' native_sql ')'
+   (
+    ( PREFETCH prefetch_on_off) |
+    ( COMPRESSION compression_level) |
+    ( ROLES '(' role_name ( ',' role_name )* ')' ) |
+    ( TRIGGER BEFORE trigger_before_procedure_name ) |
+    ( TRIGGER AFTER trigger_after_procedure_name )
+   )*
+   AS? statement_alias?
+ ;
+
+declare_procedure_stmt
+ : DECLARE PROCEDURE procedure_name FOR java_method_name
+ ;
+
+include_script_file_stmt
+ : INCLUDE sql_script_file ( ',' sql_script_file )*
+ ;
+
+login_if_exists
+ : LOGIN IF EXISTS
+   '(' native_sql ')'
+ ;
+
 schedule_stmt
- : K_SCHEDULE procedure_name K_AT cron_expression
+ : SCHEDULE procedure_name AT cron_expression
  ;
 
 /* Developed by : Bart Kiers, bart@big-o.nl */

@@ -53,23 +53,17 @@ Work (secure) with your backend database within HTML<br>
 <h2>Table of Contents</h2>
 <ul>
 <li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Basic example</a></li>
-<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of SET ALLOW LOGIN statement.">Authentication</a></li>
-<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of SET ALLOW LOGIN statement.">Authorization</a></li>
-<li><a href="#secure_our_backend_with_whitelists" title="How to secure our backend with whitelists with ADD WHITELIST statement.">Whitelists</a></li>
+<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
+<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
+<li><a href="#secure_our_backend_with_expose_statement" title="How to secure our backend with EXPOSE statement.">Expose our database to frontend</a></li>
 <li><a href="#reference_statements_by_their_hash" title="How to reference statements by their SHA-256 hash.">Reference statements by their SHA-256 hash</a></li>
 <li><a href="#reference_statements_by_custom_names" title="How to use custom names as statements references.">Reference statements by name</a></li>
-<li><a href="#assign_statements_to_roles" title="How to limit statements by role and/or user with SET ALLOW STATEMENT statement.">Limit statements by role/user</a></li>
 <li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
 <li><a href="#parametrized_statements" title="How to use parametrized statements.">Parametrized statements</a></li>
 <li><a href="#batch_execution" title="How to use batch execution">Batch execution</a></li>
 <li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
-<li><a href="#session_management" title="How to manage your sessions (CREATE SESSION and INVALIDATE SESSION statements), access to session information (GET SESSION INFO statement), set and get custom attributes (SET SESSION ATTRIBUTES and GET SESSION ATTRIBUTES statements).">Session management</a></li>
-<li><a href="#cookies_management" title="How to manage your cookies (ADD COOKIES and GET COOKIES statements).">Cookies management</a></li>
 <li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
-<li><a href="#add_database_event_notifier" title="How to add database event notifier (ADD NOTIFIER statement).">Database event notification</a></li>
 <li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
-<li><a href="#global_request_validator" title="How to write and use global request validator (SET VALIDATOR statement).">Global request validator</a></li>
-<li><a href="#warmed_up_queries" title="How to use «warmed up» static queries with no interaction with underlying database.">Warming up your queries</a></li>
 <li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
 <li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
 </ul>
@@ -177,7 +171,7 @@ FBSQL JavaScript API (client) is self-hosted by FBSQL Server, so we need just pl
 <a id="add_simple_authentication"></a>
 <h2>Authentication</h2>
 <p><i>
-In this chapter we will learn how to add simple authentication and usage of SET ALLOW LOGIN statement.
+In this chapter we will learn how to add simple authentication and usage of LOGIN statement.
 </i></p>
 
 <strong>Backend:</strong><br>
@@ -311,10 +305,10 @@ SET ALLOW LOGIN IF EXISTS (
 </html>
 ```
 <hr>
-<a id="secure_our_backend_with_whitelists"></a>
-<h2>Whitelists</h2>
+<a id="secure_our_backend_with_expose_statement"></a>
+<h2>Expose our database to frontend</h2>
 <p><i>
-In this chapter we will learn how to secure our backend with whitelists with ADD WHITELIST statement.
+In this chapter we will learn how to secure our backend with EXPOSE statement statement.
 </i></p>
 
 <strong>Backend:</strong><br>
@@ -484,98 +478,7 @@ SELECT 'Hello, World!' AS HELLO;
     </body>
 </html>
 ```
-<hr>
-<a id="assign_statements_to_roles"></a>
-<h2>Limit statements by role/user</h2>
-<p><i>
-In this chapter we will learn how to limit statements by role and/or user with SET ALLOW STATEMENT statement.
-</i></p>
 
-FBSQL supports simple mechanism that helps assign particular SQL statements to specified roles.
-
-
-<strong>Backend:</strong><br>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
- */
-
-CONNECT TO 'jdbc:sqlite:sample';
-
-/*
- * Authenticaton and authorization. Implement your own authentication/authorization logic here!
- */
-
-DROP TABLE IF EXISTS USER_ROLES;
-DROP TABLE IF EXISTS USERS;
-
-CREATE TABLE IF NOT EXISTS USERS (
-    USERNAME VARCHAR(15) NOT NULL PRIMARY KEY,
-    PASSWORD VARCHAR(15) NOT NULL
-);
-
-INSERT INTO USERS (USERNAME, PASSWORD) VALUES('john',  'secret'   );
-INSERT INTO USERS (USERNAME, PASSWORD) VALUES('tim',   'secret123');
-INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
-
-CREATE TABLE IF NOT EXISTS USER_ROLES (
-    USERNAME VARCHAR(15) NOT NULL,
-    ROLE     VARCHAR(15) NOT NULL,
-    PRIMARY KEY (USERNAME, ROLE)
-);
-
-INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('john',  'manager'      );
-INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('tim',   'programmer'   );
-INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
-
-CREATE TABLE IF NOT EXISTS STATEMENTS_ROLES (
-    STATEMENT VARCHAR(128) NOT NULL,
-    ROLE      VARCHAR(15) NOT NULL,
-    PRIMARY KEY (STATEMENT, ROLE)
-);
-INSERT INTO STATEMENTS_ROLES (STATEMENT, ROLE) VALUES('myHello', 'manager');
-
-/*
- * Authenticate and authorize by user, password and role
- */
-
-SET ALLOW LOGIN IF EXISTS (
-    SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
-        SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role
-    )
-);
-
-/*
- * Allow particular statements to specified roles
- */
-SET ALLOW STATEMENT IF EXISTS (
-    SELECT TRUE FROM STATEMENTS_ROLES WHERE STATEMENT=:statement_name AND ROLE=:role
-);
-
-```
-<strong>Frontend:</strong><br>
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            /* connector name: 'my-sqlite', user: 'john', password: 'secret', role: 'manager' */
-            const conn = new Connection('my-sqlite', 'john', 'secret', 'manager');
-            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
-            ps.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
-        </script>
-    </body>
-</html>
-```
 <hr>
 <a id="execute_query_and_execute_update"></a>
 <h2>Execute SQL statements</h2>
@@ -925,20 +828,6 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
     </body>
 </html>
 ```
-<hr>
-<a id="session_management"></a>
-<h2>Session management</h2>
-<p><i>
-In this chapter we will learn how to manage your sessions (CREATE SESSION and INVALIDATE SESSION statements), access to session information (GET SESSION INFO statement), set and get custom attributes (SET SESSION ATTRIBUTES and GET SESSION ATTRIBUTES statements).
-</i></p>
-
-
-<hr>
-<a id="cookies_management"></a>
-<h2>Cookies management</h2>
-<p><i>
-In this chapter we will learn how to manage your cookies (ADD COOKIES and GET COOKIES statements).
-</i></p>
 
 <hr>
 <a id="database_agnostic_stored_procedures"></a>
@@ -1057,47 +946,7 @@ public class StoredProcedures {
     </body>
 </html>
 ```
-<hr>
-<a id="add_database_event_notifier"></a>
-<h2>Database event notification</h2>
-<p><i>
-In this chapter we will learn how  to add database event notifier (ADD NOTIFIER statement).
-</i></p>
 
-<hr>
-<strong>Backend:</strong><br>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
- */
-
-CONNECT TO 'jdbc:sqlite:sample';
-
-DECLARE PROCEDURE MYNOTIFIER FOR "org.fbsql.examples.StoredProcedures::myNotifier";
-ADD NOTIFIER MYNOTIFIER TO "add_new_employee";
-
-```
-<strong>Frontend:</strong><br>
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection('my-sqlite');
-            conn.addDatabaseEventListener(event => console.log(event));
-        </script>
-    </body>
-</html>
-```
 <a id="schedule_periodic_jobs"></a>
 <h2>Schedule periodic jobs</h2>
 <p><i>
@@ -1366,140 +1215,6 @@ SCHEDULE PERIODICRUN AT "0/5 * * * * ?";
 
 ```
 
-<hr>
-<a id="global_request_validator"></a>
-<h2>Global request validator</h2>
-<p><i>
-In this chapter we will learn how to write and use global request validator (SET VALIDATOR statement).
-</i></p>
-
-<strong>Backend:</strong><br>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
- */
-
-CONNECT TO 'jdbc:sqlite:sample';
-
-DECLARE PROCEDURE MYVALIDATOR FOR "org.fbsql.examples.StoredProcedures::myValidator";
-SET VALIDATOR MYVALIDATOR TO "add_new_employee";
-
-DROP TABLE IF EXISTS COUNTRIES;
-CREATE TABLE IF NOT EXISTS COUNTRIES (
-    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
-    COUNTRY_NAME VARCHAR(40) NOT NULL
-);
-
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('AU', 'Australia');
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
-
-```
-<strong>Frontend:</strong><br>
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection('my-sqlite');
-            
-            /* add new records */
-            const ps   = conn.prepareStatement("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES(:countryId, :countryName)");
-            ps.executeUpdate(
-            	[
-            		{countryId: 'IT', countryName: 'Italy'},
-            		{countryId: 'ES', countryName: 'Spain'},
-            	]
-            )
-            .then(result => alert(`${result.rowCount} records added`));
-        </script>
-    </body>
-</html>
-```
-<a id="warmed_up_queries"></a>
-<h2>Binary data</h2>
-<p><i>
-In this chapter we will learn how to work with warmed up queries.
-</i></p>
-
-<strong>Backend:</strong><br>
-
-```sql
-CONNECT TO 'jdbc:sqlite:sample';
-
-DROP TABLE IF EXISTS COUNTRIES;
-CREATE TABLE IF NOT EXISTS COUNTRIES (
-    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
-    COUNTRY_NAME VARCHAR(40) NOT NULL,
-    COUNTRY_FLAG BLOB
-);
-
-SET PREFETCH FOR SELECT * FROM COUNTRIES;
-
-```
-<strong>Frontend:</strong><br>
-
-```html
-
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
-    </head>
-
-    <body>
-        <img id="myImage"><br>
-        <input id="myInput" type="file" accept="image/*">
-
-        <script type="text/javascript">
-            let myImage = document.getElementById("myImage");
-            let myInput = document.getElementById("myInput");
-
-            const conn = new Connection('my-sqlite');
-            let psSelect = conn.prepareStatement("SELECT COUNTRY_FLAG FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
-            let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_FLAG = :country_flag WHERE COUNTRY_ID = 'AU'");
-
-            /* Load image from database */
-            psSelect.executeQuery()
-            .then(resultSet => {
-                let base64data = resultSet[0].COUNTRY_FLAG;
-                if (base64data != null)
-                    myImage.src = 'data:;base64,' + base64data;
-            });
-
-            /* Select new image */
-            myInput.onchange = function(event) {
-                var input = event.target;
-                var reader = new FileReader();
-                reader.onload = function() {
-                    /* Update image */
-                    psUpdate.executeUpdate({country_flag: reader.result})
-                    .then(result => {
-                        /* Load image from database */
-                        return psSelect.executeQuery();
-                    })
-                    .then(resultSet => {
-                        console.log(`${reader.result.byteLength} byte(s) stored in database as VARBINARY and readed back.`);
-                        let base64data = resultSet[0].COUNTRY_FLAG;
-                        if (base64data != null)
-                            myImage.src = 'data:;base64,' + base64data;
-                    });
-                };
-                reader.readAsArrayBuffer(input.files[0]);
-            };
-        </script>
-    </body>
-</html>
-```
 
 <a id="blob_type"></a>
 <h2>Binary data</h2>
@@ -1648,6 +1363,120 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME, COU
     </body>
 </html>
 ```
+https://github.com/GuntherRademacher/rr
+
+<h1>REFERENCE</h1>
+
+<h3>CONNECT TO</h3>
+
+```EBNF
+connect_to_stmt
+::= CONNECT TO jdbc_url
+   (
+    (USER user) |
+    (PASSWORD password) |
+    (PROPERTIES jdbc_connection_properties) |
+    (DRIVER jdbc_driver_class_name) |
+    (LIB jar_file ( ',' jar_file )* ) |
+    (CONNECTION POOL
+     (
+      (MIN connection_pool_size_min) |
+      (MAX connection_pool_size_max)
+     )+
+    )
+   )*
+ ;
+```
+<img src="connect_to_stmt.png"><br><br>
+<i>Examples</i><br>
+
+```sql
+CONNECT TO 'jdbc:sqlite:sample';
+```
+```sql
+CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
+      USER 'SA'
+  PASSWORD '';
+
+```
+```sql
+     CONNECT TO 'jdbc:as400://mysystem.helloworld.com/mylibrary;naming=system;errors=full'
+           USER 'QSECOFR'
+       PASSWORD 'MYSECRET'
+         DRIVER 'com.ibm.as400.access.AS400JDBCDriver'
+            LIB '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
+CONNECTION POOL MIN 50 MAX 1000;
+
+```
+
+<br><br>
+
+<h3>EXPOSE</h3>
+
+```EBNF
+expose_stmt
+::= EXPOSE
+   '(' native_sql ')'
+   (
+    ( PREFETCH prefetch_on_off) |
+    ( COMPRESSION compression_level) |
+    ( ROLES '(' role_name ( ',' role_name )* ')' ) |
+    ( TRIGGER BEFORE trigger_before_procedure_name ) |
+    ( TRIGGER AFTER trigger_after_procedure_name )
+   )*
+   AS? statement_alias?
+ ;
+```
+
+<img src="expose_stmt.png"><br><br>
+<i>Examples</i><br>
+
+```sql
+EXPOSE (SELECT * FROM COUNRIES) PREFETCH ON AS COUNTRIES_LIST
+
+```
+<h3>DECLARE PROCEDURE</h3>
+
+```EBNF
+declare_procedure_stmt
+ : DECLARE PROCEDURE procedure_name FOR java_method_name
+ ;
+```
+<img src="declare_procedure_stmt.png">
+<br><br>
+
+
+
+<h3>INCLUDE</h3>
+
+```EBNF
+include_script_file_stmt
+ : INCLUDE sql_script_file ( ',' sql_script_file )*
+ ;
+```
+<img src="include_script_file_stmt.png">
+
+
+<h3>LOGIN</h3>
+
+```EBNF
+login_if_exists
+ : LOGIN IF EXISTS
+   '(' native_sql ')'
+ ;
+```
+<img src="login_if_exists.png">
+
+<h3>SCHEDULE</h3>
+
+```EBNF
+schedule_stmt
+ : SCHEDULE procedure_name AT cron_expression
+ ;
+
+
+```
+<img src="schedule_stmt.png">
 
 <h3>Contacts and support:</h3>
 <ul>

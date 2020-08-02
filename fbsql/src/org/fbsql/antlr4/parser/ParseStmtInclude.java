@@ -27,6 +27,9 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.antlr4.parser;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
@@ -35,30 +38,31 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
-import org.fbsql.antlr4.generated.FbsqlParser.FileContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Sql_script_fileContext;
 import org.fbsql.servlet.StringUtils;
 
-public class ParseStmtIncludeScriptFile {
+public class ParseStmtInclude {
 	/**
 	 * DECLARE PROCEDURE statement transfer object
 	 * Declare stored procedure or function (can be used only in «init.sql» script)
 	 */
-	public class StmtIncludeScriptFile {
-		public String fileName;
+	public class StmtInclude {
+		public List<String> fileNames;
 
 		@Override
 		public String toString() {
-			return "StmtInclude [fileName=" + fileName + "]";
+			return "StmtIncludeScriptFile [fileNames=" + fileNames + "]";
 		}
 	}
 
 	/**
 	 * StmtInclude transfer object
 	 */
-	private StmtIncludeScriptFile st;
+	private StmtInclude st;
 
-	public ParseStmtIncludeScriptFile() {
-		st = new StmtIncludeScriptFile();
+	public ParseStmtInclude() {
+		st = new StmtInclude();
+		st.fileNames = new ArrayList<>();
 	}
 
 	/**
@@ -69,7 +73,7 @@ public class ParseStmtIncludeScriptFile {
 	 * @param sql
 	 * @return
 	 */
-	public StmtIncludeScriptFile parse(String sql) {
+	public StmtInclude parse(String sql) {
 		Lexer       lexer  = new FbsqlLexer(CharStreams.fromString(sql));
 		FbsqlParser parser = new FbsqlParser(new CommonTokenStream(lexer));
 		ParseTree   tree   = parser.include_script_file_stmt();
@@ -77,13 +81,22 @@ public class ParseStmtIncludeScriptFile {
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
 
 			@Override
-			public void enterFile(FileContext ctx) {
-				st.fileName = StringUtils.unquote(ctx.getText());
+			public void enterSql_script_file(Sql_script_fileContext ctx) {
+				st.fileNames.add(StringUtils.unquote(ctx.getText()));
 			}
+
 		}, tree);
 
 		return st;
 	}
+	
+		public static void main(String[] args) {
+			String                                    sql = "INCLUDE  'abc', '123', 'kk'";
+			ParseStmtInclude            p   = new ParseStmtInclude();
+			ParseStmtInclude.StmtInclude se  = p.parse(sql);
+			System.out.println(se);
+		}
+
 }
 
 /*

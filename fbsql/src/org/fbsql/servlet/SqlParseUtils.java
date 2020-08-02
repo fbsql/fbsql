@@ -36,6 +36,7 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -49,10 +50,10 @@ import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure;
 import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure.StmtDeclareProcedure;
 import org.fbsql.antlr4.parser.ParseStmtExpose;
 import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
-import org.fbsql.antlr4.parser.ParseStmtIncludeScriptFile;
+import org.fbsql.antlr4.parser.ParseStmtInclude;
+import org.fbsql.antlr4.parser.ParseStmtLoginIfExists;
 import org.fbsql.antlr4.parser.ParseStmtScheduleAt;
 import org.fbsql.antlr4.parser.ParseStmtScheduleAt.StmtScheduleAt;
-import org.fbsql.antlr4.parser.ParseStmtSetAllowLoginIfExists;
 import org.h2.util.ScriptReader;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -77,26 +78,7 @@ public class SqlParseUtils {
 	public static final String SPECIAL_STATEMENT_SCHEDULE                  = canonizeSql("SCHEDULE");                  // Add scheduled stored procedure (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_EXPOSE                    = canonizeSql("EXPOSE");                    // Expose corresponding native SQL statement to frontend
 	public static final String SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS = canonizeSql("SET ALLOW LOGIN IF EXISTS"); // Authenticate/Authorize users (can be used only in «init.sql» script)
-
-	/**
-	 * Special FBSQL statements that
-	 * can be used only in frontend
-	 */
-	public static final String SPECIAL_STATEMENT_CREATE_SESSION         = "CREATE SESSION";         // Session management: Create session
-	public static final String SPECIAL_STATEMENT_INVALIDATE_SESSION     = "INVALIDATE SESSION";     // Session management: Invalidate session
-	public static final String SPECIAL_STATEMENT_GET_SESSION_INFO       = "GET SESSION INFO";       // Session management: Get session information (session ID, creation time, last accessed time)
-	public static final String SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES = "SET SESSION ATTRIBUTES"; // Session management: Set custom session attributes
-	public static final String SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES = "GET SESSION ATTRIBUTES"; // Session management: Get custom session attributes
-	public static final String SPECIAL_STATEMENT_ADD_COOKIES            = "ADD COOKIES";            // Add cookies
-	public static final String SPECIAL_STATEMENT_GET_COOKIES            = "GET COOKIES";            // Get cookies
-
-	private static final String[] SPECIAL_CLIENT_STATEMENTS = { //
-			SPECIAL_STATEMENT_CREATE_SESSION, //
-			SPECIAL_STATEMENT_INVALIDATE_SESSION, //
-			SPECIAL_STATEMENT_GET_SESSION_INFO, //
-			SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES, //
-			SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES //
-	};
+	public static final String SPECIAL_STATEMENT_INCLUDE                   = canonizeSql("INCLUDE");                   // Include script file(s) (can be used only in «init.sql» script)
 
 	/**
 	 * SQL statement separator: «;»
@@ -223,7 +205,7 @@ public class SqlParseUtils {
 		sql = sql.replace('\r', ' ');
 		sql = processStatement(sql);
 
-		return new ParseStmtSetAllowLoginIfExists().parse(sql).authenticationQuery;
+		return new ParseStmtLoginIfExists().parse(sql).authenticationQuery;
 	}
 
 	/**
@@ -651,29 +633,19 @@ public class SqlParseUtils {
 		List<String /* SQL statements */> initList = parseSqlFile(path);
 		for (String statement : initList) {
 			String statementUpperCase = statement.toUpperCase(Locale.ENGLISH);
-			if (statementUpperCase.startsWith("INCLUDE")) {
-				String fileName = new ParseStmtIncludeScriptFile().parse(statement).fileName;
-				if (fileName.startsWith("/"))
-					path = Paths.get(fileName);
-				else
-					path = Paths.get(path.getParent().toString(), fileName);
-				if (Files.exists(path))
-					processIncludes(path, list); // recursive call
+			if (statementUpperCase.startsWith(SPECIAL_STATEMENT_INCLUDE)) {
+				List<String> fileNames = new ParseStmtInclude().parse(statement).fileNames;
+				for (String fileName : fileNames) {
+					if (fileName.startsWith("/"))
+						path = Paths.get(fileName);
+					else
+						path = Paths.get(path.getParent().toString(), fileName);
+					if (Files.exists(path))
+						processIncludes(path, list); // recursive call
+				}
 			} else
 				list.add(statement);
 		}
-	}
-
-	/**
-	 * 
-	 * @param s
-	 * @return
-	 */
-	public static boolean isSpecialClientStatement(String s) {
-		for (String st : SPECIAL_CLIENT_STATEMENTS)
-			if (indexOf(s, st) == 0)
-				return true;
-		return false;
 	}
 
 	/**

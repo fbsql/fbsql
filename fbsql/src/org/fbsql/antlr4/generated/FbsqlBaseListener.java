@@ -45,18 +45,6 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFbsql_stmt(FbsqlParser.Fbsql_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFbsql_stmt(FbsqlParser.Fbsql_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterNative_sql(FbsqlParser.Native_sqlContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -105,25 +93,25 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCompression(FbsqlParser.CompressionContext ctx) { }
+	@Override public void enterCompression_level(FbsqlParser.Compression_levelContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCompression(FbsqlParser.CompressionContext ctx) { }
+	@Override public void exitCompression_level(FbsqlParser.Compression_levelContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrefetch(FbsqlParser.PrefetchContext ctx) { }
+	@Override public void enterPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrefetch(FbsqlParser.PrefetchContext ctx) { }
+	@Override public void exitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -136,18 +124,6 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitStatement_alias(FbsqlParser.Statement_aliasContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterExpose_stmt(FbsqlParser.Expose_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExpose_stmt(FbsqlParser.Expose_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -177,18 +153,6 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterJdbc_url(FbsqlParser.Jdbc_urlContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -201,61 +165,61 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJdbc_user(FbsqlParser.Jdbc_userContext ctx) { }
+	@Override public void enterUser(FbsqlParser.UserContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJdbc_user(FbsqlParser.Jdbc_userContext ctx) { }
+	@Override public void exitUser(FbsqlParser.UserContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJdbc_password(FbsqlParser.Jdbc_passwordContext ctx) { }
+	@Override public void enterPassword(FbsqlParser.PasswordContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJdbc_password(FbsqlParser.Jdbc_passwordContext ctx) { }
+	@Override public void exitPassword(FbsqlParser.PasswordContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJdbc_properties(FbsqlParser.Jdbc_propertiesContext ctx) { }
+	@Override public void enterJdbc_connection_properties(FbsqlParser.Jdbc_connection_propertiesContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJdbc_properties(FbsqlParser.Jdbc_propertiesContext ctx) { }
+	@Override public void exitJdbc_connection_properties(FbsqlParser.Jdbc_connection_propertiesContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJdbc_driver(FbsqlParser.Jdbc_driverContext ctx) { }
+	@Override public void enterJdbc_driver_class_name(FbsqlParser.Jdbc_driver_class_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJdbc_driver(FbsqlParser.Jdbc_driverContext ctx) { }
+	@Override public void exitJdbc_driver_class_name(FbsqlParser.Jdbc_driver_class_nameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJdbc_driver_jar(FbsqlParser.Jdbc_driver_jarContext ctx) { }
+	@Override public void enterJar_file(FbsqlParser.Jar_fileContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJdbc_driver_jar(FbsqlParser.Jdbc_driver_jarContext ctx) { }
+	@Override public void exitJar_file(FbsqlParser.Jar_fileContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -285,13 +249,25 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDebug(FbsqlParser.DebugContext ctx) { }
+	@Override public void enterSql_script_file(FbsqlParser.Sql_script_fileContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDebug(FbsqlParser.DebugContext ctx) { }
+	@Override public void exitSql_script_file(FbsqlParser.Sql_script_fileContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCron_expression(FbsqlParser.Cron_expressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCron_expression(FbsqlParser.Cron_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -309,13 +285,25 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFile(FbsqlParser.FileContext ctx) { }
+	@Override public void enterExpose_stmt(FbsqlParser.Expose_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFile(FbsqlParser.FileContext ctx) { }
+	@Override public void exitExpose_stmt(FbsqlParser.Expose_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDeclare_procedure_stmt(FbsqlParser.Declare_procedure_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -333,25 +321,13 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSet_allow_login_if_exists(FbsqlParser.Set_allow_login_if_existsContext ctx) { }
+	@Override public void enterLogin_if_exists(FbsqlParser.Login_if_existsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSet_allow_login_if_exists(FbsqlParser.Set_allow_login_if_existsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterCron_expression(FbsqlParser.Cron_expressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCron_expression(FbsqlParser.Cron_expressionContext ctx) { }
+	@Override public void exitLogin_if_exists(FbsqlParser.Login_if_existsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
