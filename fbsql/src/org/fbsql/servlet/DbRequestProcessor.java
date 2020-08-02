@@ -54,6 +54,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Calendar;
 import java.util.Collection;
@@ -117,18 +118,18 @@ public class DbRequestProcessor implements Runnable {
 	 */
 	private static final String EXEC_TYPE_UPDATE = "U";
 
-	private static final String SESSION_ATTRIBUTE_SESSION_JSON = "SESSION_JSON";
-
 	/*
 	 * Built-in functions
 	 */
 
 	/* functions with parameter */
-	private static final String FUT_IN_ROLE                    = "IN_ROLE(";
-	private static final String FUT_GET_COOKIE                 = "COOKIE(";
-	private static final String FUT_GET_HTTP_HEADER_AS_CHAR    = "GET_HTTP_HEADER_AS_CHAR(";
-	private static final String FUT_GET_HTTP_HEADER_AS_DATE    = "GET_HTTP_HEADER_AS_DATE(";
-	private static final String FUT_GET_HTTP_HEADER_AS_INTEGER = "GET_HTTP_HEADER_AS_INTEGER(";
+	private static final String FUT_IN_ROLE                               = "IN_ROLE(";
+	private static final String FUT_GET_COOKIE                            = "COOKIE(";
+	private static final String FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR    = "GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR(";
+	private static final String FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER = "GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER(";
+	private static final String FUT_GET_HTTP_HEADER_AS_CHAR               = "GET_HTTP_HEADER_AS_CHAR(";
+	private static final String FUT_GET_HTTP_HEADER_AS_DATE               = "GET_HTTP_HEADER_AS_DATE(";
+	private static final String FUT_GET_HTTP_HEADER_AS_INTEGER            = "GET_HTTP_HEADER_AS_INTEGER(";
 
 	/* functions without parameters */
 	private static final String FUN_REMOTE_USER                       = "REMOTE_USER()";
@@ -136,7 +137,6 @@ public class DbRequestProcessor implements Runnable {
 	private static final String FUN_REMOTE_SESSION_ID                 = "REMOTE_SESSION_ID()";
 	private static final String FUN_REMOTE_SESSION_CREATION_TIME      = "REMOTE_SESSION_CREATION_TIME()";
 	private static final String FUN_REMOTE_SESSION_LAST_ACCESSED_TIME = "REMOTE_SESSION_LAST_ACCESSED_TIME()";
-	private static final String FUN_REMOTE_SESSION_ATTRIBUTES         = "REMOTE_SESSION_ATTRIBUTES()";
 	private static final String FUN_USER_INFO                         = "USER_INFO()";
 
 	private String       instanceName;
@@ -197,38 +197,19 @@ public class DbRequestProcessor implements Runnable {
 	 */
 	@Override
 	public void run() {
+		HttpServletRequest  request  = (HttpServletRequest) asyncContext.getRequest();
 		HttpServletResponse response = (HttpServletResponse) asyncContext.getResponse();
+
 		try {
-			HttpServletRequest request        = (HttpServletRequest) asyncContext.getRequest();
-			String             etagFromClient = request.getHeader("If-None-Match");
+			String etagFromClient = request.getHeader("If-None-Match");
 
-			String      remoteUser  = (String) request.getAttribute(DbServlet.REQUEST_ATTRIBUTE_USER);
-			String      remoteRole  = request.getHeader(DbServlet.CUSTOM_HTTP_HEADER_ROLE);
-			Cookie[]    cookies     = request.getCookies();
-			String      cookiesJson = getCookiesJson(cookies);
-			HttpSession session     = request.getSession(false);
-
-			String sessionId;
-			Long   sessionCreationTime;
-			Long   sessionLastAccessedTime;
-			String sessionAttributesJson;
-
-			if (session == null) {
-				sessionId               = null;
-				sessionCreationTime     = null;
-				sessionLastAccessedTime = null;
-				sessionAttributesJson   = null;
-			} else {
-				sessionId               = session.getId();
-				sessionCreationTime     = session.getCreationTime();
-				sessionLastAccessedTime = session.getLastAccessedTime();
-
-				sessionAttributesJson = (String) session.getAttribute(SESSION_ATTRIBUTE_SESSION_JSON);
-				if (sessionAttributesJson == null)
-					sessionAttributesJson = "{}";
-			}
-
+			String   remoteUser = (String) request.getAttribute(DbServlet.REQUEST_ATTRIBUTE_USER);
+			String   remoteRole = request.getHeader(DbServlet.CUSTOM_HTTP_HEADER_ROLE);
+			Cookie[] cookies    = request.getCookies();
 			//
+			HttpSession session = request.getSession();
+			//String      sessionAttributesJson = (String) session.getAttribute(instanceName);
+
 			boolean reject        = false;
 			String  rejectMessage = null;
 			String  rejectJson    = null;
@@ -242,9 +223,11 @@ public class DbRequestProcessor implements Runnable {
 			String              jsonStrFormat   = bodyMap.get("format");
 			Integer             resultSetFormat = JsonUtils.parseJsonInt(jsonStrFormat);
 			String              parameters      = bodyMap.get("parameters");
+			CharSequence        sessionInfoJson = generateSessionInfoJson(request, sharedCoder.encoder);
 			String              userInfoJson    = generateUserInfoJson(                                    //
 					request,                                                                               //
-					clientInfoJson                                                                         //
+					clientInfoJson,                                                                        //
+					sessionInfoJson                                                                        //
 			);
 
 			String updateResultJson = null;
@@ -345,8 +328,9 @@ public class DbRequestProcessor implements Runnable {
 							String javaMethod = proceduresMap.get(validatorStoredProcedureName);
 							if (javaMethod == null) {
 								CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
-								cs.setString(1, userInfoJson);
-								cs.setString(2, statementInfoJson);
+								cs.setString(1, instanceName);
+								cs.setString(2, userInfoJson);
+								cs.setString(3, statementInfoJson);
 
 								try (ResultSet rs = cs.executeQuery()) {
 									if (rs.next())
@@ -358,8 +342,8 @@ public class DbRequestProcessor implements Runnable {
 								String   methodName = array[1];
 
 								Class<?> clazz  = Class.forName(className);
-								Method   method = clazz.getMethod(methodName, HttpServletRequest.class, Connection.class, String.class, String.class);
-								modifiedParamsJson = (String) method.invoke(null, request, dbConnection0.getConnection(), userInfoJson, statementInfoJson);
+								Method   method = clazz.getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, Connection.class, String.class, String.class, String.class);
+								modifiedParamsJson = (String) method.invoke(null, request, response, dbConnection0.getConnection(), instanceName, userInfoJson, statementInfoJson);
 							}
 						} finally {
 							if (dbConnection0 != null)
@@ -403,10 +387,9 @@ public class DbRequestProcessor implements Runnable {
 			//
 			preparedStatement = preparedStatement.replace(FUN_REMOTE_USER, remoteUser == null ? SQL_NULL : SQL_QUOTE_CHAR + remoteUser + SQL_QUOTE_CHAR);
 			preparedStatement = preparedStatement.replace(FUN_REMOTE_ROLE, remoteRole == null ? SQL_NULL : SQL_QUOTE_CHAR + remoteRole + SQL_QUOTE_CHAR);
-			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_ID, sessionId == null ? SQL_NULL : SQL_QUOTE_CHAR + sessionId + SQL_QUOTE_CHAR);
-			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_CREATION_TIME, sessionCreationTime == null ? SQL_NULL : Long.toString(sessionCreationTime));
-			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_LAST_ACCESSED_TIME, sessionLastAccessedTime == null ? SQL_NULL : Long.toString(sessionLastAccessedTime));
-			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_ATTRIBUTES, sessionAttributesJson == null ? SQL_NULL : SQL_QUOTE_CHAR + sessionAttributesJson + SQL_QUOTE_CHAR);
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_ID, SQL_QUOTE_CHAR + session.getId() + SQL_QUOTE_CHAR);
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_CREATION_TIME, Long.toString(session.getCreationTime()));
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_LAST_ACCESSED_TIME, Long.toString(session.getLastAccessedTime()));
 			preparedStatement = preparedStatement.replace(FUN_USER_INFO, userInfoJson == null ? SQL_NULL : SQL_QUOTE_CHAR + userInfoJson + SQL_QUOTE_CHAR);
 
 			//
@@ -447,6 +430,38 @@ public class DbRequestProcessor implements Runnable {
 					}
 				}
 				preparedStatement = preparedStatement.substring(0, offset) + (value == null ? SQL_NULL : SQL_QUOTE_CHAR + value + SQL_QUOTE_CHAR) + preparedStatement.substring(pos1 + cookieName.length() + 3);
+			}
+
+			//
+			// Replace GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR() built-in function with value
+			//
+			while (true) {
+				int offset = SqlParseUtils.indexOf(preparedStatement, FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR);
+				if (offset == -1)
+					break;
+				int    pos1           = offset + FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR.length();
+				char   quote          = preparedStatement.charAt(pos1);                          // get single «'» or double «"» quote
+				String s              = preparedStatement.substring(pos1 + 1);
+				int    pos2           = s.indexOf(quote);
+				String attributeName  = s.substring(0, pos2);
+				Object attributeValue = session.getAttribute(attributeName);
+				preparedStatement = preparedStatement.substring(0, offset) + (attributeValue == null ? SQL_NULL : SQL_QUOTE_CHAR + attributeValue.toString() + SQL_QUOTE_CHAR) + preparedStatement.substring(pos1 + attributeName.length() + 3);
+			}
+
+			//
+			// Replace FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER() built-in function with value
+			//
+			while (true) {
+				int offset = SqlParseUtils.indexOf(preparedStatement, FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER);
+				if (offset == -1)
+					break;
+				int    pos1           = offset + FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER.length();
+				char   quote          = preparedStatement.charAt(pos1);                             // get single «'» or double «"» quote
+				String s              = preparedStatement.substring(pos1 + 1);
+				int    pos2           = s.indexOf(quote);
+				String attributeName  = s.substring(0, pos2);
+				Object attributeValue = session.getAttribute(attributeName);
+				preparedStatement = preparedStatement.substring(0, offset) + (attributeValue == null ? SQL_NULL : attributeValue.toString()) + preparedStatement.substring(pos1 + attributeName.length() + 3);
 			}
 
 			//
@@ -503,456 +518,272 @@ public class DbRequestProcessor implements Runnable {
 			byte[]      bs          = null;
 
 			if (readyResult == null) {
-				if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_CREATE_SESSION) == 0) {
-					if (executeTypeUpdate) { // Execute Update
-						int rowCount;
-						if (session == null) {
-							rowCount                = 1;
-							session                 = request.getSession();
-							sessionId               = session.getId();
-							sessionCreationTime     = session.getCreationTime();
-							sessionLastAccessedTime = session.getLastAccessedTime();
-						} else
-							rowCount = 0;
-
-						bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
-					} else {
-						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-						try (OutputStream os = response.getOutputStream()) {
-							os.write(("{" + q("message") + ":" + q(SqlParseUtils.SPECIAL_STATEMENT_CREATE_SESSION + " require PreparedStatement.executeUpdate() method") + "}").getBytes(StandardCharsets.UTF_8));
-							os.flush();
-						}
-						asyncContext.complete();
-						return;
-					}
-
-				} else if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_INVALIDATE_SESSION) == 0) {
-					if (executeTypeUpdate) { // Execute Update
-						int rowCount;
-						if (session == null)
-							rowCount = 0;
-						else {
-							rowCount = 1;
-							session.invalidate();
-						}
-						bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
-					} else {
-						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-						try (OutputStream os = response.getOutputStream()) {
-							os.write(("{" + q("message") + ":" + q(SqlParseUtils.SPECIAL_STATEMENT_INVALIDATE_SESSION + " require PreparedStatement.executeUpdate() method") + "}").getBytes(StandardCharsets.UTF_8));
-							os.flush();
-						}
-						asyncContext.complete();
-						return;
-					}
-
-				} else if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES) == 0) {
-					if (executeTypeUpdate) { // Execute Update
-						int rowCount;
-						if (session == null)
-							rowCount = 0;
-						else {
-							rowCount = 1;
-							session.setAttribute(SESSION_ATTRIBUTE_SESSION_JSON, paramJsons.get(0));
-						}
-						bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
-					} else {
-						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-						try (OutputStream os = response.getOutputStream()) {
-							os.write(("{" + q("message") + ":" + q(SqlParseUtils.SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES + " require PreparedStatement.executeUpdate() method") + "}").getBytes(StandardCharsets.UTF_8));
-							os.flush();
-						}
-						asyncContext.complete();
-						return;
-					}
-				} else if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES) == 0) {
-					if (executeTypeQuery) { // Execute Query
-						String sessionJson;
-						if (session == null)
-							sessionJson = "{}";
-						else {
-							sessionJson = (String) session.getAttribute(SESSION_ATTRIBUTE_SESSION_JSON);
-							if (sessionJson == null)
-								sessionJson = "{}";
-						}
-						String                                                       sessionJsons = '[' + sessionJson + ']';
-						Integer                                                      compression  = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
-						List<String /* JSON object */ >                              jsonObjStrs  = JsonUtils.parseJsonArray(sessionJsons);
-						List<Map<String /* column name */, String /* JSON value */>> list         = new ArrayList<>(jsonObjStrs.size());
-						for (String jsonObjStr : jsonObjStrs) {
-							Map<String /* column name */, String /* JSON value */> map = JsonUtils.parseJsonObject(jsonObjStr);
-							list.add(map);
-						}
-						ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-						bs         = rr.bs;
-						etag       = rr.etag;
-						compressed = rr.compressed;
-					} else {
-						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-						try (OutputStream os = response.getOutputStream()) {
-							os.write(("{" + q("message") + ":" + q(SqlParseUtils.SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES + " require PreparedStatement.executeQuery() method") + "}").getBytes(StandardCharsets.UTF_8));
-							os.flush();
-						}
-						asyncContext.complete();
-						return;
-					}
-				} else if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_GET_SESSION_INFO) == 0) {
-					if (executeTypeQuery) { // Execute Query
-						String sessionJson;
-						if (session == null)
-							sessionJson = "{}";
-						else {
-							sessionJson = '{' + //
-									q("SESSION_ID") + ':' + q(sessionId) + ',' + //
-									q("SESSION_CREATION_TIME") + ':' + sessionCreationTime + ',' + //
-									q("SESSION_LAST_ACCESSED_TIME") + ':' + sessionLastAccessedTime + //
-									'}';
-						}
-						String                                                       sessionJsons = '[' + sessionJson + ']';
-						Integer                                                      compression  = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
-						List<String /* JSON object */ >                              jsonObjStrs  = JsonUtils.parseJsonArray(sessionJsons);
-						List<Map<String /* column name */, String /* JSON value */>> list         = new ArrayList<>(jsonObjStrs.size());
-						for (String jsonObjStr : jsonObjStrs) {
-							Map<String /* column name */, String /* JSON value */> map = JsonUtils.parseJsonObject(jsonObjStr);
-							list.add(map);
-						}
-						ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-						bs         = rr.bs;
-						etag       = rr.etag;
-						compressed = rr.compressed;
-					} else {
-						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-						try (OutputStream os = response.getOutputStream()) {
-							os.write(("{" + q("message") + ":" + q(SqlParseUtils.SPECIAL_STATEMENT_GET_SESSION_INFO + " require PreparedStatement.executeQuery() method") + "}").getBytes(StandardCharsets.UTF_8));
-							os.flush();
-						}
-						asyncContext.complete();
-						return;
-					}
-				} else if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_ADD_COOKIES) == 0) {
-					if (executeTypeUpdate) { // Execute Update
-						for (String paramJson : paramJsons) {
-							Map<String, Object> map = (Map<String, Object>) JsonRhinoUtils.toObject(paramJson);
-
-							String  name     = (String) map.get("name");
-							String  value    = (String) map.get("value");
-							String  comment  = (String) map.get("comment");
-							String  domain   = (String) map.get("domain");
-							String  path     = (String) map.get("path");
-							Integer maxAge   = (Integer) map.get("maxAge");
-							Integer version  = (Integer) map.get("version");
-							Boolean secure   = (Boolean) map.get("secure");
-							Boolean httpOnly = (Boolean) map.get("httpOnly");
-
-							Cookie cookie = new Cookie(name, value);
-							if (comment != null)
-								cookie.setComment(comment);
-							if (domain != null)
-								cookie.setDomain(domain);
-							if (path != null)
-								cookie.setPath(path);
-							if (maxAge != null)
-								cookie.setMaxAge(maxAge);
-							if (version != null)
-								cookie.setVersion(version);
-							if (secure != null)
-								cookie.setSecure(secure);
-							if (httpOnly != null)
-								cookie.setHttpOnly(httpOnly);
-
-							response.addCookie(cookie);
-						}
-						int rowCount = paramJsons.size();
-						bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
-					} else {
-						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-						try (OutputStream os = response.getOutputStream()) {
-							os.write(("{" + q("message") + ":" + q(SqlParseUtils.SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES + " require PreparedStatement.executeUpdate() method") + "}").getBytes(StandardCharsets.UTF_8));
-							os.flush();
-						}
-						asyncContext.complete();
-						return;
-					}
-				} else if (SqlParseUtils.indexOf(preparedStatement, SqlParseUtils.SPECIAL_STATEMENT_GET_COOKIES) == 0) {
-					if (executeTypeQuery) { // Execute Query
-						Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
-						List<String /* JSON object */ >                              jsonObjStrs = JsonUtils.parseJsonArray(cookiesJson);
-						List<Map<String /* column name */, String /* JSON value */>> list        = new ArrayList<>(jsonObjStrs.size());
-						for (String jsonObjStr : jsonObjStrs) {
-							Map<String /* column name */, String /* JSON value */> map = JsonUtils.parseJsonObject(jsonObjStr);
-							list.add(map);
-						}
-						ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-						bs         = rr.bs;
-						etag       = rr.etag;
-						compressed = rr.compressed;
-					} else {
-						response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-						try (OutputStream os = response.getOutputStream()) {
-							os.write(("{" + q("message") + ":" + q(SqlParseUtils.SPECIAL_STATEMENT_GET_SESSION_INFO + " require PreparedStatement.executeQuery() method") + "}").getBytes(StandardCharsets.UTF_8));
-							os.flush();
-						}
-						asyncContext.complete();
-						return;
-					}
-				} else {
-					if (debug) {
-						System.out.println("Statement was delegated to underlying database:");
-						System.out.println(unprocessedNamedPreparedStatement);
-					}
-					DbConnection dbConnection = connectionPoolManager.getConnection();
-					try {
-						Method method = CallUtils.getCallStatementMethod(unprocessedNamedPreparedStatement, proceduresMap);
-						if (method != null) {
-							if (executeTypeUpdate) {
-								int rowCount = 0;
-								for (Map<String, Object> parametersMap : parametersListOfMaps) {
-									List<Object> parameterValues = new ArrayList<>();
-									parameterValues.add(request);
-									parameterValues.add(dbConnection.getConnection());
-									CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
-									method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
-									rowCount++;
-								}
-								bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
-							} else if (executeTypeQuery) {
-								Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
-								List<Object>        parameterValues = new ArrayList<>();
-								parameterValues.add(request);
-								parameterValues.add(dbConnection.getConnection());
-								CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
-								try (ResultSet rs = (ResultSet) method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]))) {
-									Integer                                                        compression       = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
-									List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-									List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
-
-									ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-									bs         = rr.bs;
-									etag       = rr.etag;
-									compressed = rr.compressed;
-								} finally {
-									if (dbConnection != null)
-										connectionPoolManager.releaseConnection(dbConnection);
-								}
-							}
-						} else {
-							PreparedStatement ps  = dbConnection.getPreparedStatement(preparedStatement);
-							ParameterMetaData pmd = ps.getParameterMetaData();
+				if (debug) {
+					System.out.println("Statement was delegated to underlying database:");
+					System.out.println(unprocessedNamedPreparedStatement);
+				}
+				DbConnection dbConnection = connectionPoolManager.getConnection();
+				try {
+					Method method = CallUtils.getCallStatementMethod(unprocessedNamedPreparedStatement, proceduresMap);
+					if (method != null) {
+						if (executeTypeUpdate) {
+							int rowCount = 0;
 							for (Map<String, Object> parametersMap : parametersListOfMaps) {
-								for (Map.Entry<String, Object> parameterMapEntry : parametersMap.entrySet()) {
-									String pname     = parameterMapEntry.getKey();
-									Object pvalueObj = parameterMapEntry.getValue();
-									String pvalue    = pvalueObj == null ? null : pvalueObj.toString();
+								List<Object> parameterValues = new ArrayList<>();
+								parameterValues.add(request);
+								parameterValues.add(response);
+								parameterValues.add(dbConnection.getConnection());
+								parameterValues.add(instanceName);
+								CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+								method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
+								rowCount++;
+							}
+							bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
+						} else if (executeTypeQuery) {
+							Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
+							List<Object>        parameterValues = new ArrayList<>();
+							parameterValues.add(request);
+							parameterValues.add(response);
+							parameterValues.add(dbConnection.getConnection());
+							parameterValues.add(instanceName);
+							CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+							Object                                                       obj         = method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
+							Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+							List<Map<String /* column name */, String /* JSON value */>> list        = null;
+							if (obj instanceof ResultSet) {
+								ResultSet                                                      rs                = (ResultSet) obj;
+								List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+								list = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+							} else if (obj instanceof CharSequence) {
+								String jsonArrayOfObjects = obj.toString();
+								list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArrayOfObjects);
+							}
+							ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+							bs         = rr.bs;
+							etag       = rr.etag;
+							compressed = rr.compressed;
+						}
+					} else {
+						PreparedStatement ps  = dbConnection.getPreparedStatement(preparedStatement);
+						ParameterMetaData pmd = ps.getParameterMetaData();
+						for (Map<String, Object> parametersMap : parametersListOfMaps) {
+							for (Map.Entry<String, Object> parameterMapEntry : parametersMap.entrySet()) {
+								String pname     = parameterMapEntry.getKey();
+								Object pvalueObj = parameterMapEntry.getValue();
+								String pvalue    = pvalueObj == null ? null : pvalueObj.toString();
 
-									List<Integer /* index */> indexes = mapParams.get(pname);
-									if (indexes != null)
-										for (int n : indexes) {
-											int parameterType = pmd.getParameterType(n);
-											if (pvalue == null) // JavaScript null
-												ps.setNull(n, parameterType);
-											else {
-												if (parameterType == Types.SMALLINT) // JavaScript Number
-													ps.setShort(n, Short.parseShort(pvalue));
-												else if (parameterType == Types.INTEGER) // JavaScript Number
-													ps.setInt(n, Integer.parseInt(pvalue));
-												else if (parameterType == Types.BIGINT) // JavaScript Number
-													ps.setLong(n, Long.parseLong(pvalue));
-												else if (parameterType == Types.FLOAT) // JavaScript Number
-													ps.setFloat(n, Float.parseFloat(pvalue));
-												else if (parameterType == Types.DOUBLE) // JavaScript Number
-													ps.setDouble(n, Double.parseDouble(pvalue));
-												else if (parameterType == Types.BOOLEAN || parameterType == Types.BIT) // JavaScript Boolean
-													ps.setBoolean(n, Boolean.parseBoolean(pvalue));
-												else if (parameterType == Types.DATE) {
-													if (pvalue.contains("T")) { // JavaScript Date
-														Instant   instant = Instant.parse(pvalue);
-														Timestamp ts      = Timestamp.from(instant);
-														long      time    = ts.getTime();
-														ps.setDate(n, new Date(time));
-													} else if (pvalue.contains("-")) // JavaScript String
-														ps.setString(n, pvalue); // JavaScript Number
-													else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
-														ps.setDate(n, new Date(Long.parseLong(pvalue)));
-													else
-														ps.setString(n, pvalue);
-												} else if (parameterType == Types.TIME) {
-													if (pvalue.contains("T")) { // JavaScript Date
-														Instant   instant = Instant.parse(pvalue);
-														Timestamp ts      = Timestamp.from(instant);
-														ps.setTime(n, new Time(ts.getTime()));
-													} else if (pvalue.contains(":")) // JavaScript String
-														ps.setString(n, pvalue);
-													else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
-														ps.setTime(n, new Time(Long.parseLong(pvalue)));
-													else
-														ps.setString(n, pvalue);
-												} else if (parameterType == Types.TIMESTAMP) {
-													if (pvalue.contains("T")) { // JavaScript Date
-														Instant   instant = Instant.parse(pvalue);
-														Timestamp ts      = Timestamp.from(instant);
-														ps.setTimestamp(n, ts);
-													} else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
-														ps.setTime(n, new Time(Long.parseLong(pvalue)));
-													else
-														ps.setString(n, pvalue);
-												} else if (parameterType == Types.BINARY || parameterType == Types.VARBINARY || parameterType == Types.LONGVARBINARY) // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
-													ps.setBytes(n, sharedCoder.decoder.decode(pvalue));
-												else if (parameterType == Types.BLOB) { // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
-													Blob blob = ps.getConnection().createBlob();
-													blob.setBytes(1L, sharedCoder.decoder.decode(pvalue));
-													ps.setBlob(n, blob);
-												} else if (parameterType == Types.CLOB) { // JavaScript string stored in CLOB "AS IS" (as String)
-													Clob clob = ps.getConnection().createClob();
-													clob.setString(1L, pvalue);
-													ps.setClob(n, clob);
-												} else // unknown
+								List<Integer /* index */> indexes = mapParams.get(pname);
+								if (indexes != null)
+									for (int n : indexes) {
+										int parameterType = pmd.getParameterType(n);
+										if (pvalue == null) // JavaScript null
+											ps.setNull(n, parameterType);
+										else {
+											if (parameterType == Types.SMALLINT) // JavaScript Number
+												ps.setShort(n, Short.parseShort(pvalue));
+											else if (parameterType == Types.INTEGER) // JavaScript Number
+												ps.setInt(n, Integer.parseInt(pvalue));
+											else if (parameterType == Types.BIGINT) // JavaScript Number
+												ps.setLong(n, Long.parseLong(pvalue));
+											else if (parameterType == Types.FLOAT) // JavaScript Number
+												ps.setFloat(n, Float.parseFloat(pvalue));
+											else if (parameterType == Types.DOUBLE) // JavaScript Number
+												ps.setDouble(n, Double.parseDouble(pvalue));
+											else if (parameterType == Types.BOOLEAN || parameterType == Types.BIT) // JavaScript Boolean
+												ps.setBoolean(n, Boolean.parseBoolean(pvalue));
+											else if (parameterType == Types.DATE) {
+												if (pvalue.contains("T")) { // JavaScript Date
+													Instant   instant = Instant.parse(pvalue);
+													Timestamp ts      = Timestamp.from(instant);
+													long      time    = ts.getTime();
+													ps.setDate(n, new Date(time));
+												} else if (pvalue.contains("-")) // JavaScript String
+													ps.setString(n, pvalue); // JavaScript Number
+												else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
+													ps.setDate(n, new Date(Long.parseLong(pvalue)));
+												else
 													ps.setString(n, pvalue);
-											}
+											} else if (parameterType == Types.TIME) {
+												if (pvalue.contains("T")) { // JavaScript Date
+													Instant   instant = Instant.parse(pvalue);
+													Timestamp ts      = Timestamp.from(instant);
+													ps.setTime(n, new Time(ts.getTime()));
+												} else if (pvalue.contains(":")) // JavaScript String
+													ps.setString(n, pvalue);
+												else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
+													ps.setTime(n, new Time(Long.parseLong(pvalue)));
+												else
+													ps.setString(n, pvalue);
+											} else if (parameterType == Types.TIMESTAMP) {
+												if (pvalue.contains("T")) { // JavaScript Date
+													Instant   instant = Instant.parse(pvalue);
+													Timestamp ts      = Timestamp.from(instant);
+													ps.setTimestamp(n, ts);
+												} else if (pvalue.charAt(0) > '0' && pvalue.charAt(0) <= '9') // JavaScript Number
+													ps.setTime(n, new Time(Long.parseLong(pvalue)));
+												else
+													ps.setString(n, pvalue);
+											} else if (parameterType == Types.BINARY || parameterType == Types.VARBINARY || parameterType == Types.LONGVARBINARY) // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
+												ps.setBytes(n, sharedCoder.decoder.decode(pvalue));
+											else if (parameterType == Types.BLOB) { // JavaScript (ArrayBuffer, Blob, URL, String) converted to BASE64 on client side
+												Blob blob = ps.getConnection().createBlob();
+												blob.setBytes(1L, sharedCoder.decoder.decode(pvalue));
+												ps.setBlob(n, blob);
+											} else if (parameterType == Types.CLOB) { // JavaScript string stored in CLOB "AS IS" (as String)
+												Clob clob = ps.getConnection().createClob();
+												clob.setString(1L, pvalue);
+												ps.setClob(n, clob);
+											} else // unknown
+												ps.setString(n, pvalue);
 										}
-								}
-								if (executeTypeUpdate)
-									ps.addBatch();
+									}
+							}
+							if (executeTypeUpdate)
+								ps.addBatch();
+						}
+
+						if (executeTypeQuery) { // Execute Query
+							try (ResultSet rs = ps.executeQuery()) {
+								Integer                                                        compression       = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+								List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+								List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+
+								ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+								bs         = rr.bs;
+								etag       = rr.etag;
+								compressed = rr.compressed;
+							} finally {
+								if (dbConnection != null)
+									connectionPoolManager.releaseConnection(dbConnection);
 							}
 
-							if (executeTypeQuery) { // Execute Query
-								try (ResultSet rs = ps.executeQuery()) {
-									Integer                                                        compression       = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
-									List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-									List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
-
-									ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-									bs         = rr.bs;
-									etag       = rr.etag;
-									compressed = rr.compressed;
-								} finally {
-									if (dbConnection != null)
-										connectionPoolManager.releaseConnection(dbConnection);
-								}
-
-							} else if (executeTypeUpdate) { // Execute Update
-								List<Map<String /* column name */, Object /* JSON value */>> gkList;
-								int[]                                                        rowCounts = ps.executeBatch();
-								try (ResultSet rsgk = ps.getGeneratedKeys()) {
-									if (rsgk == null)
-										gkList = Collections.emptyList();
-									else
-										gkList = QueryUtils.resutlSetToListOfMaps(rsgk);
-								} catch (Throwable e) {
-									e.printStackTrace();
+						} else if (executeTypeUpdate) { // Execute Update
+							List<Map<String /* column name */, Object /* JSON value */>> gkList;
+							int[]                                                        rowCounts = ps.executeBatch();
+							try (ResultSet rsgk = ps.getGeneratedKeys()) {
+								if (rsgk == null)
 									gkList = Collections.emptyList();
-								} finally {
-									if (dbConnection != null)
-										connectionPoolManager.releaseConnection(dbConnection);
-								}
+								else
+									gkList = QueryUtils.resutlSetToListOfMaps(rsgk);
+							} catch (Throwable e) {
+								e.printStackTrace();
+								gkList = Collections.emptyList();
+							} finally {
+								if (dbConnection != null)
+									connectionPoolManager.releaseConnection(dbConnection);
+							}
 
-								List<Map<String /* column name */, String /* JSON value */>> generatedKeys = QueryUtils.listOfMapsToListOfMapsJsonValues(gkList, sharedCoder.encoder);
+							List<Map<String /* column name */, String /* JSON value */>> generatedKeys = QueryUtils.listOfMapsToListOfMapsJsonValues(gkList, sharedCoder.encoder);
 
-								//
-								// Build executeUpdate result JSON
-								//
+							//
+							// Build executeUpdate result JSON
+							//
 
-								StringBuilder resultSb = new StringBuilder();
-								resultSb.append('{');
-								resultSb.append(q("rowCount"));
-								resultSb.append(':');
-								resultSb.append(batch ? Arrays.toString(rowCounts).replace(" ", "") : Integer.toString(rowCounts[0])); // JavaScript array of numbers (batch) or number
-								resultSb.append(',');
-								resultSb.append(q("generatedKeys"));
-								resultSb.append(':');
-								resultSb.append(QueryUtils.convertToJsonArray(generatedKeys, resultSetFormat));
-								resultSb.append('}');
+							StringBuilder resultSb = new StringBuilder();
+							resultSb.append('{');
+							resultSb.append(q("rowCount"));
+							resultSb.append(':');
+							resultSb.append(batch ? Arrays.toString(rowCounts).replace(" ", "") : Integer.toString(rowCounts[0])); // JavaScript array of numbers (batch) or number
+							resultSb.append(',');
+							resultSb.append(q("generatedKeys"));
+							resultSb.append(':');
+							resultSb.append(QueryUtils.convertToJsonArray(generatedKeys, resultSetFormat));
+							resultSb.append('}');
 
-								updateResultJson = resultSb.toString();
-								bs               = updateResultJson.getBytes(StandardCharsets.UTF_8);
-							} else
-								throw new IllegalArgumentException(execType);
-						}
-					} catch (SQLException e) {
-						e.printStackTrace();
-						try (OutputStream os = response.getOutputStream()) {
-							String message  = e.getMessage();
-							String sqlState = e.getSQLState();
-							String msg      = "{" + q("message") + ":" + (message == null ? "null" : q(message)) + "," + q("errorCode") + ":" + e.getErrorCode() + "," + q("SQLState") + ":" + (sqlState == null ? "null" : q(sqlState)) + "}";
-							os.write(msg.getBytes(StandardCharsets.UTF_8));
-							os.flush();
-						} catch (Exception e2) {
-							e2.printStackTrace();
-						}
-						asyncContext.complete();
-						return;
-					} finally {
-						if (dbConnection != null)
-							connectionPoolManager.releaseConnection(dbConnection);
+							updateResultJson = resultSb.toString();
+							bs               = updateResultJson.getBytes(StandardCharsets.UTF_8);
+						} else
+							throw new IllegalArgumentException(execType);
 					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+					try (OutputStream os = response.getOutputStream()) {
+						String message  = e.getMessage();
+						String sqlState = e.getSQLState();
+						String msg      = "{" + q("message") + ":" + (message == null ? "null" : q(message)) + "," + q("errorCode") + ":" + e.getErrorCode() + "," + q("SQLState") + ":" + (sqlState == null ? "null" : q(sqlState)) + "}";
+						os.write(msg.getBytes(StandardCharsets.UTF_8));
+						os.flush();
+					} catch (Exception e2) {
+						e2.printStackTrace();
+					}
+					asyncContext.complete();
+					return;
+				} finally {
+					if (dbConnection != null)
+						connectionPoolManager.releaseConnection(dbConnection);
+				}
 
-					if (!ongoingRequests.isEmpty()) {
-						long timestamp = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
-						if (stmtExpose != null) {
-							String notifierStoredProcedureName = stmtExpose.trigger_after_procedure_name;
-							for (AsyncContext ac : ongoingRequests) {
-								try {
-									HttpServletRequest selfRequest = (HttpServletRequest) ac.getRequest();
-									if (notifierStoredProcedureName != null) {
-										String selfClientInfoJson = getClientInfo(selfRequest, sharedCoder.decoder);
+				if (!ongoingRequests.isEmpty()) {
+					long timestamp = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
+					if (stmtExpose != null) {
+						String notifierStoredProcedureName = stmtExpose.trigger_after_procedure_name;
+						for (AsyncContext ac : ongoingRequests) {
+							try {
+								HttpServletRequest  selfRequest  = (HttpServletRequest) ac.getRequest();
+								HttpServletResponse selfResponce = (HttpServletResponse) ac.getResponse();
 
-										String selfUserInfoJson = generateUserInfoJson( //
-												selfRequest, //
-												selfClientInfoJson //
-										);
+								if (notifierStoredProcedureName != null) {
+									String       selfClientInfoJson  = getClientInfo(selfRequest, sharedCoder.decoder);
+									CharSequence selfSessionInfoJson = generateSessionInfoJson(request, sharedCoder.encoder);
 
-										String statementInfoJson = generateStatementInfoJson( //
-												instanceName, //
-												statementId, //
-												unprocessedNamedPreparedStatement, //
-												paramJsonArray //
-										);
+									String selfUserInfoJson = generateUserInfoJson( //
+											selfRequest, //
+											selfClientInfoJson, //
+											selfSessionInfoJson //
+									);
 
-										String executionResultJson = generateExecutionResultJson( //
-												timestamp, //
-												updateResultJson);
+									String statementInfoJson = generateStatementInfoJson( //
+											instanceName, //
+											statementId, //
+											unprocessedNamedPreparedStatement, //
+											paramJsonArray //
+									);
 
-										String       outEvent      = null;
-										DbConnection dbConnection0 = null;
-										try {
-											dbConnection0 = connectionPoolManager.getConnection();
-											String javaMethod = proceduresMap.get(notifierStoredProcedureName);
-											if (javaMethod == null) {
-												CallableStatement cs = dbConnection0.getCallableStatement("{call " + notifierStoredProcedureName + "(?,?,?,?)}");
-												cs.setString(1, userInfoJson);
-												cs.setString(2, selfUserInfoJson);
-												cs.setString(3, statementInfoJson);
-												cs.setString(4, executionResultJson);
+									String executionResultJson = generateExecutionResultJson( //
+											timestamp, //
+											updateResultJson);
 
-												try (ResultSet rs = cs.executeQuery()) {
-													if (rs.next())
-														outEvent = rs.getString(1);
-												}
-											} else {
-												String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
-												String   className  = array[0];
-												String   methodName = array[1];
+									String       outEvent      = null;
+									DbConnection dbConnection0 = null;
+									try {
+										dbConnection0 = connectionPoolManager.getConnection();
+										String javaMethod = proceduresMap.get(notifierStoredProcedureName);
+										if (javaMethod == null) {
+											CallableStatement cs = dbConnection0.getCallableStatement("{call " + notifierStoredProcedureName + "(?,?,?,?)}");
+											cs.setString(1, userInfoJson);
+											cs.setString(2, selfUserInfoJson);
+											cs.setString(3, statementInfoJson);
+											cs.setString(4, executionResultJson);
 
-												Class<?> clazz        = Class.forName(className);
-												Method   notifyMethod = clazz.getMethod(methodName, HttpServletRequest.class, Connection.class, String.class, String.class, String.class, String.class);
-												outEvent = (String) notifyMethod.invoke(null, selfRequest, dbConnection0.getConnection(), userInfoJson, selfUserInfoJson, statementInfoJson, executionResultJson);
+											try (ResultSet rs = cs.executeQuery()) {
+												if (rs.next())
+													outEvent = rs.getString(1);
 											}
-										} finally {
-											if (dbConnection0 != null)
-												connectionPoolManager.releaseConnection(dbConnection0);
-											if (outEvent != null) { // send if outEvent is not null
-												Writer writer = ac.getResponse().getWriter();
-												writer.append(outEvent + '\n');
-												writer.flush();
-												if (debug) {
-													System.out.println("Event was delivered to client:");
-													System.out.println(outEvent);
-												}
+										} else {
+											String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
+											String   className  = array[0];
+											String   methodName = array[1];
+
+											Class<?> clazz        = Class.forName(className);
+											Method   notifyMethod = clazz.getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, Connection.class, String.class, String.class, String.class, String.class);
+											outEvent = (String) notifyMethod.invoke(null, selfRequest, selfResponce, dbConnection0.getConnection(), userInfoJson, selfUserInfoJson, statementInfoJson, executionResultJson);
+										}
+									} finally {
+										if (dbConnection0 != null)
+											connectionPoolManager.releaseConnection(dbConnection0);
+										if (outEvent != null) { // send if outEvent is not null
+											Writer writer = ac.getResponse().getWriter();
+											writer.append(outEvent + '\n');
+											writer.flush();
+											if (debug) {
+												System.out.println("Event was delivered to client:");
+												System.out.println(outEvent);
 											}
 										}
 									}
-								} catch (Exception e) {
-									e.printStackTrace();
 								}
+							} catch (Exception e) {
+								e.printStackTrace();
 							}
 						}
 					}
@@ -1032,15 +863,44 @@ public class DbRequestProcessor implements Runnable {
 	private static String simpleExecuteUpdateResultJson(int rowCount) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
-		sb.append(q("rowCount"));
-		sb.append(':');
-		sb.append(Integer.toString(rowCount));
+		sb.append(q("rowCount") + ':' + Integer.toString(rowCount));
 		sb.append(',');
-		sb.append(q("generatedKeys"));
-		sb.append(':');
-		sb.append("[]");
+		sb.append(q("generatedKeys") + ':' + "[]");
 		sb.append('}');
 		return sb.toString();
+	}
+
+	private static CharSequence generateSessionInfoJson(HttpServletRequest request, Base64.Encoder encoder) throws SQLException {
+		HttpSession session                 = request.getSession(false);
+		String      sessionId               = session.getId();
+		long        sessionCreationTime     = session.getCreationTime();
+		long        sessionLastAccessedTime = session.getLastAccessedTime();
+
+		final char COLON = ':';
+		final char COMMA = ',';
+
+		Enumeration<String> attributeNames = session.getAttributeNames();
+		StringBuilder       sb             = new StringBuilder();
+		sb.append('{');
+		sb.append(q("id")).append(COLON).append(q(sessionId)).append(COMMA);
+		sb.append(q("creationTime")).append(COLON).append(Long.toString(sessionCreationTime)).append(COMMA);
+		sb.append(q("lastAccessedTime")).append(COLON).append(Long.toString(sessionLastAccessedTime)).append(COMMA);
+		sb.append(q("attributeNames")).append(COLON);
+		sb.append('{');
+		boolean first = true;
+		while (attributeNames.hasMoreElements()) {
+			String name   = attributeNames.nextElement();
+			Object value  = session.getAttribute(name);
+			String svalue = QueryUtils.valueToJsonString(value, encoder);
+			if (first)
+				first = false;
+			else
+				sb.append(COMMA);
+			sb.append(q(name) + COLON + svalue);
+		}
+		sb.append('}');
+		sb.append('}');
+		return sb;
 	}
 
 	/**
@@ -1054,7 +914,8 @@ public class DbRequestProcessor implements Runnable {
 	 */
 	private static String generateUserInfoJson( //
 			HttpServletRequest request, //
-			String clientInfoJson //
+			String clientInfoJson, //
+			CharSequence sessionInfoJson //
 	) throws IOException, ParseException {
 		String      remoteAddr  = request.getRemoteAddr();
 		String      remoteHost  = request.getRemoteHost();
@@ -1062,29 +923,9 @@ public class DbRequestProcessor implements Runnable {
 		String      remoteUser  = (String) request.getAttribute(DbServlet.REQUEST_ATTRIBUTE_USER);
 		String      remoteRole  = request.getHeader(DbServlet.CUSTOM_HTTP_HEADER_ROLE);
 		Cookie[]    cookies     = request.getCookies();
-		String      cookiesJson = getCookiesJson(cookies);
+		String      cookiesJson = HttpRequestUtils.getCookiesJson(cookies);
 		HttpSession session     = request.getSession(false);
-		String      headersJson = getHttpHeadersJson(request);
-
-		String sessionId;
-		Long   sessionCreationTime;
-		Long   sessionLastAccessedTime;
-		String sessionAttributesJson;
-
-		if (session == null) {
-			sessionId               = null;
-			sessionCreationTime     = null;
-			sessionLastAccessedTime = null;
-			sessionAttributesJson   = null;
-		} else {
-			sessionId               = session.getId();
-			sessionCreationTime     = session.getCreationTime();
-			sessionLastAccessedTime = session.getLastAccessedTime();
-
-			sessionAttributesJson = (String) session.getAttribute(SESSION_ATTRIBUTE_SESSION_JSON);
-			if (sessionAttributesJson == null)
-				sessionAttributesJson = "{}";
-		}
+		String      headersJson = HttpRequestUtils.getHttpHeadersJson(request);
 
 		final String  NULL  = "null";
 		final char    COLON = ':';
@@ -1100,17 +941,7 @@ public class DbRequestProcessor implements Runnable {
 		sb.append(q("client")).append(COLON).append(clientInfoJson).append(COMMA);
 		sb.append(q("headers")).append(COLON).append(headersJson).append(COMMA);
 		sb.append(q("cookies")).append(COLON).append("[]".equals(cookiesJson) ? NULL : cookiesJson).append(COMMA);
-		sb.append(q("httpSession")).append(COLON);
-		if (sessionId == null)
-			sb.append(NULL);
-		else {
-			sb.append('{');
-			sb.append(q("id")).append(COLON).append(q(sessionId)).append(COMMA);
-			sb.append(q("creationTime")).append(COLON).append(Long.toString(sessionCreationTime)).append(COMMA);
-			sb.append(q("lastAccessedTime")).append(COLON).append(Long.toString(sessionLastAccessedTime)).append(COMMA);
-			sb.append(q("attributes")).append(COLON).append("{}".equals(sessionAttributesJson) ? NULL : sessionAttributesJson);
-			sb.append('}');
-		}
+		sb.append(q("httpSession")).append(COLON).append(sessionInfoJson);
 		sb.append('}');
 		return sb.toString();
 	}
@@ -1164,56 +995,7 @@ public class DbRequestProcessor implements Runnable {
 		sb.append('}');
 		return sb.toString();
 	}
-
-	/**
-	 * Converts HTTP headers to JSON-formatted string
-	 *
-	 * @param request
-	 * @return
-	 */
-	private static String getHttpHeadersJson(HttpServletRequest request) {
-		StringBuilder sb    = new StringBuilder();
-		boolean       first = true;
-		sb.append('{');
-		for (Enumeration<String> e = request.getHeaderNames(); e.hasMoreElements();) {
-			String header = e.nextElement();
-			String value  = request.getHeader(header);
-			if (first)
-				first = false;
-			else
-				sb.append(',');
-			sb.append(q(header) + ':' + q(value));
-		}
-		sb.append('}');
-		return sb.toString();
-	}
-
-	/**
-	 * Converts cookies array to JSON-formatted string
-	 *
-	 * @param request
-	 * @return
-	 */
-	private static String getCookiesJson(Cookie[] cookies) {
-		if (cookies == null)
-			return "[]";
-		StringBuilder sb = new StringBuilder();
-		sb.append('[');
-		for (int i = 0; i < cookies.length; i++) {
-			if (i != 0)
-				sb.append(',');
-			Cookie cookie = cookies[i];
-			sb.append("{");
-			sb.append(q("name")).append(':').append(cookie.getName() == null ? "null" : q(cookie.getName())).append(',');
-			sb.append(q("value")).append(':').append(cookie.getValue() == null ? "null" : q(cookie.getValue()));
-			sb.append("}");
-		}
-		sb.append(']');
-		return sb.toString();
-	}
-
 }
-
 /*
 Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
 or visit https://fbsql.github.io if you need additional

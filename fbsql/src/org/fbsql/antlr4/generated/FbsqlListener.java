@@ -97,15 +97,15 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitCompression(FbsqlParser.CompressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#prefetch}.
+	 * Enter a parse tree produced by {@link FbsqlParser#prefetch_on_off}.
 	 * @param ctx the parse tree
 	 */
-	void enterPrefetch(FbsqlParser.PrefetchContext ctx);
+	void enterPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#prefetch}.
+	 * Exit a parse tree produced by {@link FbsqlParser#prefetch_on_off}.
 	 * @param ctx the parse tree
 	 */
-	void exitPrefetch(FbsqlParser.PrefetchContext ctx);
+	void exitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#statement_alias}.
 	 * @param ctx the parse tree
@@ -237,15 +237,15 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitConnection_pool_size_max(FbsqlParser.Connection_pool_size_maxContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#debug}.
+	 * Enter a parse tree produced by {@link FbsqlParser#debug_on_off}.
 	 * @param ctx the parse tree
 	 */
-	void enterDebug(FbsqlParser.DebugContext ctx);
+	void enterDebug_on_off(FbsqlParser.Debug_on_offContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#debug}.
+	 * Exit a parse tree produced by {@link FbsqlParser#debug_on_off}.
 	 * @param ctx the parse tree
 	 */
-	void exitDebug(FbsqlParser.DebugContext ctx);
+	void exitDebug_on_off(FbsqlParser.Debug_on_offContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#connect_to_stmt}.
 	 * @param ctx the parse tree

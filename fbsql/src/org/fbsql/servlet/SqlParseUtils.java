@@ -79,26 +79,6 @@ public class SqlParseUtils {
 	public static final String SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS = canonizeSql("SET ALLOW LOGIN IF EXISTS"); // Authenticate/Authorize users (can be used only in «init.sql» script)
 
 	/**
-	 * Special FBSQL statements that
-	 * can be used only in frontend
-	 */
-	public static final String SPECIAL_STATEMENT_CREATE_SESSION         = "CREATE SESSION";         // Session management: Create session
-	public static final String SPECIAL_STATEMENT_INVALIDATE_SESSION     = "INVALIDATE SESSION";     // Session management: Invalidate session
-	public static final String SPECIAL_STATEMENT_GET_SESSION_INFO       = "GET SESSION INFO";       // Session management: Get session information (session ID, creation time, last accessed time)
-	public static final String SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES = "SET SESSION ATTRIBUTES"; // Session management: Set custom session attributes
-	public static final String SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES = "GET SESSION ATTRIBUTES"; // Session management: Get custom session attributes
-	public static final String SPECIAL_STATEMENT_ADD_COOKIES            = "ADD COOKIES";            // Add cookies
-	public static final String SPECIAL_STATEMENT_GET_COOKIES            = "GET COOKIES";            // Get cookies
-
-	private static final String[] SPECIAL_CLIENT_STATEMENTS = { //
-			SPECIAL_STATEMENT_CREATE_SESSION, //
-			SPECIAL_STATEMENT_INVALIDATE_SESSION, //
-			SPECIAL_STATEMENT_GET_SESSION_INFO, //
-			SPECIAL_STATEMENT_SET_SESSION_ATTRIBUTES, //
-			SPECIAL_STATEMENT_GET_SESSION_ATTRIBUTES //
-	};
-
-	/**
 	 * SQL statement separator: «;»
 	 */
 	private static final String STATEMENT_SEPARATOR      = ";";
@@ -662,18 +642,6 @@ public class SqlParseUtils {
 			} else
 				list.add(statement);
 		}
-	}
-
-	/**
-	 * 
-	 * @param s
-	 * @return
-	 */
-	public static boolean isSpecialClientStatement(String s) {
-		for (String st : SPECIAL_CLIENT_STATEMENTS)
-			if (indexOf(s, st) == 0)
-				return true;
-		return false;
 	}
 
 	/**

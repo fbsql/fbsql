@@ -117,13 +117,13 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrefetch(FbsqlParser.PrefetchContext ctx) { }
+	@Override public void enterPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitPrefetch(FbsqlParser.PrefetchContext ctx) { }
+	@Override public void exitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -285,13 +285,13 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDebug(FbsqlParser.DebugContext ctx) { }
+	@Override public void enterDebug_on_off(FbsqlParser.Debug_on_offContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitDebug(FbsqlParser.DebugContext ctx) { }
+	@Override public void exitDebug_on_off(FbsqlParser.Debug_on_offContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

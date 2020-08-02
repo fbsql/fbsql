@@ -76,11 +76,11 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCompression(FbsqlParser.CompressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link FbsqlParser#prefetch}.
+	 * Visit a parse tree produced by {@link FbsqlParser#prefetch_on_off}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPrefetch(FbsqlParser.PrefetchContext ctx);
+	T visitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#statement_alias}.
 	 * @param ctx the parse tree
@@ -160,11 +160,11 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConnection_pool_size_max(FbsqlParser.Connection_pool_size_maxContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link FbsqlParser#debug}.
+	 * Visit a parse tree produced by {@link FbsqlParser#debug_on_off}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDebug(FbsqlParser.DebugContext ctx);
+	T visitDebug_on_off(FbsqlParser.Debug_on_offContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#connect_to_stmt}.
 	 * @param ctx the parse tree

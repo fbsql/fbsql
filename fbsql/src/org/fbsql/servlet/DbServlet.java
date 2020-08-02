@@ -376,7 +376,7 @@ public class DbServlet extends HttpServlet {
 		try (Statement st = connection.createStatement()) {
 			//
 			// Execute all statements from 'init.sql' script
-			// "CONNECT TO" and "SET AUTHORIZE USERS IF EXISTS" statements are ignored
+			// "CONNECT TO" and "SET ALLOW LOGIN IF EXISTS" statements are ignored
 			//
 
 			instancesProceduresMap.put(instanceName, proceduresMap);
@@ -390,15 +390,10 @@ public class DbServlet extends HttpServlet {
 				if (method != null) { // Process CALL statement
 					List<Object> parameterValues = new ArrayList<>();
 					parameterValues.add(connection);
+					parameterValues.add(instanceName);
 					CallUtils.parseSqlParameters(statement, parameterValues);
 					method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
 				} //
-					//				else if (!SqlParseUtils.isSpecialServerStatement(statementUpperCase)) // Not a special statements => native SQL
-					//					st.execute(statement);
-				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO))
-					; // ignore
-				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS))
-					; // ignore
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_DECLARE_PROCEDURE)) // Process DECLARE PROCEDURE statement
 					SqlParseUtils.parseDeclareProcedureStatement(servletConfig, statement, proceduresMap);
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SCHEDULE))
@@ -406,7 +401,12 @@ public class DbServlet extends HttpServlet {
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_EXPOSE)) {
 					StmtExpose stmtExpose = parseExposeStatement(servletConfig, statement);
 					exposedStatements.put(stmtExpose.alias, stmtExpose);
-				} else // Not a special statements => native SQL
+				} //
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO))
+					; // ignore
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS))
+					; // ignore
+				else // Not a special statements => native SQL
 					st.execute(statement);
 			}
 

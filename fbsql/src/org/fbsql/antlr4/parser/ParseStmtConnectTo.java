@@ -43,7 +43,7 @@ import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Connect_to_stmtContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_maxContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_minContext;
-import org.fbsql.antlr4.generated.FbsqlParser.DebugContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Debug_on_offContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driverContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driver_jarContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_passwordContext;
@@ -194,8 +194,8 @@ public class ParseStmtConnectTo {
 			}
 
 			@Override
-			public void enterDebug(DebugContext ctx) {
-				st.debug = ctx.getText().equalsIgnoreCase(ctx.K_ON().getText());
+			public void enterDebug_on_off(Debug_on_offContext ctx) {
+				st.debug = ctx.ON() != null;
 			}
 
 			@Override
@@ -238,7 +238,7 @@ public class ParseStmtConnectTo {
 	}
 
 	public static void main(String[] args) {
-		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DEBUG on DRIVER 'org.h2.Driver' PASSWORD 'ppp' USER uuu";
+		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DEBUG on DRIVER 'org.h2.Driver' CONNECTION POOL SIZE MIN 21 MAX 62 PASSWORD 'ppp' USER uuu DEBUG ON";
 		ParseStmtConnectTo p   = new ParseStmtConnectTo();
 		StmtConnectTo      se  = p.parse(null, sql);
 		System.out.println(se);

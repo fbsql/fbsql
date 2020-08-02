@@ -77,51 +77,51 @@ fbsql_stmt
 
 /* keywords */
 
-K_EXPOSE      : E X P O S E;
-K_PREFETCH    : P R E F E T C H;
-K_ROLES       : R O L E S;
-K_TRIGGER     : T R I G G E R;
-K_BEFORE      : B E F O R E;
-K_AFTER       : A F T E R;
-K_AS          : A S;
-K_COMPRESSION : C O M P R E S S I O N;
-K_NONE        : N O N E;
-K_BEST        : B E S T;
-K_SPEED       : S P E E D;
-K_ON          : O N;
-K_OFF         : O F F;
+EXPOSE      : E X P O S E;
+PREFETCH    : P R E F E T C H;
+ROLES       : R O L E S;
+TRIGGER     : T R I G G E R;
+BEFORE      : B E F O R E;
+AFTER       : A F T E R;
+AS          : A S;
+COMPRESSION : C O M P R E S S I O N;
+NONE        : N O N E;
+BEST        : B E S T;
+SPEED       : S P E E D;
+ON          : O N;
+OFF         : O F F;
 
-K_DECLARE     : D E C L A R E;
-K_PROCEDURE   : P R O C E D U R E;
-K_FOR         : F O R;
+DECLARE     : D E C L A R E;
+PROCEDURE   : P R O C E D U R E;
+FOR         : F O R;
 
-K_CONNECT     : C O N N E C T;
-K_TO          : T O;
-K_USER        : U S E R;
-K_PASSWORD    : P A S S W O R D;
-K_PROPERTIES  : P R O  P E R T I E S;
-K_DRIVER      : D R I V E R;
-K_JAR         : J A R;
-K_FILES       : F I L E S;
-K_CONNECTION  : C O N N E C T I O N;
-K_POOL        : P O O L;
-K_SIZE        : S I Z E;
-K_MIN         : M I N;
-K_MAX         : M A X;
-K_DEBUG       : D E B U G;
+CONNECT     : C O N N E C T;
+TO          : T O;
+USER        : U S E R;
+PASSWORD    : P A S S W O R D;
+PROPERTIES  : P R O  P E R T I E S;
+DRIVER      : D R I V E R;
+JAR         : J A R;
+FILES       : F I L E S;
+CONNECTION  : C O N N E C T I O N;
+POOL        : P O O L;
+SIZE        : S I Z E;
+MIN         : M I N;
+MAX         : M A X;
+DEBUG       : D E B U G;
 
-K_SET         : S E T;
-K_ALLOW       : A L L O W;
-K_LOGIN       : L O G I N;
-K_IF          : I F;
-K_EXISTS      : E X I S T S;
+SET         : S E T;
+ALLOW       : A L L O W;
+LOGIN       : L O G I N;
+IF          : I F;
+EXISTS      : E X I S T S;
 
-K_SCHEDULE    : S C H E D U L E;
-K_AT          : A T;
+SCHEDULE    : S C H E D U L E;
+AT          : A T;
 
-K_INCLUDE     : I N C L U D E;
-K_SCRIPT      : S C R I P T;
-K_FILE        : F I L E;
+INCLUDE     : I N C L U D E;
+SCRIPT      : S C R I P T;
+FILE        : F I L E;
 
 native_sql
  : .*?
@@ -141,14 +141,14 @@ trigger_after_procedure_name
  ;
 
 compression
- : K_NONE
- | K_BEST K_COMPRESSION
- | K_BEST K_SPEED
+ : NONE
+ | BEST COMPRESSION
+ | BEST SPEED
  ;
 
-prefetch
- : K_ON
- | K_OFF
+prefetch_on_off
+ : ON
+ | OFF
  ;
 
 statement_alias
@@ -157,16 +157,16 @@ statement_alias
  ;
 
 expose_stmt
- : K_EXPOSE
+ : EXPOSE
    '(' native_sql ')'
    (
-    ( K_PREFETCH prefetch) |
-    ( K_COMPRESSION compression) |
-    ( K_ROLES '(' role_name ( ',' role_name )* ')' ) |
-    ( K_TRIGGER K_BEFORE trigger_before_procedure_name ) |
-    ( K_TRIGGER K_AFTER trigger_after_procedure_name )
+    ( PREFETCH prefetch_on_off) |
+    ( COMPRESSION compression) |
+    ( ROLES '(' role_name ( ',' role_name )* ')' ) |
+    ( TRIGGER BEFORE trigger_before_procedure_name ) |
+    ( TRIGGER AFTER trigger_after_procedure_name )
    )*
-   K_AS? statement_alias?
+   AS? statement_alias?
  ;
 
 procedure_name
@@ -179,7 +179,7 @@ java_method_name
  ;
 
 declare_procedure_stmt
- : K_DECLARE K_PROCEDURE procedure_name K_FOR java_method_name
+ : DECLARE PROCEDURE procedure_name FOR java_method_name
  ;
 
 jdbc_url // JDBC URL
@@ -214,22 +214,26 @@ connection_pool_size_max
  : NUMERIC_LITERAL
  ;
 
-debug
- : K_ON
- | K_OFF
+debug_on_off
+ : ON
+ | OFF
  ;
 
 connect_to_stmt
- : K_CONNECT K_TO jdbc_url
+ : CONNECT TO jdbc_url
    (
-    (K_USER jdbc_user) |
-    (K_PASSWORD jdbc_password) |
-    (K_PROPERTIES jdbc_properties) |
-    (K_DRIVER jdbc_driver) |
-    (K_JAR K_FILES '(' jdbc_driver_jar ( ',' jdbc_driver_jar )* ')') |
-    (K_CONNECTION K_POOL K_SIZE K_MIN connection_pool_size_min) | 
-    (K_CONNECTION K_POOL K_SIZE K_MAX connection_pool_size_max) |
-    (K_DEBUG debug)
+    (USER jdbc_user) |
+    (PASSWORD jdbc_password) |
+    (PROPERTIES jdbc_properties) |
+    (DRIVER jdbc_driver) |
+    (JAR FILES '(' jdbc_driver_jar ( ',' jdbc_driver_jar )* ')') |
+    (CONNECTION POOL SIZE
+     (
+      (MIN connection_pool_size_min) |
+      (MAX connection_pool_size_max)
+     )+
+    ) |
+    (DEBUG debug_on_off)
    )*
  ;
 
@@ -238,11 +242,11 @@ file // file name
  ;
 
 include_script_file_stmt
- : K_INCLUDE K_SCRIPT K_FILE file
+ : INCLUDE SCRIPT FILE file
  ;
 
 set_allow_login_if_exists
- : K_SET K_ALLOW K_LOGIN K_IF K_EXISTS
+ : SET ALLOW LOGIN IF EXISTS
    '(' native_sql ')'
  ;
 
@@ -251,7 +255,7 @@ cron_expression
  ;
 
 schedule_stmt
- : K_SCHEDULE procedure_name K_AT cron_expression
+ : SCHEDULE procedure_name AT cron_expression
  ;
 
 /* Developed by : Bart Kiers, bart@big-o.nl */

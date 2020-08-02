@@ -88,7 +88,7 @@ public class FbsqlBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitPrefetch(FbsqlParser.PrefetchContext ctx) { return visitChildren(ctx); }
+	@Override public T visitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -186,7 +186,7 @@ public class FbsqlBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitDebug(FbsqlParser.DebugContext ctx) { return visitChildren(ctx); }
+	@Override public T visitDebug_on_off(FbsqlParser.Debug_on_offContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
