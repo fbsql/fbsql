@@ -36,15 +36,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.sql.CommonDataSource;
-
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeJSON;
 import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 
 public class RhinoUtils {
@@ -78,54 +75,6 @@ public class RhinoUtils {
 		return object;
 	}
 
-	public static void main(String[] args) throws IOException {
-		Map<String /* js file name */, Scriptable> mapScopes = new HashMap<>();
-		Map<String /* js file name */, Map<String /* function name */, Function>>  mapFunctions = new HashMap<>();
-		String script = "/home/qsecofr/fbsql/config/db/my-sqlite/a.js";
-		//String   script     = "function abc(x,y) {return [{a: x+y}]};";
-		final Object[] parameters = new Object[] { 2, 3 };
-		Object   result     = callJavaScriptFunction(mapScopes, mapFunctions, "/home/qsecofr/fbsql/config/db/my-sqlite/a.js", "abc", parameters);
-		System.out.println(result);
-		final Object[] parameters2 = new Object[] { 20, 30 };
-		result     = callJavaScriptFunction(mapScopes, mapFunctions, "/home/qsecofr/fbsql/config/db/my-sqlite/a.js",  "abc", parameters2);
-		System.out.println(result);
-
-		new Thread() {
-			public void run() {
-				final Object[] parameters3 = new Object[] { 20, 30 };
-				Object result = null;
-				try {
-					result = callJavaScriptFunction(mapScopes, mapFunctions, "/home/qsecofr/fbsql/config/db/my-sqlite/b.js",  "eee", parameters3);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println(result);			
-			};
-		}.start();
-
-		new Thread() {
-			public void run() {
-				final Object[] parameters = new Object[] { 20, 30 };
-				Object result = null;
-				try {
-					result = callJavaScriptFunction(mapScopes, mapFunctions, "/home/qsecofr/fbsql/config/db/my-sqlite/a.js",  "rrr", parameters);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println(result);
-			};
-		}.start();
-
-
-		Object[] parameters4 = new Object[] { 20, 30 };
-		result     = callJavaScriptFunction(mapScopes, mapFunctions, "/home/qsecofr/fbsql/config/db/my-sqlite/a.js",  "abc", parameters4);
-		System.out.println(result);
-
-
-	}
-
 	/**
 	 * 
 	 * @param mapScopes
@@ -146,7 +95,7 @@ public class RhinoUtils {
 
 			ctx.setLanguageVersion(Context.VERSION_1_7);
 			ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-			
+
 			Scriptable scope = mapScopes.get(scriptFile);
 			if (scope == null) {
 				String content = new String(Files.readAllBytes(Paths.get(scriptFile)), StandardCharsets.UTF_8);
@@ -159,7 +108,7 @@ public class RhinoUtils {
 			if (map == null) {
 				map = new HashMap<>();
 				mapFunctions.put(scriptFile, map);
-			} 
+			}
 			Function fct = map.get(funcName);
 			if (fct == null) {
 				fct = (Function) scope.get(funcName, scope);
@@ -174,37 +123,6 @@ public class RhinoUtils {
 			Context.exit();
 		}
 	}
-
-//	/**
-//	 * 
-//	 * @param script
-//	 * @param funcName
-//	 * @param parameters
-//	 * @return
-//	 */
-//	public static Object callJavaScriptFunction2222(String script, String funcName, Object[] parameters) {
-//		try {
-//			//
-//			// initize Rhino
-//			// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
-//			//
-//			Context ctx = Context.enter();
-//			ctx.getWrapFactory().setJavaPrimitiveWrap(true);
-//			ctx.setLanguageVersion(Context.VERSION_1_7);
-//			ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-//			Scriptable scope = ctx.initStandardObjects(); // scope
-//			ctx.evaluateString(scope, script, "", 1, null);
-//			Scriptable that = ctx.newObject(scope);
-//
-//			Function fct    = ctx.compileFunction(that, script, "script", 1, null);
-//			Object   result = fct.call(ctx, scope, that, parameters);
-//			if (result instanceof NativeObject || result instanceof NativeArray) // return JSON object that will sent to client
-//				return (String) NativeJSON.stringify(ctx, scope, result, null, null);
-//			return null; // notification will not sent to client
-//		} finally {
-//			Context.exit();
-//		}
-//	}
 
 }
 
