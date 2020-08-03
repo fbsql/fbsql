@@ -412,7 +412,7 @@ public class DbServlet extends HttpServlet {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				st.execute(statement);
+				
 			}
 
 			for (StmtExpose stmtExpose : exposedStatements.values()) {
