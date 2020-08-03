@@ -43,17 +43,8 @@ import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Connect_to_stmtContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_maxContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_minContext;
-<<<<<<< HEAD
-import org.fbsql.antlr4.generated.FbsqlParser.Jar_fileContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_connection_propertiesContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driver_class_nameContext;
-=======
-import org.fbsql.antlr4.generated.FbsqlParser.Debug_on_offContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driverContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driver_jarContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_passwordContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_propertiesContext;
->>>>>>> refs/remotes/origin/master
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_urlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.PasswordContext;
 import org.fbsql.antlr4.generated.FbsqlParser.UserContext;
@@ -196,19 +187,6 @@ public class ParseStmtConnectTo {
 			}
 
 			@Override
-			public void enterJar_file(Jar_fileContext ctx) {
-				st.driverJars.add(StringUtils.unquote(ctx.getText()));
-			}
-
-			@Override
-<<<<<<< HEAD
-=======
-			public void enterDebug_on_off(Debug_on_offContext ctx) {
-				st.debug = ctx.ON() != null;
-			}
-
-			@Override
->>>>>>> refs/remotes/origin/master
 			public void enterConnection_pool_size_min(Connection_pool_size_minContext ctx) {
 				try {
 					st.connectionPoolSizeMin = Integer.parseInt(ctx.getText());

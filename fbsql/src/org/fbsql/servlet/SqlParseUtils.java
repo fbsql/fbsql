@@ -78,10 +78,7 @@ public class SqlParseUtils {
 	public static final String SPECIAL_STATEMENT_SCHEDULE                  = canonizeSql("SCHEDULE");                  // Add scheduled stored procedure (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_EXPOSE                    = canonizeSql("EXPOSE");                    // Expose corresponding native SQL statement to frontend
 	public static final String SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS = canonizeSql("SET ALLOW LOGIN IF EXISTS"); // Authenticate/Authorize users (can be used only in «init.sql» script)
-<<<<<<< HEAD
 	public static final String SPECIAL_STATEMENT_INCLUDE                   = canonizeSql("INCLUDE");                   // Include script file(s) (can be used only in «init.sql» script)
-=======
->>>>>>> refs/remotes/origin/master
 
 	/**
 	 * SQL statement separator: «;»

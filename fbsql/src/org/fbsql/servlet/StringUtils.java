@@ -33,8 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 
-import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_urlContext;
-
 public class StringUtils {
 
 	/**

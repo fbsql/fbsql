@@ -165,7 +165,6 @@ public class FbsqlBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-<<<<<<< HEAD
 	@Override public T visitSql_script_file(FbsqlParser.Sql_script_fileContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -174,9 +173,6 @@ public class FbsqlBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitCron_expression(FbsqlParser.Cron_expressionContext ctx) { return visitChildren(ctx); }
-=======
-	@Override public T visitDebug_on_off(FbsqlParser.Debug_on_offContext ctx) { return visitChildren(ctx); }
->>>>>>> refs/remotes/origin/master
 	/**
 	 * {@inheritDoc}
 	 *
