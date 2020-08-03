@@ -49,10 +49,18 @@ public class FbsqlLexer extends Lexer {
 		T__0=1, T__1=2, T__2=3, EXPOSE=4, PREFETCH=5, ROLES=6, TRIGGER=7, BEFORE=8, 
 		AFTER=9, AS=10, COMPRESSION=11, NONE=12, BEST=13, SPEED=14, ON=15, OFF=16, 
 		DECLARE=17, PROCEDURE=18, FOR=19, CONNECT=20, TO=21, USER=22, PASSWORD=23, 
+<<<<<<< HEAD
 		PROPERTIES=24, DRIVER=25, LIB=26, CONNECTION=27, POOL=28, MIN=29, MAX=30, 
 		LOGIN=31, IF=32, EXISTS=33, SCHEDULE=34, AT=35, INCLUDE=36, FILE=37, IDENTIFIER=38, 
 		NUMERIC_LITERAL=39, STRING_LITERAL=40, SINGLE_LINE_COMMENT=41, MULTILINE_COMMENT=42, 
 		SPACES=43, UNEXPECTED_CHAR=44;
+=======
+		PROPERTIES=24, DRIVER=25, JAR=26, FILES=27, CONNECTION=28, POOL=29, SIZE=30, 
+		MIN=31, MAX=32, DEBUG=33, SET=34, ALLOW=35, LOGIN=36, IF=37, EXISTS=38, 
+		SCHEDULE=39, AT=40, INCLUDE=41, SCRIPT=42, FILE=43, IDENTIFIER=44, NUMERIC_LITERAL=45, 
+		STRING_LITERAL=46, SINGLE_LINE_COMMENT=47, MULTILINE_COMMENT=48, SPACES=49, 
+		UNEXPECTED_CHAR=50;
+>>>>>>> refs/remotes/origin/master
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 	};
@@ -66,12 +74,21 @@ public class FbsqlLexer extends Lexer {
 			"T__0", "T__1", "T__2", "EXPOSE", "PREFETCH", "ROLES", "TRIGGER", "BEFORE", 
 			"AFTER", "AS", "COMPRESSION", "NONE", "BEST", "SPEED", "ON", "OFF", "DECLARE", 
 			"PROCEDURE", "FOR", "CONNECT", "TO", "USER", "PASSWORD", "PROPERTIES", 
+<<<<<<< HEAD
 			"DRIVER", "LIB", "CONNECTION", "POOL", "MIN", "MAX", "LOGIN", "IF", "EXISTS", 
 			"SCHEDULE", "AT", "INCLUDE", "FILE", "IDENTIFIER", "NUMERIC_LITERAL", 
 			"STRING_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", 
 			"UNEXPECTED_CHAR", "DIGIT", "A", "B", "C", "D", "E", "F", "G", "H", "I", 
 			"J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", 
 			"X", "Y", "Z"
+=======
+			"DRIVER", "JAR", "FILES", "CONNECTION", "POOL", "SIZE", "MIN", "MAX", 
+			"DEBUG", "SET", "ALLOW", "LOGIN", "IF", "EXISTS", "SCHEDULE", "AT", "INCLUDE", 
+			"SCRIPT", "FILE", "IDENTIFIER", "NUMERIC_LITERAL", "STRING_LITERAL", 
+			"SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", "UNEXPECTED_CHAR", 
+			"DIGIT", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", 
+			"M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+>>>>>>> refs/remotes/origin/master
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -87,10 +104,17 @@ public class FbsqlLexer extends Lexer {
 			null, null, null, null, "EXPOSE", "PREFETCH", "ROLES", "TRIGGER", "BEFORE", 
 			"AFTER", "AS", "COMPRESSION", "NONE", "BEST", "SPEED", "ON", "OFF", "DECLARE", 
 			"PROCEDURE", "FOR", "CONNECT", "TO", "USER", "PASSWORD", "PROPERTIES", 
+<<<<<<< HEAD
 			"DRIVER", "LIB", "CONNECTION", "POOL", "MIN", "MAX", "LOGIN", "IF", "EXISTS", 
 			"SCHEDULE", "AT", "INCLUDE", "FILE", "IDENTIFIER", "NUMERIC_LITERAL", 
 			"STRING_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", 
 			"UNEXPECTED_CHAR"
+=======
+			"DRIVER", "JAR", "FILES", "CONNECTION", "POOL", "SIZE", "MIN", "MAX", 
+			"DEBUG", "SET", "ALLOW", "LOGIN", "IF", "EXISTS", "SCHEDULE", "AT", "INCLUDE", 
+			"SCRIPT", "FILE", "IDENTIFIER", "NUMERIC_LITERAL", "STRING_LITERAL", 
+			"SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", "UNEXPECTED_CHAR"
+>>>>>>> refs/remotes/origin/master
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();

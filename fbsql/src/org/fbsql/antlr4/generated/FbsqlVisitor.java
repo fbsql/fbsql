@@ -142,10 +142,15 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConnection_pool_size_max(FbsqlParser.Connection_pool_size_maxContext ctx);
 	/**
+<<<<<<< HEAD
 	 * Visit a parse tree produced by {@link FbsqlParser#sql_script_file}.
+=======
+	 * Visit a parse tree produced by {@link FbsqlParser#debug_on_off}.
+>>>>>>> refs/remotes/origin/master
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+<<<<<<< HEAD
 	T visitSql_script_file(FbsqlParser.Sql_script_fileContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#cron_expression}.
@@ -153,6 +158,9 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCron_expression(FbsqlParser.Cron_expressionContext ctx);
+=======
+	T visitDebug_on_off(FbsqlParser.Debug_on_offContext ctx);
+>>>>>>> refs/remotes/origin/master
 	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#connect_to_stmt}.
 	 * @param ctx the parse tree

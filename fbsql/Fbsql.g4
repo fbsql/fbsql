@@ -92,12 +92,28 @@ USER        : U S E R;
 PASSWORD    : P A S S W O R D;
 PROPERTIES  : P R O  P E R T I E S;
 DRIVER      : D R I V E R;
+<<<<<<< HEAD
 LIB         : L I B;
 CONNECTION  : C O N N E C T I O N;
 POOL        : P O O L;
 MIN         : M I N;
 MAX         : M A X;
+=======
+JAR         : J A R;
+FILES       : F I L E S;
+CONNECTION  : C O N N E C T I O N;
+POOL        : P O O L;
+SIZE        : S I Z E;
+MIN         : M I N;
+MAX         : M A X;
+DEBUG       : D E B U G;
+>>>>>>> refs/remotes/origin/master
 
+<<<<<<< HEAD
+=======
+SET         : S E T;
+ALLOW       : A L L O W;
+>>>>>>> refs/remotes/origin/master
 LOGIN       : L O G I N;
 IF          : I F;
 EXISTS      : E X I S T S;
@@ -106,6 +122,10 @@ SCHEDULE    : S C H E D U L E;
 AT          : A T;
 
 INCLUDE     : I N C L U D E;
+<<<<<<< HEAD
+=======
+SCRIPT      : S C R I P T;
+>>>>>>> refs/remotes/origin/master
 FILE        : F I L E;
 
 native_sql
@@ -125,7 +145,11 @@ trigger_after_procedure_name
  : IDENTIFIER
  ;
 
+<<<<<<< HEAD
 compression_level
+=======
+compression
+>>>>>>> refs/remotes/origin/master
  : NONE
  | BEST COMPRESSION
  | BEST SPEED
@@ -141,6 +165,22 @@ statement_alias
  | STRING_LITERAL
  ;
 
+<<<<<<< HEAD
+=======
+expose_stmt
+ : EXPOSE
+   '(' native_sql ')'
+   (
+    ( PREFETCH prefetch_on_off) |
+    ( COMPRESSION compression) |
+    ( ROLES '(' role_name ( ',' role_name )* ')' ) |
+    ( TRIGGER BEFORE trigger_before_procedure_name ) |
+    ( TRIGGER AFTER trigger_after_procedure_name )
+   )*
+   AS? statement_alias?
+ ;
+
+>>>>>>> refs/remotes/origin/master
 procedure_name
  : IDENTIFIER
  | STRING_LITERAL
@@ -150,6 +190,13 @@ java_method_name
  : STRING_LITERAL
  ;
 
+<<<<<<< HEAD
+=======
+declare_procedure_stmt
+ : DECLARE PROCEDURE procedure_name FOR java_method_name
+ ;
+
+>>>>>>> refs/remotes/origin/master
 jdbc_url // JDBC URL
  : STRING_LITERAL
  ;
@@ -183,10 +230,49 @@ connection_pool_size_max
  : NUMERIC_LITERAL
  ;
 
+<<<<<<< HEAD
 sql_script_file // file name
+=======
+debug_on_off
+ : ON
+ | OFF
+ ;
+
+connect_to_stmt
+ : CONNECT TO jdbc_url
+   (
+    (USER jdbc_user) |
+    (PASSWORD jdbc_password) |
+    (PROPERTIES jdbc_properties) |
+    (DRIVER jdbc_driver) |
+    (JAR FILES '(' jdbc_driver_jar ( ',' jdbc_driver_jar )* ')') |
+    (CONNECTION POOL SIZE
+     (
+      (MIN connection_pool_size_min) |
+      (MAX connection_pool_size_max)
+     )+
+    ) |
+    (DEBUG debug_on_off)
+   )*
+ ;
+
+file // file name
+>>>>>>> refs/remotes/origin/master
  : STRING_LITERAL
  ;
 
+<<<<<<< HEAD
+=======
+include_script_file_stmt
+ : INCLUDE SCRIPT FILE file
+ ;
+
+set_allow_login_if_exists
+ : SET ALLOW LOGIN IF EXISTS
+   '(' native_sql ')'
+ ;
+
+>>>>>>> refs/remotes/origin/master
 cron_expression
  : STRING_LITERAL
  ;

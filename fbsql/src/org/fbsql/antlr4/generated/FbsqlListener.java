@@ -207,14 +207,27 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitConnection_pool_size_max(FbsqlParser.Connection_pool_size_maxContext ctx);
 	/**
+<<<<<<< HEAD
 	 * Enter a parse tree produced by {@link FbsqlParser#sql_script_file}.
+=======
+	 * Enter a parse tree produced by {@link FbsqlParser#debug_on_off}.
+>>>>>>> refs/remotes/origin/master
 	 * @param ctx the parse tree
 	 */
+<<<<<<< HEAD
 	void enterSql_script_file(FbsqlParser.Sql_script_fileContext ctx);
+=======
+	void enterDebug_on_off(FbsqlParser.Debug_on_offContext ctx);
+>>>>>>> refs/remotes/origin/master
 	/**
+<<<<<<< HEAD
 	 * Exit a parse tree produced by {@link FbsqlParser#sql_script_file}.
+=======
+	 * Exit a parse tree produced by {@link FbsqlParser#debug_on_off}.
+>>>>>>> refs/remotes/origin/master
 	 * @param ctx the parse tree
 	 */
+<<<<<<< HEAD
 	void exitSql_script_file(FbsqlParser.Sql_script_fileContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#cron_expression}.
@@ -226,6 +239,9 @@ public interface FbsqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCron_expression(FbsqlParser.Cron_expressionContext ctx);
+=======
+	void exitDebug_on_off(FbsqlParser.Debug_on_offContext ctx);
+>>>>>>> refs/remotes/origin/master
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#connect_to_stmt}.
 	 * @param ctx the parse tree

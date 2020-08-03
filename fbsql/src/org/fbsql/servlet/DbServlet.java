@@ -407,11 +407,15 @@ public class DbServlet extends HttpServlet {
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS))
 					; // ignore
 				else // Not a special statements => native SQL
+<<<<<<< HEAD
 					try {
 						st.execute(statement);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+=======
+					st.execute(statement);
+>>>>>>> refs/remotes/origin/master
 			}
 
 			for (StmtExpose stmtExpose : exposedStatements.values()) {

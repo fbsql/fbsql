@@ -123,7 +123,6 @@ public class RhinoUtils {
 			Context.exit();
 		}
 	}
-
 }
 
 /*

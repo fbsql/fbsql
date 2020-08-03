@@ -249,12 +249,17 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+<<<<<<< HEAD
 	@Override public void enterSql_script_file(FbsqlParser.Sql_script_fileContext ctx) { }
+=======
+	@Override public void enterDebug_on_off(FbsqlParser.Debug_on_offContext ctx) { }
+>>>>>>> refs/remotes/origin/master
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+<<<<<<< HEAD
 	@Override public void exitSql_script_file(FbsqlParser.Sql_script_fileContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -268,6 +273,9 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCron_expression(FbsqlParser.Cron_expressionContext ctx) { }
+=======
+	@Override public void exitDebug_on_off(FbsqlParser.Debug_on_offContext ctx) { }
+>>>>>>> refs/remotes/origin/master
 	/**
 	 * {@inheritDoc}
 	 *

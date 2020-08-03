@@ -113,7 +113,11 @@ public class ParseStmtExpose {
 			}
 
 			@Override
+<<<<<<< HEAD
 			public void enterCompression_level(Compression_levelContext ctx) {
+=======
+			public void enterCompression(CompressionContext ctx) {
+>>>>>>> refs/remotes/origin/master
 				if (ctx.BEST() != null && ctx.COMPRESSION() != null)
 					st.compressionLevel = CompressionLevel.BEST_COMPRESSION;
 				else if (ctx.BEST() != null && ctx.SPEED() != null)
