@@ -53,13 +53,8 @@ Work (secure) with your backend database within HTML<br>
 <h2>Table of Contents</h2>
 <ul>
 <li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Basic example</a></li>
-<<<<<<< HEAD
 <li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
 <li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
-=======
-<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of SET ALLOW LOGIN statement.">Authentication</a></li>
-<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of SET ALLOW LOGIN statement.">Authorization</a></li>
->>>>>>> refs/remotes/origin/master
 <li><a href="#secure_our_backend_with_expose_statement" title="How to secure our backend with EXPOSE statement.">Expose our database to frontend</a></li>
 <li><a href="#reference_statements_by_their_hash" title="How to reference statements by their SHA-256 hash.">Reference statements by their SHA-256 hash</a></li>
 <li><a href="#reference_statements_by_custom_names" title="How to use custom names as statements references.">Reference statements by name</a></li>
@@ -1378,7 +1373,6 @@ https://github.com/GuntherRademacher/rr
 connect_to_stmt
 ::= CONNECT TO jdbc_url
    (
-<<<<<<< HEAD
     (USER user) |
     (PASSWORD password) |
     (PROPERTIES jdbc_connection_properties) |
@@ -1406,12 +1400,12 @@ CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
 
 ```
 ```sql
-     CONNECT TO 'jdbc:as400://mysystem.helloworld.com/mylibrary;naming=system;errors=full'
-           USER 'QSECOFR'
-       PASSWORD 'MYSECRET'
-         DRIVER 'com.ibm.as400.access.AS400JDBCDriver'
-            LIB '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
-CONNECTION POOL MIN 50 MAX 1000;
+     CONNECT TO      'jdbc:as400://mysystem.helloworld.com/mylibrary;naming=system;errors=full'
+           USER      'QSECOFR'
+       PASSWORD      'MYSECRET'
+         DRIVER      'com.ibm.as400.access.AS400JDBCDriver'
+            LIB      '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
+CONNECTION POOL      MIN 50 MAX 1000;
 
 ```
 
@@ -1483,65 +1477,6 @@ schedule_stmt
 
 ```
 <img src="schedule_stmt.png">
-=======
-    (USER jdbc_user) |
-    (PASSWORD jdbc_password) |
-    (PROPERTIES jdbc_properties) |
-    (DRIVER jdbc_driver) |
-    (JAR FILES '(' jdbc_driver_jar ( ',' jdbc_driver_jar )* ')') |
-    (CONNECTION POOL SIZE MIN connection_pool_size_min) | 
-    (CONNECTION POOL SIZE MAX connection_pool_size_max) |
-    (DEBUG debug)
-   )*
-```
-<img src="connect_to_stmt.png"><br><br>
-<i>Examples</i><br>
-
-```sql
-CONNECT TO 'jdbc:sqlite:sample';
-```
-
-```sql
-CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
-      USER 'SA'
-  PASSWORD '';
-
-```
-
-```sql
-CONNECT TO 'jdbc:as400://mysystem.helloworld.com/mylibrary;naming=system;errors=full'
-      USER 'QSECOFR'
-  PASSWORD 'MYSECRET'
-    DRIVER 'com.ibm.as400.access.AS400JDBCDriver'
- JAR FILES ('~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar')
- CONNECTION POOL SIZE MIN   50
- CONNECTION POOL SIZE MAX 1000
- DEBUG ON
- LOG '~/john/logs'
- ALLOW LOGIN IF EXISTS (SELECT TRUE FROM mmm)
-
-```
-
-<br><br>
-
-<h3>EXPOSE</h3>
-
-```EBNF
-expose_stmt
-::= EXPOSE
-   '(' native_sql ')'
-   (
-    ( PREFETCH prefetch) |
-    ( COMPRESSION compression) |
-    ( ROLES '(' role_name ( ',' role_name )* ')' ) |
-    ( TRIGGER BEFORE trigger_before_procedure_name ) |
-    ( TRIGGER AFTER trigger_after_procedure_name )
-   )*
-   AS? statement_alias?
-```
-<img src="expose_stmt.png">
-<br><br>
->>>>>>> refs/remotes/origin/master
 
 <h3>Contacts and support:</h3>
 <ul>
