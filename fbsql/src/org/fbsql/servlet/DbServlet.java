@@ -319,7 +319,7 @@ public class DbServlet extends HttpServlet {
 					Logger.out(Severity.INFO, MessageFormat.format("Can't connect to ''{0}''. Bad 'CONNECT TO' statement in file: ''{1}''", instanceName, initSqlPath));
 					return instanceName;
 				}
-			} else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS)) {
+			} else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_LOGIN_IF_EXISTS)) {
 				String authenticationQuery = parseSetIfExistsStatement(servletConfig, statement);
 				authenticationQueryMap.put(instanceName, authenticationQuery);
 			}
@@ -404,7 +404,7 @@ public class DbServlet extends HttpServlet {
 				} //
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO))
 					; // ignore
-				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS))
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_LOGIN_IF_EXISTS))
 					; // ignore
 				else // Not a special statements => native SQL
 					try {

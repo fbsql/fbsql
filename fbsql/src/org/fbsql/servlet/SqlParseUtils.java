@@ -73,12 +73,12 @@ public class SqlParseUtils {
 	 * Special FBSQL statements that
 	 * can be used only in «init.sql» script
 	 */
-	public static final String SPECIAL_STATEMENT_CONNECT_TO                = canonizeSql("CONNECT TO");                // Connect to database instance (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE         = canonizeSql("DECLARE PROCEDURE");         // Declare non native stored procedure written in one of JVM languages
-	public static final String SPECIAL_STATEMENT_SCHEDULE                  = canonizeSql("SCHEDULE");                  // Add scheduled stored procedure (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_EXPOSE                    = canonizeSql("EXPOSE");                    // Expose corresponding native SQL statement to frontend
-	public static final String SPECIAL_STATEMENT_SET_ALLOW_LOGIN_IF_EXISTS = canonizeSql("SET ALLOW LOGIN IF EXISTS"); // Authenticate/Authorize users (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_INCLUDE                   = canonizeSql("INCLUDE");                   // Include script file(s) (can be used only in «init.sql» script)
+	public static final String SPECIAL_STATEMENT_CONNECT_TO        = canonizeSql("CONNECT TO");        // Connect to database instance (can be used only in «init.sql» script)
+	public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE = canonizeSql("DECLARE PROCEDURE"); // Declare non native stored procedure written in one of JVM languages
+	public static final String SPECIAL_STATEMENT_SCHEDULE          = canonizeSql("SCHEDULE");          // Add scheduled stored procedure (can be used only in «init.sql» script)
+	public static final String SPECIAL_STATEMENT_EXPOSE            = canonizeSql("EXPOSE");            // Expose corresponding native SQL statement to frontend
+	public static final String SPECIAL_STATEMENT_LOGIN_IF_EXISTS   = canonizeSql("LOGIN IF EXISTS");   // Authenticate/Authorize users (can be used only in «init.sql» script)
+	public static final String SPECIAL_STATEMENT_INCLUDE           = canonizeSql("INCLUDE");           // Include script file(s) (can be used only in «init.sql» script)
 
 	/**
 	 * SQL statement separator: «;»
