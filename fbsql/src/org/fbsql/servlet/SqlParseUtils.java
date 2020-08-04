@@ -54,6 +54,8 @@ import org.fbsql.antlr4.parser.ParseStmtInclude;
 import org.fbsql.antlr4.parser.ParseStmtLoginIfExists;
 import org.fbsql.antlr4.parser.ParseStmtScheduleAt;
 import org.fbsql.antlr4.parser.ParseStmtScheduleAt.StmtScheduleAt;
+import org.fbsql.antlr4.parser.ParseStmtSwitchTo;
+import org.fbsql.antlr4.parser.ParseStmtSwitchTo.StmtSwitchTo;
 import org.h2.util.ScriptReader;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -74,6 +76,7 @@ public class SqlParseUtils {
 	 * can be used only in «init.sql» script
 	 */
 	public static final String SPECIAL_STATEMENT_CONNECT_TO        = canonizeSql("CONNECT TO");        // Connect to database instance (can be used only in «init.sql» script)
+	public static final String SPECIAL_STATEMENT_SWITCH_TO         = canonizeSql("SWITCH TO");         // Switch connection to database instance (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE = canonizeSql("DECLARE PROCEDURE"); // Declare non native stored procedure written in one of JVM languages
 	public static final String SPECIAL_STATEMENT_SCHEDULE          = canonizeSql("SCHEDULE");          // Add scheduled stored procedure (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_EXPOSE            = canonizeSql("EXPOSE");            // Expose corresponding native SQL statement to frontend
@@ -553,34 +556,6 @@ public class SqlParseUtils {
 	}
 
 	/**
-	 * Parse SQL script by splitting it on SQL statements
-	 * Standard semicolon character «;» is used as statement separator.
-	 *
-	 * This method also:
-	 * - compress row(s) of each SQL statement by removing
-	 * ambiguous  trailing white spaces characters.
-	 * - remove trailing statement separator «;»
-	 *
-	 * @param sqlScript - SQL script to parse
-	 * @param list      - list of all presented in script SQL statements
-	 * @throws IOException 
-	 */
-	static void parseScript(String sqlScript, List<String /* SQL statements */> list) throws IOException {
-		try (ScriptReader scriptReader = new ScriptReader(new StringReader(sqlScript))) {
-			while (true) {
-				String stat = scriptReader.readStatement();
-				if (stat == null)
-					break;
-				stat = stat.trim();
-				stat = stripComments(stat).trim();
-				if (!stat.isEmpty())
-					list.add(stat);
-			}
-		}
-
-	}
-
-	/**
 	 * Parse named prepared statement and return parameter name to index map and
 	 * replace host variables with '?' character to provide standard prepared statement form
 	 * 
@@ -611,27 +586,58 @@ public class SqlParseUtils {
 	}
 
 	/**
-	 * 
-	 * @param path
-	 * @return
-	 * @throws IOException
+	 * Parse SQL script by splitting it on SQL statements
+	 * Standard semicolon character «;» is used as statement separator.
+	 *
+	 * This method also:
+	 * - compress row(s) of each SQL statement by removing
+	 * ambiguous  trailing white spaces characters.
+	 * - remove trailing statement separator «;»
+	 *
+	 * @param sqlScript - SQL script to parse
+	 * @param list      - list of all presented in script SQL statements (output parameter)
+	 * @throws IOException 
 	 */
-	private static List<String> parseSqlFile(Path path) throws IOException {
-		List<String> list = new ArrayList<>();
-		parseScript(StringUtils.readAsText(path), list);
-		return list;
+	private static void readSqlScriptToList(String sqlScript, List<String /* SQL statements */> list) throws IOException {
+		try (ScriptReader scriptReader = new ScriptReader(new StringReader(sqlScript))) {
+			while (true) {
+				String stat = scriptReader.readStatement();
+				if (stat == null)
+					break;
+				stat = stat.trim();
+				stat = stripComments(stat).trim();
+				if (!stat.isEmpty())
+					list.add(stat);
+			}
+		}
+
 	}
+
+	//	/**
+	//	 * Read SQL script file to list of SQL statements
+	//	 *
+	//	 * @param path
+	//	 * @return
+	//	 * @throws IOException
+	//	 */
+	//	private static List<String> readSqlScriptFileToListOfStatements(Path path) throws IOException {
+	//		List<String> list = new ArrayList<>();
+	//		parseScript(StringUtils.readAsText(path), list);
+	//		return list;
+	//	}
 
 	/**
 	 * Recursive method to process "INCLUDE SCRIPT FILE" statement
 	 *
-	 * @param path
-	 * @param list
-	 * @throws Exception
+	 * @param path       - path to SQL script to parse
+	 * @param list       - list of all presented in script SQL statements with injected includes (output parameter)
+	 * @throws IOException
 	 */
-	public static void processIncludes(Path path, List<String /* SQL statements */> list) throws IOException {
-		List<String /* SQL statements */> initList = parseSqlFile(path);
-		for (String statement : initList) {
+	private static void processIncludes(Path path, List<String /* SQL statements */> list) throws IOException {
+		List<String /* SQL statements */> singleFileList = new ArrayList<>();
+		readSqlScriptToList(StringUtils.readAsText(path), singleFileList);
+
+		for (String statement : singleFileList) {
 			String statementUpperCase = statement.toUpperCase(Locale.ENGLISH);
 			if (statementUpperCase.startsWith(SPECIAL_STATEMENT_INCLUDE)) {
 				List<String> fileNames = new ParseStmtInclude().parse(statement).fileNames;
@@ -648,6 +654,56 @@ public class SqlParseUtils {
 		}
 	}
 
+	/**
+	 * Read 'init.sql' file record by record and divide it by instance name to map
+	 *
+	 * @param path
+	 * @param map
+	 * @throws IOException
+	 */
+	private static void separateSqlFile(List<String /* SQL statements */> list, Map<String /* connection name */, List<String /* SQL statements */>> map) throws IOException {
+		String       instanceName = null;
+		List<String> listBuffer   = null;
+		for (String statement : list) {
+			String canonizedStatement = canonizeSql(statement);
+			if (canonizedStatement.startsWith(SPECIAL_STATEMENT_CONNECT_TO)) {
+				StmtConnectTo stmtConnectTo = new ParseStmtConnectTo().parse(null, statement);
+				instanceName = stmtConnectTo.instanceName;
+				listBuffer = new ArrayList<>();
+				listBuffer.add(statement);
+				map.put(instanceName, listBuffer);
+			} else if (canonizedStatement.startsWith(SPECIAL_STATEMENT_SWITCH_TO)) {
+				StmtSwitchTo stmtSwitchTo = new ParseStmtSwitchTo().parse(null, statement);
+				instanceName = stmtSwitchTo.instanceName;
+				listBuffer   = map.get(instanceName);
+				if (listBuffer == null)
+					throw new Error("CONNECT TO required prior " + statement);
+			} else {
+				if (listBuffer == null)
+					throw new Error("CONNECT TO required prior " + statement);
+				listBuffer.add(statement);
+			}
+		}
+	}
+
+	/**
+	 * Read 'init.sql' file, process 'includes', iterate record by record and divide it by instance name to map
+	 *
+	 * @param path
+	 * @param map
+	 * @throws IOException
+	 */
+	public static void processInitSqlFile(Path path, Map<String /* connection name */, List<String /* SQL statements */>> map) throws IOException {
+		List<String /* SQL statements */> list = new ArrayList<>();
+		processIncludes(path, list);
+		separateSqlFile(list, map);
+	}
+
+	public static void main(String[] args) throws IOException {
+		Map<String /* connection name */, List<String /* SQL statements */>> map = new LinkedHashMap<>();
+		processInitSqlFile(Paths.get("/home/qsecofr/fbsql/config/db/my-sqlite/init.sql"), map);
+		System.out.println(map);
+	}
 	/**
 	 * Canonize SQL statement for compare (startsWith)
 	 * 

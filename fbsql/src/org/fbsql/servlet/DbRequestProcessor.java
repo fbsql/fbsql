@@ -54,12 +54,10 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -208,7 +206,6 @@ public class DbRequestProcessor implements Runnable {
 			Cookie[] cookies    = request.getCookies();
 			//
 			HttpSession session = request.getSession();
-			//String      sessionAttributesJson = (String) session.getAttribute(instanceName);
 
 			boolean reject        = false;
 			String  rejectMessage = null;
@@ -223,11 +220,11 @@ public class DbRequestProcessor implements Runnable {
 			String              jsonStrFormat   = bodyMap.get("format");
 			Integer             resultSetFormat = JsonUtils.parseJsonInt(jsonStrFormat);
 			String              parameters      = bodyMap.get("parameters");
-			CharSequence        sessionInfoJson = generateSessionInfoJson(request, sharedCoder.encoder);
-			String              userInfoJson    = generateUserInfoJson(                                    //
-					request,                                                                               //
-					clientInfoJson,                                                                        //
-					sessionInfoJson                                                                        //
+			CharSequence        sessionInfoJson = HttpRequestUtils.generateSessionInfoJson(request, sharedCoder.encoder);
+			String              userInfoJson    = generateUserInfoJson(                                                  //
+					request,                                                                                             //
+					clientInfoJson,                                                                                      //
+					sessionInfoJson                                                                                      //
 			);
 
 			String updateResultJson = null;
@@ -282,7 +279,7 @@ public class DbRequestProcessor implements Runnable {
 					}
 					reject = statementId == null;
 					if (reject)
-						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not found in white list", namedPreparedStatement));
+						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not exposed to frontend", namedPreparedStatement));
 				}
 			} else { // SQL statement name provided
 				stmtExpose = whiteList.get(statementId);
@@ -724,7 +721,7 @@ public class DbRequestProcessor implements Runnable {
 
 								if (notifierStoredProcedureName != null) {
 									String       selfClientInfoJson  = getClientInfo(selfRequest, sharedCoder.decoder);
-									CharSequence selfSessionInfoJson = generateSessionInfoJson(request, sharedCoder.encoder);
+									CharSequence selfSessionInfoJson = HttpRequestUtils.generateSessionInfoJson(request, sharedCoder.encoder);
 
 									String selfUserInfoJson = generateUserInfoJson( //
 											selfRequest, //
@@ -870,39 +867,6 @@ public class DbRequestProcessor implements Runnable {
 		return sb.toString();
 	}
 
-	private static CharSequence generateSessionInfoJson(HttpServletRequest request, Base64.Encoder encoder) throws SQLException {
-		HttpSession session                 = request.getSession(false);
-		String      sessionId               = session.getId();
-		long        sessionCreationTime     = session.getCreationTime();
-		long        sessionLastAccessedTime = session.getLastAccessedTime();
-
-		final char COLON = ':';
-		final char COMMA = ',';
-
-		Enumeration<String> attributeNames = session.getAttributeNames();
-		StringBuilder       sb             = new StringBuilder();
-		sb.append('{');
-		sb.append(q("id")).append(COLON).append(q(sessionId)).append(COMMA);
-		sb.append(q("creationTime")).append(COLON).append(Long.toString(sessionCreationTime)).append(COMMA);
-		sb.append(q("lastAccessedTime")).append(COLON).append(Long.toString(sessionLastAccessedTime)).append(COMMA);
-		sb.append(q("attributeNames")).append(COLON);
-		sb.append('{');
-		boolean first = true;
-		while (attributeNames.hasMoreElements()) {
-			String name   = attributeNames.nextElement();
-			Object value  = session.getAttribute(name);
-			String svalue = QueryUtils.valueToJsonString(value, encoder);
-			if (first)
-				first = false;
-			else
-				sb.append(COMMA);
-			sb.append(q(name) + COLON + svalue);
-		}
-		sb.append('}');
-		sb.append('}');
-		return sb;
-	}
-
 	/**
 	 * Generate User Info JSON-formatted string
 	 * 
@@ -917,15 +881,14 @@ public class DbRequestProcessor implements Runnable {
 			String clientInfoJson, //
 			CharSequence sessionInfoJson //
 	) throws IOException, ParseException {
-		String      remoteAddr  = request.getRemoteAddr();
-		String      remoteHost  = request.getRemoteHost();
-		Integer     remotePort  = request.getRemotePort();
-		String      remoteUser  = (String) request.getAttribute(DbServlet.REQUEST_ATTRIBUTE_USER);
-		String      remoteRole  = request.getHeader(DbServlet.CUSTOM_HTTP_HEADER_ROLE);
-		Cookie[]    cookies     = request.getCookies();
-		String      cookiesJson = HttpRequestUtils.getCookiesJson(cookies);
-		HttpSession session     = request.getSession(false);
-		String      headersJson = HttpRequestUtils.getHttpHeadersJson(request);
+		String       remoteAddr  = request.getRemoteAddr();
+		String       remoteHost  = request.getRemoteHost();
+		Integer      remotePort  = request.getRemotePort();
+		String       remoteUser  = (String) request.getAttribute(DbServlet.REQUEST_ATTRIBUTE_USER);
+		String       remoteRole  = request.getHeader(DbServlet.CUSTOM_HTTP_HEADER_ROLE);
+		Cookie[]     cookies     = request.getCookies();
+		CharSequence cookiesJson = HttpRequestUtils.getCookiesJson(cookies);
+		CharSequence headersJson = HttpRequestUtils.getHttpHeadersJson(request);
 
 		final String  NULL  = "null";
 		final char    COLON = ':';

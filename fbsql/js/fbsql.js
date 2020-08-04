@@ -61,12 +61,6 @@ const CUSTOM_HTTP_HEADER_STATEMENT   = "X-FB-SQL-Statement";
 const CUSTOM_HTTP_HEADER_ROLE        = "X-FB-SQL-Role";
 
 /**
- * Default instance name
- * WARNING! This constant used also in Java part
- */
-const DEFAULT_INSTANCE             = "fbsql_default_db";
-
-/**
  * Execute type: query
  * WARNING! This constant used also in Java part
  */
@@ -94,10 +88,7 @@ class Connection {
 	 * @param {String}        role     - optional user role
 	 */
 	constructor(url, username, password, role) {
-		if (url === undefined)
-			url = DEFAULT_INSTANCE;
-
-		this.url      = url;
+		this.url = url;
 		if (this.url instanceof URL)
 			this.url = this.url.href;
 		if (!this.url.startsWith('https://') && !this.url.startsWith('http://')) // instance name provided

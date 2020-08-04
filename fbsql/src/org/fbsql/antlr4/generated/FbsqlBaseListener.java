@@ -117,6 +117,18 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterConnection_alias(FbsqlParser.Connection_aliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitConnection_alias(FbsqlParser.Connection_aliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterStatement_alias(FbsqlParser.Statement_aliasContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -280,6 +292,18 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitConnect_to_stmt(FbsqlParser.Connect_to_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSwitch_to_stmt(FbsqlParser.Switch_to_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSwitch_to_stmt(FbsqlParser.Switch_to_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

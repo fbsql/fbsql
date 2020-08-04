@@ -35,7 +35,6 @@ import static org.fbsql.servlet.SqlParseUtils.parseSetIfExistsStatement;
 import static org.fbsql.servlet.StringUtils.q;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -252,20 +251,21 @@ public class DbServlet extends HttpServlet {
 			sharedCoder.encoder = Base64.getEncoder().withoutPadding();
 			sharedCoder.decoder = Base64.getDecoder();
 
-			File[] instancesDirs = new File(dbConnectorsDir).listFiles(new FileFilter() {
+			File initSqlFile = new File(dbConnectorsDir, "init.sql");
 
-				@Override
-				public boolean accept(File file) {
-					return file.isDirectory();
-				}
-			});
+			if (!initSqlFile.exists() || !initSqlFile.isFile())
+				Logger.out(Severity.WARN, "File not found: 'init.sql'");
 
-			int instancesCount = instancesDirs.length;
+			Map<String /* connection name */, List<String /* SQL statements */>> initSqlMap  = new HashMap<>();
+			Path                                                                 initSqlPath = initSqlFile.toPath();
+			SqlParseUtils.processInitSqlFile(initSqlPath, initSqlMap);
+			int instancesCount = initSqlMap.size();
+
 			if (instancesCount == 0)
 				Logger.out(Severity.WARN, "No connection instances found");
 			else
 				Logger.out(Severity.INFO, MessageFormat.format("{0} connection instance(s) found", instancesCount));
-			//
+
 			connectionPoolManagerMap = new HashMap<>(instancesCount);
 			whiteListMap             = new HashMap<>(instancesCount);
 			staticJsonsMap           = new HashMap<>(instancesCount);
@@ -277,13 +277,16 @@ public class DbServlet extends HttpServlet {
 
 			instances = new ArrayList<>(instancesCount);
 
-			for (File instancesDir : instancesDirs)
+			for (Map.Entry<String /* connection name */, List<String /* SQL statements */>> entry : initSqlMap.entrySet()) {
+				String                            instanceName = entry.getKey();
+				List<String /* SQL statements */> initList     = entry.getValue();
 				try {
-					String instanceName = openInstance(instancesDir);
+					openInstance(instanceName, initList);
 					instances.add(instanceName);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+			}
 			System.out.println("*** FBSQL started ***");
 		} catch (Throwable e) {
 			throw new ServletException(e);
@@ -297,18 +300,10 @@ public class DbServlet extends HttpServlet {
 	 * @return
 	 * @throws Exception 
 	 */
-	private String openInstance(File instanceDir) throws Exception {
-		String instanceName = instanceDir.getName();
-
+	private void openInstance(String instanceName, List<String /* SQL statements */> initList) throws Exception {
 		Logger.out(Severity.INFO, MessageFormat.format("Instance found: ''{0}''", instanceName));
-
-		Path initSqlPath = Paths.get(instanceDir.toPath().toString(), "init.sql");
-
-		List<String /* SQL statements */> initList = new ArrayList<>();
-		SqlParseUtils.processIncludes(initSqlPath, initList);
-
 		if (initList.isEmpty())
-			return instanceName;
+			return;
 
 		StmtConnectTo info = null;
 		for (String statement : initList) {
@@ -316,8 +311,8 @@ public class DbServlet extends HttpServlet {
 			if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO)) {
 				info = parseConnectStatement(servletConfig, statement);
 				if (info.jdbcUrl == null) {
-					Logger.out(Severity.INFO, MessageFormat.format("Can't connect to ''{0}''. Bad 'CONNECT TO' statement in file: ''{1}''", instanceName, initSqlPath));
-					return instanceName;
+					Logger.out(Severity.INFO, MessageFormat.format("Can't connect to ''{0}''. Bad 'CONNECT TO' statement: ''{1}''", instanceName, statement));
+					return;
 				}
 			} else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_LOGIN_IF_EXISTS)) {
 				String authenticationQuery = parseSetIfExistsStatement(servletConfig, statement);
@@ -325,8 +320,7 @@ public class DbServlet extends HttpServlet {
 			}
 		}
 
-		final boolean debug = info.debug;
-		if (debug)
+		if (DEBUG)
 			System.out.println(info);
 
 		connectionInfoMap.put(instanceName, info);
@@ -412,7 +406,7 @@ public class DbServlet extends HttpServlet {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				
+
 			}
 
 			for (StmtExpose stmtExpose : exposedStatements.values()) {
@@ -499,7 +493,7 @@ public class DbServlet extends HttpServlet {
 										Writer writer = ac.getResponse().getWriter();
 										writer.append(outEvent + '\n');
 										writer.flush();
-										if (debug) {
+										if (DEBUG) {
 											System.out.println("Background job event was delivered to client:");
 											System.out.println(outEvent);
 										}
@@ -532,9 +526,6 @@ public class DbServlet extends HttpServlet {
 			scheduler.scheduleJob(jobDetail, trigger);
 			scheduler.start();
 		}
-
-		return instanceName;
-
 	}
 
 	/**
@@ -845,7 +836,7 @@ public class DbServlet extends HttpServlet {
 		new DbRequestProcessor( //
 				instanceName, //
 				asyncCtx, //
-				connectionInfo.debug, //
+				DEBUG, //
 				connectionPoolManager, //
 				whiteList, //
 				proceduresMap, //

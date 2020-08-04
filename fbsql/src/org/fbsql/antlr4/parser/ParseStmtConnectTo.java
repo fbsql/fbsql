@@ -40,7 +40,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
-import org.fbsql.antlr4.generated.FbsqlParser.Connect_to_stmtContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Connection_aliasContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_maxContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_minContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_connection_propertiesContext;
@@ -55,17 +55,21 @@ import org.fbsql.servlet.StringUtils;
  * ANTLR4 grammar:
  *
  * connect_to_stmt
- *  : K_CONNECT K_TO jdbc_url
+ *  : CONNECT TO jdbc_url
  *    (
- *     (K_USER jdbc_user) |
- *     (K_PASSWORD jdbc_password) |
- *     (K_PROPERTIES jdbc_properties) |
- *     (K_DRIVER jdbc_driver) |
- *     (K_JAR K_FILES '(' jdbc_driver_jar ( ',' jdbc_driver_jar )* ')') |
- *     (K_CONNECTION K_POOL K_SIZE K_MIN connection_pool_size_min) | 
- *     (K_CONNECTION K_POOL K_SIZE K_MAX connection_pool_size_max) |
- *     (K_DEBUG debug)
+ *     (USER user) |
+ *     (PASSWORD password) |
+ *     (PROPERTIES jdbc_connection_properties) |
+ *     (DRIVER jdbc_driver_class_name) |
+ *     (LIB jar_file ( ',' jar_file )* ) |
+ *     (CONNECTION POOL
+ *      (
+ *       (MIN connection_pool_size_min) |
+ *       (MAX connection_pool_size_max)
+ *      )+
+ *     )
  *    )*
+ *    AS? connection_alias
  *  ;
  */
 public class ParseStmtConnectTo {
@@ -122,13 +126,13 @@ public class ParseStmtConnectTo {
 		public int connectionPoolSizeMax = DEFAULT_CONNECTION_POOL_SIZE_MAX;
 
 		/**
-		 * Value from "DEBUG" clause
+		 * Value from "AS" clause
 		 */
-		public boolean debug;
+		public String instanceName;
 
 		@Override
 		public String toString() {
-			return "StmtConnectTo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", debug=" + debug + "]";
+			return "StmtConnectTo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", instanceName=" + instanceName + "]";
 		}
 	}
 
@@ -156,10 +160,6 @@ public class ParseStmtConnectTo {
 		ParseTree   tree   = parser.connect_to_stmt();
 
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
-
-			@Override
-			public void enterConnect_to_stmt(Connect_to_stmtContext ctx) {
-			}
 
 			@Override
 			public void enterJdbc_url(Jdbc_urlContext ctx) {
@@ -220,13 +220,18 @@ public class ParseStmtConnectTo {
 				}
 			}
 
+			@Override
+			public void enterConnection_alias(Connection_aliasContext ctx) {
+				st.instanceName = StringUtils.unquote(ctx.getText());
+			}
+
 		}, tree);
 
 		return st;
 	}
 
 	public static void main(String[] args) {
-		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DEBUG on DRIVER 'org.h2.Driver' CONNECTION POOL SIZE MIN 21 MAX 62 PASSWORD 'ppp' USER uuu DEBUG ON";
+		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'ppp' USER uuu ali";
 		ParseStmtConnectTo p   = new ParseStmtConnectTo();
 		StmtConnectTo      se  = p.parse(null, sql);
 		System.out.println(se);

@@ -76,6 +76,12 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#connection_alias}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConnection_alias(FbsqlParser.Connection_aliasContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#statement_alias}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -159,6 +165,12 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitConnect_to_stmt(FbsqlParser.Connect_to_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#switch_to_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSwitch_to_stmt(FbsqlParser.Switch_to_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#expose_stmt}.
 	 * @param ctx the parse tree

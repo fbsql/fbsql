@@ -97,6 +97,16 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link FbsqlParser#connection_alias}.
+	 * @param ctx the parse tree
+	 */
+	void enterConnection_alias(FbsqlParser.Connection_aliasContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FbsqlParser#connection_alias}.
+	 * @param ctx the parse tree
+	 */
+	void exitConnection_alias(FbsqlParser.Connection_aliasContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#statement_alias}.
 	 * @param ctx the parse tree
 	 */
@@ -236,6 +246,16 @@ public interface FbsqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitConnect_to_stmt(FbsqlParser.Connect_to_stmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link FbsqlParser#switch_to_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterSwitch_to_stmt(FbsqlParser.Switch_to_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FbsqlParser#switch_to_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitSwitch_to_stmt(FbsqlParser.Switch_to_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#expose_stmt}.
 	 * @param ctx the parse tree

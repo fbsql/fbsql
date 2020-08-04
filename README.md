@@ -110,12 +110,9 @@ fbsql-server-plus-2.3.4-linux-x86-64 ─┐
 </li>
 
 <li>
-Add database instance connector:<br><br>
-Assume our database is SQLite. Let's give some name E.g. <code>my-sqlite</code> to our connector.<br><br>
-<ul>
-<li>Make the connector directory: <code>~/fbsql/config/db/my-sqlite</code></li>
-<li>Copy the initialization script <code>init.sql</code> into the connector directory:</li>
-</ul>
+Create the initialization script:<br><br>
+Assume our database is SQLite. Let's give some name E.g. <code>MySQLite</code> to our connection.<br><br>
+To expose our database to frontend we need create the initialization script <code>init.sql</code> into the <code>~/fbsql/config/db</code> directory:
 
 ```sql
 /*
@@ -126,8 +123,18 @@ Assume our database is SQLite. Let's give some name E.g. <code>my-sqlite</code> 
  * any operations that you want to be executed at start up time
  */
 
-CONNECT TO 'jdbc:sqlite:sample';
+CONNECT TO 'jdbc:sqlite:sample' AS MySQLite;
 ```
+Internally FBSQL use JDBC API, which allow a client to access a database.
+FBSQL use JDBC URL to create database connection.<br>
+In our case string <code>'jdbc:sqlite:sample'</code> is the JDBC URL.
+
+<blockquote>
+The JDBC driver implements the protocol for transferring the SQL statements and results between client and database.<br>
+Typically the JDBC driver available for download from the database vendor site.<br>
+Connection parameters are provided in JDBC URL. JDBC URLs always starts with 'jdbc:' prefix.<br>
+See your JDBC driver documentation for available JDBC URL formats and examples.
+</blockquote>
 </li>
 
 <li>
@@ -153,7 +160,7 @@ Start FBSQL server:<br><br>
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection('my-sqlite');
+            const conn = new Connection('MySQLite');
             const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
             ps.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
         </script>
@@ -1385,6 +1392,7 @@ connect_to_stmt
      )+
     )
    )*
+   AS? connection_alias
  ;
 ```
 <img src="connect_to_stmt.png"><br><br>

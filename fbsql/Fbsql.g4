@@ -99,6 +99,8 @@ SIZE        : S I Z E;
 MIN         : M I N;
 MAX         : M A X;
 
+SWITCH      : S W I T C H;
+
 LOGIN       : L O G I N;
 IF          : I F;
 EXISTS      : E X I S T S;
@@ -135,6 +137,11 @@ compression_level
 prefetch_on_off
  : ON
  | OFF
+ ;
+
+connection_alias
+ : IDENTIFIER
+ | STRING_LITERAL
  ;
 
 statement_alias
@@ -207,6 +214,11 @@ connect_to_stmt
      )+
     )
    )*
+   AS? connection_alias
+ ;
+
+switch_to_stmt
+ : SWITCH TO connection_alias
  ;
 
 expose_stmt
