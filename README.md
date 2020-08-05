@@ -1392,8 +1392,12 @@ connect_to_stmt
      )+
     )
    )*
+   (
+   EXPOSE
+   (IF EXISTS '(' native_sql ')')?
    AS? connection_alias
- ;
+   )?
+
 ```
 <img src="connect_to_stmt.png"><br><br>
 <i>Examples</i><br>
@@ -1464,16 +1468,6 @@ include_script_file_stmt
 ```
 <img src="include_script_file_stmt.png">
 
-
-<h3>LOGIN</h3>
-
-```EBNF
-login_if_exists
- : LOGIN IF EXISTS
-   '(' native_sql ')'
- ;
-```
-<img src="login_if_exists.png">
 
 <h3>SCHEDULE</h3>
 

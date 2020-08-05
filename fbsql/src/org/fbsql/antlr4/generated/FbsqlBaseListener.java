@@ -345,18 +345,6 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLogin_if_exists(FbsqlParser.Login_if_existsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLogin_if_exists(FbsqlParser.Login_if_existsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterSchedule_stmt(FbsqlParser.Schedule_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}

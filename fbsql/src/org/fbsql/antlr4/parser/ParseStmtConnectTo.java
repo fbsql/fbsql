@@ -29,12 +29,14 @@ package org.fbsql.antlr4.parser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.ServletConfig;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
@@ -46,7 +48,9 @@ import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_minContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_connection_propertiesContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driver_class_nameContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_urlContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.PasswordContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Statement_aliasContext;
 import org.fbsql.antlr4.generated.FbsqlParser.UserContext;
 import org.fbsql.servlet.SqlParseUtils;
 import org.fbsql.servlet.StringUtils;
@@ -73,6 +77,8 @@ import org.fbsql.servlet.StringUtils;
  *  ;
  */
 public class ParseStmtConnectTo {
+	public static final String NONEXPOSABLE_PREFIX = "NONEXPOSABLE:";
+
 	private static final int DEFAULT_CONNECTION_POOL_SIZE_MIN = 1;
 	private static final int DEFAULT_CONNECTION_POOL_SIZE_MAX = 100;
 
@@ -125,6 +131,8 @@ public class ParseStmtConnectTo {
 		 */
 		public int connectionPoolSizeMax = DEFAULT_CONNECTION_POOL_SIZE_MAX;
 
+		public String authenticationQuery;
+
 		/**
 		 * Value from "AS" clause
 		 */
@@ -132,8 +140,9 @@ public class ParseStmtConnectTo {
 
 		@Override
 		public String toString() {
-			return "StmtConnectTo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", instanceName=" + instanceName + "]";
+			return "StmtConnectTo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", authenticationQuery=" + authenticationQuery + ", instanceName=" + instanceName + "]";
 		}
+
 	}
 
 	/**
@@ -221,17 +230,28 @@ public class ParseStmtConnectTo {
 			}
 
 			@Override
+			public void enterNative_sql(Native_sqlContext ctx) {
+				int      startIndex = ctx.start.getStartIndex();
+				int      stopIndex  = ctx.stop.getStopIndex();
+				Interval interval   = new Interval(startIndex, stopIndex);
+				st.authenticationQuery = ctx.start.getInputStream().getText(interval);
+			}
+
+			@Override
 			public void enterConnection_alias(Connection_aliasContext ctx) {
 				st.instanceName = StringUtils.unquote(ctx.getText());
 			}
 
 		}, tree);
 
+		if (st.instanceName == null)
+			st.instanceName = NONEXPOSABLE_PREFIX + UUID.randomUUID().toString();
+
 		return st;
 	}
 
 	public static void main(String[] args) {
-		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'ppp' USER uuu ali";
+		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'ppp' USER uuu EXPOSE IF EXISTS (SELECT * from USERS where USER=:user) AS ali";
 		ParseStmtConnectTo p   = new ParseStmtConnectTo();
 		StmtConnectTo      se  = p.parse(null, sql);
 		System.out.println(se);

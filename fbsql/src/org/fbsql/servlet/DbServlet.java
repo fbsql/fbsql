@@ -31,7 +31,6 @@ import static org.fbsql.servlet.SqlParseUtils.JAVA_METHOD_SEPARATOR;
 import static org.fbsql.servlet.SqlParseUtils.parseConnectStatement;
 import static org.fbsql.servlet.SqlParseUtils.parseExposeStatement;
 import static org.fbsql.servlet.SqlParseUtils.parseNamedPreparedStatement;
-import static org.fbsql.servlet.SqlParseUtils.parseSetIfExistsStatement;
 import static org.fbsql.servlet.StringUtils.q;
 
 import java.io.File;
@@ -80,6 +79,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.fbsql.antlr4.parser.ParseStmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
 import org.fbsql.connection_pool.ConnectionPoolManager;
@@ -301,22 +301,20 @@ public class DbServlet extends HttpServlet {
 	 * @throws Exception 
 	 */
 	private void openInstance(String instanceName, List<String /* SQL statements */> initList) throws Exception {
-		Logger.out(Severity.INFO, MessageFormat.format("Instance found: ''{0}''", instanceName));
 		if (initList.isEmpty())
 			return;
 
+		Logger.out(Severity.INFO, MessageFormat.format("Instance found: ''{0}''", instanceName));
 		StmtConnectTo info = null;
 		for (String statement : initList) {
 			String text = SqlParseUtils.canonizeSql(statement);
 			if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO)) {
 				info = parseConnectStatement(servletConfig, statement);
 				if (info.jdbcUrl == null) {
-					Logger.out(Severity.INFO, MessageFormat.format("Can't connect to ''{0}''. Bad 'CONNECT TO' statement: ''{1}''", instanceName, statement));
+					Logger.out(Severity.INFO, MessageFormat.format("Can't connect to ''{0}''. Bad 'CONNECT TO' statement: ''{1}''. No JDBC URL provided.", instanceName, statement));
 					return;
 				}
-			} else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_LOGIN_IF_EXISTS)) {
-				String authenticationQuery = parseSetIfExistsStatement(servletConfig, statement);
-				authenticationQueryMap.put(instanceName, authenticationQuery);
+				authenticationQueryMap.put(instanceName, info.authenticationQuery);
 			}
 		}
 
@@ -397,8 +395,6 @@ public class DbServlet extends HttpServlet {
 					exposedStatements.put(stmtExpose.alias, stmtExpose);
 				} //
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO))
-					; // ignore
-				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_LOGIN_IF_EXISTS))
 					; // ignore
 				else // Not a special statements => native SQL
 					try {
@@ -594,7 +590,7 @@ public class DbServlet extends HttpServlet {
 
 		String instanceName = inst_and_oper[0];
 
-		if (!connectionInfoMap.containsKey(instanceName)) {
+		if (instanceName.startsWith(ParseStmtConnectTo.NONEXPOSABLE_PREFIX) || !connectionInfoMap.containsKey(instanceName)) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, StringUtils.formatMessage("Instance Not Found: \"{0}\"", instanceName));
 			return;
 		}
@@ -718,8 +714,6 @@ public class DbServlet extends HttpServlet {
 			String instanceName = inst_and_oper[0];
 			String operName     = inst_and_oper[1];
 
-			//			if (operName.equals("session"))
-			//				request.getSession();
 			if (operName.equals("events")) {
 				Queue<AsyncContext> ongoingRequests = ongoingRequestsMap.get(instanceName);
 

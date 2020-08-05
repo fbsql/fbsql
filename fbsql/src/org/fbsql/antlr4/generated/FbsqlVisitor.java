@@ -190,12 +190,6 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInclude_script_file_stmt(FbsqlParser.Include_script_file_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link FbsqlParser#login_if_exists}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogin_if_exists(FbsqlParser.Login_if_existsContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#schedule_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

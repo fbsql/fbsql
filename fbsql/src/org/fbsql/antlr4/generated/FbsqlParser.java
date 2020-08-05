@@ -50,9 +50,9 @@ public class FbsqlParser extends Parser {
 		AFTER=9, AS=10, COMPRESSION=11, NONE=12, BEST=13, SPEED=14, ON=15, OFF=16, 
 		DECLARE=17, PROCEDURE=18, FOR=19, CONNECT=20, TO=21, USER=22, PASSWORD=23, 
 		PROPERTIES=24, DRIVER=25, LIB=26, CONNECTION=27, POOL=28, SIZE=29, MIN=30, 
-		MAX=31, SWITCH=32, LOGIN=33, IF=34, EXISTS=35, SCHEDULE=36, AT=37, INCLUDE=38, 
-		FILE=39, IDENTIFIER=40, NUMERIC_LITERAL=41, STRING_LITERAL=42, SINGLE_LINE_COMMENT=43, 
-		MULTILINE_COMMENT=44, SPACES=45, UNEXPECTED_CHAR=46;
+		MAX=31, IF=32, EXISTS=33, SWITCH=34, SCHEDULE=35, AT=36, INCLUDE=37, FILE=38, 
+		IDENTIFIER=39, NUMERIC_LITERAL=40, STRING_LITERAL=41, SINGLE_LINE_COMMENT=42, 
+		MULTILINE_COMMENT=43, SPACES=44, UNEXPECTED_CHAR=45;
 	public static final int
 		RULE_native_sql = 0, RULE_role_name = 1, RULE_trigger_before_procedure_name = 2, 
 		RULE_trigger_after_procedure_name = 3, RULE_compression_level = 4, RULE_prefetch_on_off = 5, 
@@ -62,7 +62,7 @@ public class FbsqlParser extends Parser {
 		RULE_jar_file = 15, RULE_connection_pool_size_min = 16, RULE_connection_pool_size_max = 17, 
 		RULE_sql_script_file = 18, RULE_cron_expression = 19, RULE_connect_to_stmt = 20, 
 		RULE_switch_to_stmt = 21, RULE_expose_stmt = 22, RULE_declare_procedure_stmt = 23, 
-		RULE_include_script_file_stmt = 24, RULE_login_if_exists = 25, RULE_schedule_stmt = 26;
+		RULE_include_script_file_stmt = 24, RULE_schedule_stmt = 25;
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"native_sql", "role_name", "trigger_before_procedure_name", "trigger_after_procedure_name", 
@@ -71,7 +71,7 @@ public class FbsqlParser extends Parser {
 			"jdbc_connection_properties", "jdbc_driver_class_name", "jar_file", "connection_pool_size_min", 
 			"connection_pool_size_max", "sql_script_file", "cron_expression", "connect_to_stmt", 
 			"switch_to_stmt", "expose_stmt", "declare_procedure_stmt", "include_script_file_stmt", 
-			"login_if_exists", "schedule_stmt"
+			"schedule_stmt"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -87,10 +87,10 @@ public class FbsqlParser extends Parser {
 			null, null, null, null, "EXPOSE", "PREFETCH", "ROLES", "TRIGGER", "BEFORE", 
 			"AFTER", "AS", "COMPRESSION", "NONE", "BEST", "SPEED", "ON", "OFF", "DECLARE", 
 			"PROCEDURE", "FOR", "CONNECT", "TO", "USER", "PASSWORD", "PROPERTIES", 
-			"DRIVER", "LIB", "CONNECTION", "POOL", "SIZE", "MIN", "MAX", "SWITCH", 
-			"LOGIN", "IF", "EXISTS", "SCHEDULE", "AT", "INCLUDE", "FILE", "IDENTIFIER", 
-			"NUMERIC_LITERAL", "STRING_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", 
-			"SPACES", "UNEXPECTED_CHAR"
+			"DRIVER", "LIB", "CONNECTION", "POOL", "SIZE", "MIN", "MAX", "IF", "EXISTS", 
+			"SWITCH", "SCHEDULE", "AT", "INCLUDE", "FILE", "IDENTIFIER", "NUMERIC_LITERAL", 
+			"STRING_LITERAL", "SINGLE_LINE_COMMENT", "MULTILINE_COMMENT", "SPACES", 
+			"UNEXPECTED_CHAR"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -171,19 +171,19 @@ public class FbsqlParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(57);
+			setState(55);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,0,_ctx);
 			while ( _alt!=1 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1+1 ) {
 					{
 					{
-					setState(54);
+					setState(52);
 					matchWildcard();
 					}
 					} 
 				}
-				setState(59);
+				setState(57);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,0,_ctx);
 			}
@@ -229,7 +229,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(60);
+			setState(58);
 			_la = _input.LA(1);
 			if ( !(_la==IDENTIFIER || _la==STRING_LITERAL) ) {
 			_errHandler.recoverInline(this);
@@ -279,7 +279,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(62);
+			setState(60);
 			match(IDENTIFIER);
 			}
 		}
@@ -321,7 +321,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(64);
+			setState(62);
 			match(IDENTIFIER);
 			}
 		}
@@ -364,31 +364,31 @@ public class FbsqlParser extends Parser {
 		Compression_levelContext _localctx = new Compression_levelContext(_ctx, getState());
 		enterRule(_localctx, 8, RULE_compression_level);
 		try {
-			setState(71);
+			setState(69);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(66);
+				setState(64);
 				match(NONE);
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(67);
+				setState(65);
 				match(BEST);
-				setState(68);
+				setState(66);
 				match(COMPRESSION);
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(69);
+				setState(67);
 				match(BEST);
-				setState(70);
+				setState(68);
 				match(SPEED);
 				}
 				break;
@@ -434,7 +434,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(73);
+			setState(71);
 			_la = _input.LA(1);
 			if ( !(_la==ON || _la==OFF) ) {
 			_errHandler.recoverInline(this);
@@ -486,7 +486,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(75);
+			setState(73);
 			_la = _input.LA(1);
 			if ( !(_la==IDENTIFIER || _la==STRING_LITERAL) ) {
 			_errHandler.recoverInline(this);
@@ -538,7 +538,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(77);
+			setState(75);
 			_la = _input.LA(1);
 			if ( !(_la==IDENTIFIER || _la==STRING_LITERAL) ) {
 			_errHandler.recoverInline(this);
@@ -590,7 +590,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(79);
+			setState(77);
 			_la = _input.LA(1);
 			if ( !(_la==IDENTIFIER || _la==STRING_LITERAL) ) {
 			_errHandler.recoverInline(this);
@@ -640,7 +640,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(81);
+			setState(79);
 			match(STRING_LITERAL);
 			}
 		}
@@ -682,7 +682,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(83);
+			setState(81);
 			match(STRING_LITERAL);
 			}
 		}
@@ -726,7 +726,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(85);
+			setState(83);
 			_la = _input.LA(1);
 			if ( !(_la==IDENTIFIER || _la==STRING_LITERAL) ) {
 			_errHandler.recoverInline(this);
@@ -776,7 +776,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(87);
+			setState(85);
 			match(STRING_LITERAL);
 			}
 		}
@@ -818,7 +818,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(89);
+			setState(87);
 			match(STRING_LITERAL);
 			}
 		}
@@ -860,7 +860,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(91);
+			setState(89);
 			match(STRING_LITERAL);
 			}
 		}
@@ -902,7 +902,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(93);
+			setState(91);
 			match(STRING_LITERAL);
 			}
 		}
@@ -944,7 +944,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(95);
+			setState(93);
 			match(NUMERIC_LITERAL);
 			}
 		}
@@ -986,7 +986,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(97);
+			setState(95);
 			match(NUMERIC_LITERAL);
 			}
 		}
@@ -1028,7 +1028,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(99);
+			setState(97);
 			match(STRING_LITERAL);
 			}
 		}
@@ -1070,7 +1070,7 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(101);
+			setState(99);
 			match(STRING_LITERAL);
 			}
 		}
@@ -1091,10 +1091,10 @@ public class FbsqlParser extends Parser {
 		public Jdbc_urlContext jdbc_url() {
 			return getRuleContext(Jdbc_urlContext.class,0);
 		}
+		public TerminalNode EXPOSE() { return getToken(FbsqlParser.EXPOSE, 0); }
 		public Connection_aliasContext connection_alias() {
 			return getRuleContext(Connection_aliasContext.class,0);
 		}
-		public TerminalNode AS() { return getToken(FbsqlParser.AS, 0); }
 		public List<TerminalNode> USER() { return getTokens(FbsqlParser.USER); }
 		public TerminalNode USER(int i) {
 			return getToken(FbsqlParser.USER, i);
@@ -1153,6 +1153,12 @@ public class FbsqlParser extends Parser {
 		public TerminalNode POOL(int i) {
 			return getToken(FbsqlParser.POOL, i);
 		}
+		public TerminalNode IF() { return getToken(FbsqlParser.IF, 0); }
+		public TerminalNode EXISTS() { return getToken(FbsqlParser.EXISTS, 0); }
+		public Native_sqlContext native_sql() {
+			return getRuleContext(Native_sqlContext.class,0);
+		}
+		public TerminalNode AS() { return getToken(FbsqlParser.AS, 0); }
 		public List<TerminalNode> MIN() { return getTokens(FbsqlParser.MIN); }
 		public TerminalNode MIN(int i) {
 			return getToken(FbsqlParser.MIN, i);
@@ -1199,26 +1205,26 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(103);
+			setState(101);
 			match(CONNECT);
-			setState(104);
+			setState(102);
 			match(TO);
-			setState(105);
+			setState(103);
 			jdbc_url();
-			setState(135);
+			setState(133);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << USER) | (1L << PASSWORD) | (1L << PROPERTIES) | (1L << DRIVER) | (1L << LIB) | (1L << CONNECTION))) != 0)) {
 				{
-				setState(133);
+				setState(131);
 				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case USER:
 					{
 					{
-					setState(106);
+					setState(104);
 					match(USER);
-					setState(107);
+					setState(105);
 					user();
 					}
 					}
@@ -1226,9 +1232,9 @@ public class FbsqlParser extends Parser {
 				case PASSWORD:
 					{
 					{
-					setState(108);
+					setState(106);
 					match(PASSWORD);
-					setState(109);
+					setState(107);
 					password();
 					}
 					}
@@ -1236,9 +1242,9 @@ public class FbsqlParser extends Parser {
 				case PROPERTIES:
 					{
 					{
-					setState(110);
+					setState(108);
 					match(PROPERTIES);
-					setState(111);
+					setState(109);
 					jdbc_connection_properties();
 					}
 					}
@@ -1246,9 +1252,9 @@ public class FbsqlParser extends Parser {
 				case DRIVER:
 					{
 					{
-					setState(112);
+					setState(110);
 					match(DRIVER);
-					setState(113);
+					setState(111);
 					jdbc_driver_class_name();
 					}
 					}
@@ -1256,23 +1262,23 @@ public class FbsqlParser extends Parser {
 				case LIB:
 					{
 					{
-					setState(114);
+					setState(112);
 					match(LIB);
-					setState(115);
+					setState(113);
 					jar_file();
-					setState(120);
+					setState(118);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 					while (_la==T__0) {
 						{
 						{
-						setState(116);
+						setState(114);
 						match(T__0);
-						setState(117);
+						setState(115);
 						jar_file();
 						}
 						}
-						setState(122);
+						setState(120);
 						_errHandler.sync(this);
 						_la = _input.LA(1);
 					}
@@ -1282,24 +1288,24 @@ public class FbsqlParser extends Parser {
 				case CONNECTION:
 					{
 					{
-					setState(123);
+					setState(121);
 					match(CONNECTION);
-					setState(124);
+					setState(122);
 					match(POOL);
-					setState(129); 
+					setState(127); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 					do {
 						{
-						setState(129);
+						setState(127);
 						_errHandler.sync(this);
 						switch (_input.LA(1)) {
 						case MIN:
 							{
 							{
-							setState(125);
+							setState(123);
 							match(MIN);
-							setState(126);
+							setState(124);
 							connection_pool_size_min();
 							}
 							}
@@ -1307,9 +1313,9 @@ public class FbsqlParser extends Parser {
 						case MAX:
 							{
 							{
-							setState(127);
+							setState(125);
 							match(MAX);
-							setState(128);
+							setState(126);
 							connection_pool_size_max();
 							}
 							}
@@ -1318,7 +1324,7 @@ public class FbsqlParser extends Parser {
 							throw new NoViableAltException(this);
 						}
 						}
-						setState(131); 
+						setState(129); 
 						_errHandler.sync(this);
 						_la = _input.LA(1);
 					} while ( _la==MIN || _la==MAX );
@@ -1329,22 +1335,50 @@ public class FbsqlParser extends Parser {
 					throw new NoViableAltException(this);
 				}
 				}
-				setState(137);
+				setState(135);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(139);
+			setState(149);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if (_la==AS) {
+			if (_la==EXPOSE) {
 				{
-				setState(138);
-				match(AS);
+				setState(136);
+				match(EXPOSE);
+				setState(143);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				if (_la==IF) {
+					{
+					setState(137);
+					match(IF);
+					setState(138);
+					match(EXISTS);
+					setState(139);
+					match(T__1);
+					setState(140);
+					native_sql();
+					setState(141);
+					match(T__2);
+					}
+				}
+
+				setState(146);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				if (_la==AS) {
+					{
+					setState(145);
+					match(AS);
+					}
+				}
+
+				setState(148);
+				connection_alias();
 				}
 			}
 
-			setState(141);
-			connection_alias();
 			}
 		}
 		catch (RecognitionException re) {
@@ -1389,11 +1423,11 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(143);
+			setState(151);
 			match(SWITCH);
-			setState(144);
+			setState(152);
 			match(TO);
-			setState(145);
+			setState(153);
 			connection_alias();
 			}
 		}
@@ -1497,28 +1531,28 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(147);
+			setState(155);
 			match(EXPOSE);
-			setState(148);
+			setState(156);
 			match(T__1);
-			setState(149);
+			setState(157);
 			native_sql();
-			setState(150);
+			setState(158);
 			match(T__2);
-			setState(175);
+			setState(183);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << PREFETCH) | (1L << ROLES) | (1L << TRIGGER) | (1L << COMPRESSION))) != 0)) {
 				{
-				setState(173);
+				setState(181);
 				_errHandler.sync(this);
-				switch ( getInterpreter().adaptivePredict(_input,9,_ctx) ) {
+				switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
 				case 1:
 					{
 					{
-					setState(151);
+					setState(159);
 					match(PREFETCH);
-					setState(152);
+					setState(160);
 					prefetch_on_off();
 					}
 					}
@@ -1526,9 +1560,9 @@ public class FbsqlParser extends Parser {
 				case 2:
 					{
 					{
-					setState(153);
+					setState(161);
 					match(COMPRESSION);
-					setState(154);
+					setState(162);
 					compression_level();
 					}
 					}
@@ -1536,29 +1570,29 @@ public class FbsqlParser extends Parser {
 				case 3:
 					{
 					{
-					setState(155);
+					setState(163);
 					match(ROLES);
-					setState(156);
+					setState(164);
 					match(T__1);
-					setState(157);
+					setState(165);
 					role_name();
-					setState(162);
+					setState(170);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 					while (_la==T__0) {
 						{
 						{
-						setState(158);
+						setState(166);
 						match(T__0);
-						setState(159);
+						setState(167);
 						role_name();
 						}
 						}
-						setState(164);
+						setState(172);
 						_errHandler.sync(this);
 						_la = _input.LA(1);
 					}
-					setState(165);
+					setState(173);
 					match(T__2);
 					}
 					}
@@ -1566,11 +1600,11 @@ public class FbsqlParser extends Parser {
 				case 4:
 					{
 					{
-					setState(167);
+					setState(175);
 					match(TRIGGER);
-					setState(168);
+					setState(176);
 					match(BEFORE);
-					setState(169);
+					setState(177);
 					trigger_before_procedure_name();
 					}
 					}
@@ -1578,37 +1612,37 @@ public class FbsqlParser extends Parser {
 				case 5:
 					{
 					{
-					setState(170);
+					setState(178);
 					match(TRIGGER);
-					setState(171);
+					setState(179);
 					match(AFTER);
-					setState(172);
+					setState(180);
 					trigger_after_procedure_name();
 					}
 					}
 					break;
 				}
 				}
-				setState(177);
+				setState(185);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(179);
+			setState(187);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==AS) {
 				{
-				setState(178);
+				setState(186);
 				match(AS);
 				}
 			}
 
-			setState(182);
+			setState(190);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==IDENTIFIER || _la==STRING_LITERAL) {
 				{
-				setState(181);
+				setState(189);
 				statement_alias();
 				}
 			}
@@ -1661,15 +1695,15 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(184);
+			setState(192);
 			match(DECLARE);
-			setState(185);
+			setState(193);
 			match(PROCEDURE);
-			setState(186);
+			setState(194);
 			procedure_name();
-			setState(187);
+			setState(195);
 			match(FOR);
-			setState(188);
+			setState(196);
 			java_method_name();
 			}
 		}
@@ -1718,83 +1752,26 @@ public class FbsqlParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(190);
+			setState(198);
 			match(INCLUDE);
-			setState(191);
+			setState(199);
 			sql_script_file();
-			setState(196);
+			setState(204);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__0) {
 				{
 				{
-				setState(192);
+				setState(200);
 				match(T__0);
-				setState(193);
+				setState(201);
 				sql_script_file();
 				}
 				}
-				setState(198);
+				setState(206);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class Login_if_existsContext extends ParserRuleContext {
-		public TerminalNode LOGIN() { return getToken(FbsqlParser.LOGIN, 0); }
-		public TerminalNode IF() { return getToken(FbsqlParser.IF, 0); }
-		public TerminalNode EXISTS() { return getToken(FbsqlParser.EXISTS, 0); }
-		public Native_sqlContext native_sql() {
-			return getRuleContext(Native_sqlContext.class,0);
-		}
-		public Login_if_existsContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_login_if_exists; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof FbsqlListener ) ((FbsqlListener)listener).enterLogin_if_exists(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FbsqlListener ) ((FbsqlListener)listener).exitLogin_if_exists(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof FbsqlVisitor ) return ((FbsqlVisitor<? extends T>)visitor).visitLogin_if_exists(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final Login_if_existsContext login_if_exists() throws RecognitionException {
-		Login_if_existsContext _localctx = new Login_if_existsContext(_ctx, getState());
-		enterRule(_localctx, 50, RULE_login_if_exists);
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(199);
-			match(LOGIN);
-			setState(200);
-			match(IF);
-			setState(201);
-			match(EXISTS);
-			setState(202);
-			match(T__1);
-			setState(203);
-			native_sql();
-			setState(204);
-			match(T__2);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1838,17 +1815,17 @@ public class FbsqlParser extends Parser {
 
 	public final Schedule_stmtContext schedule_stmt() throws RecognitionException {
 		Schedule_stmtContext _localctx = new Schedule_stmtContext(_ctx, getState());
-		enterRule(_localctx, 52, RULE_schedule_stmt);
+		enterRule(_localctx, 50, RULE_schedule_stmt);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(206);
-			match(SCHEDULE);
 			setState(207);
-			procedure_name();
+			match(SCHEDULE);
 			setState(208);
-			match(AT);
+			procedure_name();
 			setState(209);
+			match(AT);
+			setState(210);
 			cron_expression();
 			}
 		}
@@ -1864,71 +1841,72 @@ public class FbsqlParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\60\u00d6\4\2\t\2"+
-		"\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13"+
-		"\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3/\u00d7\4\2\t\2\4"+
+		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
+		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
-		"\4\32\t\32\4\33\t\33\4\34\t\34\3\2\7\2:\n\2\f\2\16\2=\13\2\3\3\3\3\3\4"+
-		"\3\4\3\5\3\5\3\6\3\6\3\6\3\6\3\6\5\6J\n\6\3\7\3\7\3\b\3\b\3\t\3\t\3\n"+
-		"\3\n\3\13\3\13\3\f\3\f\3\r\3\r\3\16\3\16\3\17\3\17\3\20\3\20\3\21\3\21"+
-		"\3\22\3\22\3\23\3\23\3\24\3\24\3\25\3\25\3\26\3\26\3\26\3\26\3\26\3\26"+
-		"\3\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\7\26y\n\26\f\26\16\26|\13"+
-		"\26\3\26\3\26\3\26\3\26\3\26\3\26\6\26\u0084\n\26\r\26\16\26\u0085\7\26"+
-		"\u0088\n\26\f\26\16\26\u008b\13\26\3\26\5\26\u008e\n\26\3\26\3\26\3\27"+
-		"\3\27\3\27\3\27\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30"+
-		"\3\30\3\30\7\30\u00a3\n\30\f\30\16\30\u00a6\13\30\3\30\3\30\3\30\3\30"+
-		"\3\30\3\30\3\30\3\30\7\30\u00b0\n\30\f\30\16\30\u00b3\13\30\3\30\5\30"+
-		"\u00b6\n\30\3\30\5\30\u00b9\n\30\3\31\3\31\3\31\3\31\3\31\3\31\3\32\3"+
-		"\32\3\32\3\32\7\32\u00c5\n\32\f\32\16\32\u00c8\13\32\3\33\3\33\3\33\3"+
-		"\33\3\33\3\33\3\33\3\34\3\34\3\34\3\34\3\34\3\34\3;\2\35\2\4\6\b\n\f\16"+
-		"\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\66\2\4\4\2**,,\3\2\21\22\2"+
-		"\u00d0\2;\3\2\2\2\4>\3\2\2\2\6@\3\2\2\2\bB\3\2\2\2\nI\3\2\2\2\fK\3\2\2"+
-		"\2\16M\3\2\2\2\20O\3\2\2\2\22Q\3\2\2\2\24S\3\2\2\2\26U\3\2\2\2\30W\3\2"+
-		"\2\2\32Y\3\2\2\2\34[\3\2\2\2\36]\3\2\2\2 _\3\2\2\2\"a\3\2\2\2$c\3\2\2"+
-		"\2&e\3\2\2\2(g\3\2\2\2*i\3\2\2\2,\u0091\3\2\2\2.\u0095\3\2\2\2\60\u00ba"+
-		"\3\2\2\2\62\u00c0\3\2\2\2\64\u00c9\3\2\2\2\66\u00d0\3\2\2\28:\13\2\2\2"+
-		"98\3\2\2\2:=\3\2\2\2;<\3\2\2\2;9\3\2\2\2<\3\3\2\2\2=;\3\2\2\2>?\t\2\2"+
-		"\2?\5\3\2\2\2@A\7*\2\2A\7\3\2\2\2BC\7*\2\2C\t\3\2\2\2DJ\7\16\2\2EF\7\17"+
-		"\2\2FJ\7\r\2\2GH\7\17\2\2HJ\7\20\2\2ID\3\2\2\2IE\3\2\2\2IG\3\2\2\2J\13"+
-		"\3\2\2\2KL\t\3\2\2L\r\3\2\2\2MN\t\2\2\2N\17\3\2\2\2OP\t\2\2\2P\21\3\2"+
-		"\2\2QR\t\2\2\2R\23\3\2\2\2ST\7,\2\2T\25\3\2\2\2UV\7,\2\2V\27\3\2\2\2W"+
-		"X\t\2\2\2X\31\3\2\2\2YZ\7,\2\2Z\33\3\2\2\2[\\\7,\2\2\\\35\3\2\2\2]^\7"+
-		",\2\2^\37\3\2\2\2_`\7,\2\2`!\3\2\2\2ab\7+\2\2b#\3\2\2\2cd\7+\2\2d%\3\2"+
-		"\2\2ef\7,\2\2f\'\3\2\2\2gh\7,\2\2h)\3\2\2\2ij\7\26\2\2jk\7\27\2\2k\u0089"+
-		"\5\26\f\2lm\7\30\2\2m\u0088\5\30\r\2no\7\31\2\2o\u0088\5\32\16\2pq\7\32"+
-		"\2\2q\u0088\5\34\17\2rs\7\33\2\2s\u0088\5\36\20\2tu\7\34\2\2uz\5 \21\2"+
-		"vw\7\3\2\2wy\5 \21\2xv\3\2\2\2y|\3\2\2\2zx\3\2\2\2z{\3\2\2\2{\u0088\3"+
-		"\2\2\2|z\3\2\2\2}~\7\35\2\2~\u0083\7\36\2\2\177\u0080\7 \2\2\u0080\u0084"+
-		"\5\"\22\2\u0081\u0082\7!\2\2\u0082\u0084\5$\23\2\u0083\177\3\2\2\2\u0083"+
-		"\u0081\3\2\2\2\u0084\u0085\3\2\2\2\u0085\u0083\3\2\2\2\u0085\u0086\3\2"+
-		"\2\2\u0086\u0088\3\2\2\2\u0087l\3\2\2\2\u0087n\3\2\2\2\u0087p\3\2\2\2"+
-		"\u0087r\3\2\2\2\u0087t\3\2\2\2\u0087}\3\2\2\2\u0088\u008b\3\2\2\2\u0089"+
-		"\u0087\3\2\2\2\u0089\u008a\3\2\2\2\u008a\u008d\3\2\2\2\u008b\u0089\3\2"+
-		"\2\2\u008c\u008e\7\f\2\2\u008d\u008c\3\2\2\2\u008d\u008e\3\2\2\2\u008e"+
-		"\u008f\3\2\2\2\u008f\u0090\5\16\b\2\u0090+\3\2\2\2\u0091\u0092\7\"\2\2"+
-		"\u0092\u0093\7\27\2\2\u0093\u0094\5\16\b\2\u0094-\3\2\2\2\u0095\u0096"+
-		"\7\6\2\2\u0096\u0097\7\4\2\2\u0097\u0098\5\2\2\2\u0098\u00b1\7\5\2\2\u0099"+
-		"\u009a\7\7\2\2\u009a\u00b0\5\f\7\2\u009b\u009c\7\r\2\2\u009c\u00b0\5\n"+
-		"\6\2\u009d\u009e\7\b\2\2\u009e\u009f\7\4\2\2\u009f\u00a4\5\4\3\2\u00a0"+
-		"\u00a1\7\3\2\2\u00a1\u00a3\5\4\3\2\u00a2\u00a0\3\2\2\2\u00a3\u00a6\3\2"+
-		"\2\2\u00a4\u00a2\3\2\2\2\u00a4\u00a5\3\2\2\2\u00a5\u00a7\3\2\2\2\u00a6"+
-		"\u00a4\3\2\2\2\u00a7\u00a8\7\5\2\2\u00a8\u00b0\3\2\2\2\u00a9\u00aa\7\t"+
-		"\2\2\u00aa\u00ab\7\n\2\2\u00ab\u00b0\5\6\4\2\u00ac\u00ad\7\t\2\2\u00ad"+
-		"\u00ae\7\13\2\2\u00ae\u00b0\5\b\5\2\u00af\u0099\3\2\2\2\u00af\u009b\3"+
-		"\2\2\2\u00af\u009d\3\2\2\2\u00af\u00a9\3\2\2\2\u00af\u00ac\3\2\2\2\u00b0"+
-		"\u00b3\3\2\2\2\u00b1\u00af\3\2\2\2\u00b1\u00b2\3\2\2\2\u00b2\u00b5\3\2"+
-		"\2\2\u00b3\u00b1\3\2\2\2\u00b4\u00b6\7\f\2\2\u00b5\u00b4\3\2\2\2\u00b5"+
-		"\u00b6\3\2\2\2\u00b6\u00b8\3\2\2\2\u00b7\u00b9\5\20\t\2\u00b8\u00b7\3"+
-		"\2\2\2\u00b8\u00b9\3\2\2\2\u00b9/\3\2\2\2\u00ba\u00bb\7\23\2\2\u00bb\u00bc"+
-		"\7\24\2\2\u00bc\u00bd\5\22\n\2\u00bd\u00be\7\25\2\2\u00be\u00bf\5\24\13"+
-		"\2\u00bf\61\3\2\2\2\u00c0\u00c1\7(\2\2\u00c1\u00c6\5&\24\2\u00c2\u00c3"+
-		"\7\3\2\2\u00c3\u00c5\5&\24\2\u00c4\u00c2\3\2\2\2\u00c5\u00c8\3\2\2\2\u00c6"+
-		"\u00c4\3\2\2\2\u00c6\u00c7\3\2\2\2\u00c7\63\3\2\2\2\u00c8\u00c6\3\2\2"+
-		"\2\u00c9\u00ca\7#\2\2\u00ca\u00cb\7$\2\2\u00cb\u00cc\7%\2\2\u00cc\u00cd"+
-		"\7\4\2\2\u00cd\u00ce\5\2\2\2\u00ce\u00cf\7\5\2\2\u00cf\65\3\2\2\2\u00d0"+
-		"\u00d1\7&\2\2\u00d1\u00d2\5\22\n\2\u00d2\u00d3\7\'\2\2\u00d3\u00d4\5("+
-		"\25\2\u00d4\67\3\2\2\2\20;Iz\u0083\u0085\u0087\u0089\u008d\u00a4\u00af"+
-		"\u00b1\u00b5\u00b8\u00c6";
+		"\4\32\t\32\4\33\t\33\3\2\7\28\n\2\f\2\16\2;\13\2\3\3\3\3\3\4\3\4\3\5\3"+
+		"\5\3\6\3\6\3\6\3\6\3\6\5\6H\n\6\3\7\3\7\3\b\3\b\3\t\3\t\3\n\3\n\3\13\3"+
+		"\13\3\f\3\f\3\r\3\r\3\16\3\16\3\17\3\17\3\20\3\20\3\21\3\21\3\22\3\22"+
+		"\3\23\3\23\3\24\3\24\3\25\3\25\3\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26"+
+		"\3\26\3\26\3\26\3\26\3\26\3\26\3\26\7\26w\n\26\f\26\16\26z\13\26\3\26"+
+		"\3\26\3\26\3\26\3\26\3\26\6\26\u0082\n\26\r\26\16\26\u0083\7\26\u0086"+
+		"\n\26\f\26\16\26\u0089\13\26\3\26\3\26\3\26\3\26\3\26\3\26\3\26\5\26\u0092"+
+		"\n\26\3\26\5\26\u0095\n\26\3\26\5\26\u0098\n\26\3\27\3\27\3\27\3\27\3"+
+		"\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\7\30\u00ab"+
+		"\n\30\f\30\16\30\u00ae\13\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\7"+
+		"\30\u00b8\n\30\f\30\16\30\u00bb\13\30\3\30\5\30\u00be\n\30\3\30\5\30\u00c1"+
+		"\n\30\3\31\3\31\3\31\3\31\3\31\3\31\3\32\3\32\3\32\3\32\7\32\u00cd\n\32"+
+		"\f\32\16\32\u00d0\13\32\3\33\3\33\3\33\3\33\3\33\3\33\39\2\34\2\4\6\b"+
+		"\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\2\4\4\2))++\3\2\21\22"+
+		"\2\u00d4\29\3\2\2\2\4<\3\2\2\2\6>\3\2\2\2\b@\3\2\2\2\nG\3\2\2\2\fI\3\2"+
+		"\2\2\16K\3\2\2\2\20M\3\2\2\2\22O\3\2\2\2\24Q\3\2\2\2\26S\3\2\2\2\30U\3"+
+		"\2\2\2\32W\3\2\2\2\34Y\3\2\2\2\36[\3\2\2\2 ]\3\2\2\2\"_\3\2\2\2$a\3\2"+
+		"\2\2&c\3\2\2\2(e\3\2\2\2*g\3\2\2\2,\u0099\3\2\2\2.\u009d\3\2\2\2\60\u00c2"+
+		"\3\2\2\2\62\u00c8\3\2\2\2\64\u00d1\3\2\2\2\668\13\2\2\2\67\66\3\2\2\2"+
+		"8;\3\2\2\29:\3\2\2\29\67\3\2\2\2:\3\3\2\2\2;9\3\2\2\2<=\t\2\2\2=\5\3\2"+
+		"\2\2>?\7)\2\2?\7\3\2\2\2@A\7)\2\2A\t\3\2\2\2BH\7\16\2\2CD\7\17\2\2DH\7"+
+		"\r\2\2EF\7\17\2\2FH\7\20\2\2GB\3\2\2\2GC\3\2\2\2GE\3\2\2\2H\13\3\2\2\2"+
+		"IJ\t\3\2\2J\r\3\2\2\2KL\t\2\2\2L\17\3\2\2\2MN\t\2\2\2N\21\3\2\2\2OP\t"+
+		"\2\2\2P\23\3\2\2\2QR\7+\2\2R\25\3\2\2\2ST\7+\2\2T\27\3\2\2\2UV\t\2\2\2"+
+		"V\31\3\2\2\2WX\7+\2\2X\33\3\2\2\2YZ\7+\2\2Z\35\3\2\2\2[\\\7+\2\2\\\37"+
+		"\3\2\2\2]^\7+\2\2^!\3\2\2\2_`\7*\2\2`#\3\2\2\2ab\7*\2\2b%\3\2\2\2cd\7"+
+		"+\2\2d\'\3\2\2\2ef\7+\2\2f)\3\2\2\2gh\7\26\2\2hi\7\27\2\2i\u0087\5\26"+
+		"\f\2jk\7\30\2\2k\u0086\5\30\r\2lm\7\31\2\2m\u0086\5\32\16\2no\7\32\2\2"+
+		"o\u0086\5\34\17\2pq\7\33\2\2q\u0086\5\36\20\2rs\7\34\2\2sx\5 \21\2tu\7"+
+		"\3\2\2uw\5 \21\2vt\3\2\2\2wz\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\u0086\3\2\2"+
+		"\2zx\3\2\2\2{|\7\35\2\2|\u0081\7\36\2\2}~\7 \2\2~\u0082\5\"\22\2\177\u0080"+
+		"\7!\2\2\u0080\u0082\5$\23\2\u0081}\3\2\2\2\u0081\177\3\2\2\2\u0082\u0083"+
+		"\3\2\2\2\u0083\u0081\3\2\2\2\u0083\u0084\3\2\2\2\u0084\u0086\3\2\2\2\u0085"+
+		"j\3\2\2\2\u0085l\3\2\2\2\u0085n\3\2\2\2\u0085p\3\2\2\2\u0085r\3\2\2\2"+
+		"\u0085{\3\2\2\2\u0086\u0089\3\2\2\2\u0087\u0085\3\2\2\2\u0087\u0088\3"+
+		"\2\2\2\u0088\u0097\3\2\2\2\u0089\u0087\3\2\2\2\u008a\u0091\7\6\2\2\u008b"+
+		"\u008c\7\"\2\2\u008c\u008d\7#\2\2\u008d\u008e\7\4\2\2\u008e\u008f\5\2"+
+		"\2\2\u008f\u0090\7\5\2\2\u0090\u0092\3\2\2\2\u0091\u008b\3\2\2\2\u0091"+
+		"\u0092\3\2\2\2\u0092\u0094\3\2\2\2\u0093\u0095\7\f\2\2\u0094\u0093\3\2"+
+		"\2\2\u0094\u0095\3\2\2\2\u0095\u0096\3\2\2\2\u0096\u0098\5\16\b\2\u0097"+
+		"\u008a\3\2\2\2\u0097\u0098\3\2\2\2\u0098+\3\2\2\2\u0099\u009a\7$\2\2\u009a"+
+		"\u009b\7\27\2\2\u009b\u009c\5\16\b\2\u009c-\3\2\2\2\u009d\u009e\7\6\2"+
+		"\2\u009e\u009f\7\4\2\2\u009f\u00a0\5\2\2\2\u00a0\u00b9\7\5\2\2\u00a1\u00a2"+
+		"\7\7\2\2\u00a2\u00b8\5\f\7\2\u00a3\u00a4\7\r\2\2\u00a4\u00b8\5\n\6\2\u00a5"+
+		"\u00a6\7\b\2\2\u00a6\u00a7\7\4\2\2\u00a7\u00ac\5\4\3\2\u00a8\u00a9\7\3"+
+		"\2\2\u00a9\u00ab\5\4\3\2\u00aa\u00a8\3\2\2\2\u00ab\u00ae\3\2\2\2\u00ac"+
+		"\u00aa\3\2\2\2\u00ac\u00ad\3\2\2\2\u00ad\u00af\3\2\2\2\u00ae\u00ac\3\2"+
+		"\2\2\u00af\u00b0\7\5\2\2\u00b0\u00b8\3\2\2\2\u00b1\u00b2\7\t\2\2\u00b2"+
+		"\u00b3\7\n\2\2\u00b3\u00b8\5\6\4\2\u00b4\u00b5\7\t\2\2\u00b5\u00b6\7\13"+
+		"\2\2\u00b6\u00b8\5\b\5\2\u00b7\u00a1\3\2\2\2\u00b7\u00a3\3\2\2\2\u00b7"+
+		"\u00a5\3\2\2\2\u00b7\u00b1\3\2\2\2\u00b7\u00b4\3\2\2\2\u00b8\u00bb\3\2"+
+		"\2\2\u00b9\u00b7\3\2\2\2\u00b9\u00ba\3\2\2\2\u00ba\u00bd\3\2\2\2\u00bb"+
+		"\u00b9\3\2\2\2\u00bc\u00be\7\f\2\2\u00bd\u00bc\3\2\2\2\u00bd\u00be\3\2"+
+		"\2\2\u00be\u00c0\3\2\2\2\u00bf\u00c1\5\20\t\2\u00c0\u00bf\3\2\2\2\u00c0"+
+		"\u00c1\3\2\2\2\u00c1/\3\2\2\2\u00c2\u00c3\7\23\2\2\u00c3\u00c4\7\24\2"+
+		"\2\u00c4\u00c5\5\22\n\2\u00c5\u00c6\7\25\2\2\u00c6\u00c7\5\24\13\2\u00c7"+
+		"\61\3\2\2\2\u00c8\u00c9\7\'\2\2\u00c9\u00ce\5&\24\2\u00ca\u00cb\7\3\2"+
+		"\2\u00cb\u00cd\5&\24\2\u00cc\u00ca\3\2\2\2\u00cd\u00d0\3\2\2\2\u00ce\u00cc"+
+		"\3\2\2\2\u00ce\u00cf\3\2\2\2\u00cf\63\3\2\2\2\u00d0\u00ce\3\2\2\2\u00d1"+
+		"\u00d2\7%\2\2\u00d2\u00d3\5\22\n\2\u00d3\u00d4\7&\2\2\u00d4\u00d5\5(\25"+
+		"\2\u00d5\65\3\2\2\2\229Gx\u0081\u0083\u0085\u0087\u0091\u0094\u0097\u00ac"+
+		"\u00b7\u00b9\u00bd\u00c0\u00ce";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

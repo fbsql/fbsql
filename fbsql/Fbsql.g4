@@ -98,12 +98,10 @@ POOL        : P O O L;
 SIZE        : S I Z E;
 MIN         : M I N;
 MAX         : M A X;
-
-SWITCH      : S W I T C H;
-
-LOGIN       : L O G I N;
 IF          : I F;
 EXISTS      : E X I S T S;
+
+SWITCH      : S W I T C H;
 
 SCHEDULE    : S C H E D U L E;
 AT          : A T;
@@ -214,7 +212,11 @@ connect_to_stmt
      )+
     )
    )*
+   (
+   EXPOSE
+   (IF EXISTS '(' native_sql ')')?
    AS? connection_alias
+   )?
  ;
 
 switch_to_stmt
@@ -240,11 +242,6 @@ declare_procedure_stmt
 
 include_script_file_stmt
  : INCLUDE sql_script_file ( ',' sql_script_file )*
- ;
-
-login_if_exists
- : LOGIN IF EXISTS
-   '(' native_sql ')'
  ;
 
 schedule_stmt

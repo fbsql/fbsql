@@ -36,7 +36,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -51,7 +50,6 @@ import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure.StmtDeclareProcedure;
 import org.fbsql.antlr4.parser.ParseStmtExpose;
 import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
 import org.fbsql.antlr4.parser.ParseStmtInclude;
-import org.fbsql.antlr4.parser.ParseStmtLoginIfExists;
 import org.fbsql.antlr4.parser.ParseStmtScheduleAt;
 import org.fbsql.antlr4.parser.ParseStmtScheduleAt.StmtScheduleAt;
 import org.fbsql.antlr4.parser.ParseStmtSwitchTo;
@@ -80,7 +78,6 @@ public class SqlParseUtils {
 	public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE = canonizeSql("DECLARE PROCEDURE"); // Declare non native stored procedure written in one of JVM languages
 	public static final String SPECIAL_STATEMENT_SCHEDULE          = canonizeSql("SCHEDULE");          // Add scheduled stored procedure (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_EXPOSE            = canonizeSql("EXPOSE");            // Expose corresponding native SQL statement to frontend
-	public static final String SPECIAL_STATEMENT_LOGIN_IF_EXISTS   = canonizeSql("LOGIN IF EXISTS");   // Authenticate/Authorize users (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_INCLUDE           = canonizeSql("INCLUDE");           // Include script file(s) (can be used only in «init.sql» script)
 
 	/**
@@ -191,24 +188,6 @@ public class SqlParseUtils {
 		if (k == token.length())
 			return savedTokenOffset;
 		return -1;
-	}
-
-	/**
-	 * Parse "SET ... IF EXISTS (..." statements (Example: "SET ALLOW LOGIN IF EXISTS (...")
-	 *
-	 * @param servletConfig - ServletConfig object
-	 * @param prefix        - "SET ... IF EXISTS" prefix
-	 * @param sql           - "SET ... IF EXISTS (..." statement
-	 * @param info          - ConnectionInfo Transfer object
-	 * @return              - internal SQL statement
-	 */
-	public static String parseSetIfExistsStatement(ServletConfig servletConfig, String sql) {
-		sql = stripComments(sql).trim();
-		sql = sql.replace('\n', ' ');
-		sql = sql.replace('\r', ' ');
-		sql = processStatement(sql);
-
-		return new ParseStmtLoginIfExists().parse(sql).authenticationQuery;
 	}
 
 	/**
@@ -669,7 +648,7 @@ public class SqlParseUtils {
 			if (canonizedStatement.startsWith(SPECIAL_STATEMENT_CONNECT_TO)) {
 				StmtConnectTo stmtConnectTo = new ParseStmtConnectTo().parse(null, statement);
 				instanceName = stmtConnectTo.instanceName;
-				listBuffer = new ArrayList<>();
+				listBuffer   = new ArrayList<>();
 				listBuffer.add(statement);
 				map.put(instanceName, listBuffer);
 			} else if (canonizedStatement.startsWith(SPECIAL_STATEMENT_SWITCH_TO)) {
@@ -699,11 +678,11 @@ public class SqlParseUtils {
 		separateSqlFile(list, map);
 	}
 
-	public static void main(String[] args) throws IOException {
-		Map<String /* connection name */, List<String /* SQL statements */>> map = new LinkedHashMap<>();
-		processInitSqlFile(Paths.get("/home/qsecofr/fbsql/config/db/my-sqlite/init.sql"), map);
-		System.out.println(map);
-	}
+	//	public static void main(String[] args) throws IOException {
+	//		Map<String /* connection name */, List<String /* SQL statements */>> map = new LinkedHashMap<>();
+	//		processInitSqlFile(Paths.get("/home/qsecofr/fbsql/config/db/my-sqlite/init.sql"), map);
+	//		System.out.println(map);
+	//	}
 	/**
 	 * Canonize SQL statement for compare (startsWith)
 	 * 

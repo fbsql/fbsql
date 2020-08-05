@@ -287,16 +287,6 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitInclude_script_file_stmt(FbsqlParser.Include_script_file_stmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#login_if_exists}.
-	 * @param ctx the parse tree
-	 */
-	void enterLogin_if_exists(FbsqlParser.Login_if_existsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#login_if_exists}.
-	 * @param ctx the parse tree
-	 */
-	void exitLogin_if_exists(FbsqlParser.Login_if_existsContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#schedule_stmt}.
 	 * @param ctx the parse tree
 	 */
