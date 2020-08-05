@@ -37,12 +37,16 @@ to access our backend SQL database.
 		//const conn = new Connection(new URL('http://localhost:8080/h2-example02'));
 
 		/* Connect to database instance with alias name 'h2-example02', user 'john' and password 'secret' as 'manager' */
-		const conn = new Connection('h2', 'john', 'secret', 'manager');
+		//const conn = new Connection('h2', 'john', 'secret', 'manager');
+		const conn = new Connection('smallsql');
 		//const conn = new Connection('my-sqlite', 'john', 'secret', 'manager');
 		//const conn = new Connection('my-sqlite');
 
 		/* Listen to database events */
 		conn.logDatabaseEvents(document.body, false);
+
+		conn.prepareStatement("SELECT * FROM USERS")
+		.logExecuteQuery(document.body, false)
 
 		conn.prepareStatement("SELECT * FROM employees")
 		.logExecuteQuery(document.body, false)

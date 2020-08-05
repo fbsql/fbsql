@@ -123,7 +123,7 @@ To expose our database to frontend we need create the initialization script <cod
  * any operations that you want to be executed at start up time
  */
 
-CONNECT TO 'jdbc:sqlite:sample' AS MySQLite;
+CONNECT TO 'jdbc:sqlite:sample' EXPOSE AS MySQLite;
 ```
 Internally FBSQL use JDBC API, which allow a client to access a database.
 FBSQL use JDBC URL to create database connection.<br>
@@ -178,7 +178,8 @@ FBSQL JavaScript API (client) is self-hosted by FBSQL Server, so we need just pl
 <a id="add_simple_authentication"></a>
 <h2>Authentication</h2>
 <p><i>
-In this chapter we will learn how to add simple authentication and usage of LOGIN statement.
+In this chapter we will learn how to add simple authentication to our CONNECT TO statement.<br>
+We are going to authenticate our users by username and password.
 </i></p>
 
 <strong>Backend:</strong><br>
@@ -192,7 +193,16 @@ In this chapter we will learn how to add simple authentication and usage of LOGI
  * any operations that you want to be executed at start up time
  */
 
-CONNECT TO 'jdbc:sqlite:sample';
+/*
+ * WARNING!
+ * In this example we are store passwords as plain text only for educational purposes.
+ * It's strongly not recommended way to store passwords in production environment.
+ * Passwords should be hashed.
+ */
+
+CONNECT TO 'jdbc:sqlite:sample' EXPOSE IF EXISTS (
+    SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password
+) AS MySQLite;
 
 /*
  * Authentication. Implement your own authentication logic here!
@@ -209,14 +219,6 @@ INSERT INTO USERS (USERNAME, PASSWORD) VALUES('john',  'secret'   );
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('tim',   'secret123');
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
 
-/*
- * Authenticate by user and password
- */
-
-SET ALLOW LOGIN IF EXISTS (
-    SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password
-);
-
 ```
 <strong>Frontend:</strong><br>
 
@@ -228,8 +230,8 @@ SET ALLOW LOGIN IF EXISTS (
     </head>
     <body>
         <script type="text/javascript">
-            /* connector name: 'my-sqlite', user: 'john', password: 'secret' */
-            const conn = new Connection('my-sqlite', 'john', 'secret');
+            /* connection name: 'MySQLite', user: 'john', password: 'secret' */
+            const conn = new Connection('MySQLite', 'john', 'secret');
             const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
             ps.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
         </script>
@@ -240,7 +242,8 @@ SET ALLOW LOGIN IF EXISTS (
 <a id="add_simple_role_based_authorization"></a>
 <h2>Authorization</h2>
 <p><i>
-In this chapter we will learn how to add simple role-based authorization, and usage of SET ALLOW LOGIN statement.
+In this chapter we will learn how to add simple role-based authorization to our CONNECT TO statement.<br>
+We are going to authenticate our users by username and password, and authorize by role.
 </i></p>
 
 <strong>Backend:</strong><br>
@@ -254,7 +257,18 @@ In this chapter we will learn how to add simple role-based authorization, and us
  * any operations that you want to be executed at start up time
  */
 
-CONNECT TO 'jdbc:sqlite:sample';
+/*
+ * WARNING!
+ * In this example we are store passwords as plain text only for educational purposes.
+ * It's strongly not recommended way to store passwords in production environment.
+ * Passwords should be hashed.
+ */
+
+CONNECT TO 'jdbc:sqlite:sample' EXPOSE IF EXISTS (
+    SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
+        SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role
+    )
+) AS MySQLite;
 
 /*
  * Authenticaton and authorization. Implement your own authentication/authorization logic here!
@@ -282,16 +296,6 @@ INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('john',  'manager'      );
 INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('tim',   'programmer'   );
 INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
 
-/*
- * Authenticate and authorize by user, password and role
- */
-
-SET ALLOW LOGIN IF EXISTS (
-    SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
-        SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role
-    )
-);
-
 ```
 <strong>Frontend:</strong><br>
 
@@ -303,8 +307,8 @@ SET ALLOW LOGIN IF EXISTS (
     </head>
     <body>
         <script type="text/javascript">
-            /* connector name: 'my-sqlite', user: 'john', password: 'secret', role: 'manager' */
-            const conn = new Connection('my-sqlite', 'john', 'secret', 'manager');
+            /* connection name: 'MySQLite', user: 'john', password: 'secret', role: 'manager' */
+            const conn = new Connection('MySQLite', 'john', 'secret', 'manager');
             const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
             ps.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
         </script>
@@ -1403,21 +1407,37 @@ connect_to_stmt
 <i>Examples</i><br>
 
 ```sql
+
+/* Connection is not exposed to frontend */
 CONNECT TO 'jdbc:sqlite:sample';
 ```
+
+```sql
+
+/* Connection is exposed to frontend */
+CONNECT TO 'jdbc:sqlite:sample' EXPOSE AS MySQLite;
+```
+
 ```sql
 CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
       USER 'SA'
-  PASSWORD '';
+  PASSWORD ''
+ EXPOSE AS MyH2;
 
 ```
+
 ```sql
-     CONNECT TO      'jdbc:as400://mysystem.helloworld.com/mylibrary;naming=system;errors=full'
-           USER      'QSECOFR'
-       PASSWORD      'MYSECRET'
-         DRIVER      'com.ibm.as400.access.AS400JDBCDriver'
-            LIB      '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
-CONNECTION POOL      MIN 50 MAX 1000;
+      CONNECT TO 'jdbc:as400://mysystem.example.com/mylibrary;naming=system;errors=full'
+            USER 'QSECOFR'
+        PASSWORD 'MYSECRET'
+          DRIVER 'com.ibm.as400.access.AS400JDBCDriver'
+             LIB '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
+ CONNECTION POOL MIN 50 MAX 1000
+EXPOSE IF EXISTS ( SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
+        	        SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role)
+                 )
+              AS MyAS400;
+
 
 ```
 

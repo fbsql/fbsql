@@ -135,7 +135,6 @@ public class ConnectionPoolManager implements AutoCloseable {
 	 */
 	public boolean releaseConnection(DbConnection dbConnection) throws SQLException {
 		dbConnection.getConnection().commit();
-		dbConnection.getConnection().setClientInfo(new Properties());
 		availableList.add(dbConnection);
 		return inUseList.remove(dbConnection);
 	}

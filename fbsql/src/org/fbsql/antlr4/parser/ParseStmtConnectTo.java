@@ -27,7 +27,9 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.antlr4.parser;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +52,6 @@ import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_driver_class_nameContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_urlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.PasswordContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Statement_aliasContext;
 import org.fbsql.antlr4.generated.FbsqlParser.UserContext;
 import org.fbsql.servlet.SqlParseUtils;
 import org.fbsql.servlet.StringUtils;
@@ -59,25 +60,30 @@ import org.fbsql.servlet.StringUtils;
  * ANTLR4 grammar:
  *
  * connect_to_stmt
- *  : CONNECT TO jdbc_url
- *    (
- *     (USER user) |
- *     (PASSWORD password) |
- *     (PROPERTIES jdbc_connection_properties) |
- *     (DRIVER jdbc_driver_class_name) |
- *     (LIB jar_file ( ',' jar_file )* ) |
- *     (CONNECTION POOL
- *      (
- *       (MIN connection_pool_size_min) |
- *       (MAX connection_pool_size_max)
- *      )+
- *     )
- *    )*
- *    AS? connection_alias
- *  ;
+ * : CONNECT TO jdbc_url
+ * (
+ *  (USER user) |
+ *  (PASSWORD password) |
+ *  (PROPERTIES jdbc_connection_properties) |
+ *  (DRIVER jdbc_driver_class_name) |
+ *  (LIB jar_file ( ',' jar_file )* ) |
+ *  (CONNECTION POOL
+ *   (
+ *    (MIN connection_pool_size_min) |
+ *    (MAX connection_pool_size_max)
+ *   )+
+ *  )
+ * )*
+ * (
+ * EXPOSE
+ * (IF EXISTS '(' native_sql ')')?
+ * AS? connection_alias
+ * )?
+ * ;
  */
 public class ParseStmtConnectTo {
-	public static final String NONEXPOSABLE_PREFIX = "NONEXPOSABLE:";
+	public static final String  NONEXPOSABLE_PREFIX     = "NONEXPOSABLE:";
+	private static final String ENCODED_PASSWORD_PREFIX = "base64:";
 
 	private static final int DEFAULT_CONNECTION_POOL_SIZE_MIN = 1;
 	private static final int DEFAULT_CONNECTION_POOL_SIZE_MAX = 100;
@@ -122,15 +128,18 @@ public class ParseStmtConnectTo {
 		public String jdbcPropertiesFile;
 
 		/**
-		 * Value from "CONNECTION POOL SIZE MIN" clause
+		 * Value from "CONNECTION POOL -> MIN" clause
 		 */
 		public int connectionPoolSizeMin = DEFAULT_CONNECTION_POOL_SIZE_MIN;
 
 		/**
-		 * Value from "CONNECTION POOL SIZE MAX" clause
+		 * Value from "CONNECTION POOL -> MAX" clause
 		 */
 		public int connectionPoolSizeMax = DEFAULT_CONNECTION_POOL_SIZE_MAX;
 
+		/**
+		 * Value from "IF EXISTS" clause
+		 */
 		public String authenticationQuery;
 
 		/**
@@ -244,14 +253,18 @@ public class ParseStmtConnectTo {
 
 		}, tree);
 
-		if (st.instanceName == null)
+		if (st.instanceName == null)	
 			st.instanceName = NONEXPOSABLE_PREFIX + UUID.randomUUID().toString();
 
+		if (st.password.startsWith(ENCODED_PASSWORD_PREFIX)) {
+			st.password = st.password.substring(ENCODED_PASSWORD_PREFIX.length());
+			st.password = new String(Base64.getDecoder().decode(st.password), StandardCharsets.UTF_8);
+		}
 		return st;
 	}
 
 	public static void main(String[] args) {
-		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'ppp' USER uuu EXPOSE IF EXISTS (SELECT * from USERS where USER=:user) AS ali";
+		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' USER uuu EXPOSE IF EXISTS (SELECT * from USERS where USER=:user) AS ali";
 		ParseStmtConnectTo p   = new ParseStmtConnectTo();
 		StmtConnectTo      se  = p.parse(null, sql);
 		System.out.println(se);

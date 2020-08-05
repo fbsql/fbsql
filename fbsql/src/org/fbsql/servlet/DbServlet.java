@@ -632,6 +632,7 @@ public class DbServlet extends HttpServlet {
 			if (authorization != null && authorization.toLowerCase(Locale.ENGLISH).startsWith("basic")) {
 				String base64Credentials = authorization.substring("Basic".length()).trim();
 				String credentials       = new String(sharedCoder.decoder.decode(base64Credentials), StandardCharsets.UTF_8);
+
 				/* parse username:password */
 				String[] userAndPassword = credentials.split(":", 2);
 
