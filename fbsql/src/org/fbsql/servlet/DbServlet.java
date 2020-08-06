@@ -85,6 +85,9 @@ import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
 import org.fbsql.connection_pool.ConnectionPoolManager;
 import org.fbsql.connection_pool.DbConnection;
 import org.fbsql.servlet.Logger.Severity;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Scriptable;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -163,14 +166,18 @@ public class DbServlet extends HttpServlet {
 	public static final String DB_CONNECTORS_DIR = "DB_CONNECTORS_DIR";
 	public static final String CORS_ALLOW_ORIGIN = "CORS_ALLOW_ORIGIN";
 
-	private Map<String /* instance name */, StmtConnectTo>                                                     connectionInfoMap;
-	private Map<String /* instance name */, String /* authentication query SQL */>                             authenticationQueryMap;
-	private Map<String /* instance name */, ConnectionPoolManager>                                             connectionPoolManagerMap;
-	private Map<String /* instance name */, Map<String /* SQL statement name */, StmtExpose>>                  whiteListMap;
-	private Map<String /* instance name */, Map<StaticStatement, ReadyResult>>                                 staticJsonsMap;
-	private Map<String /* instance name */, Queue<AsyncContext>>                                               ongoingRequestsMap;
-	private Map<String /* instance name */, Connection>                                                        connectionMap;
-	private Map<String /* instance name */, Map<String /* stored procedure name */, String /* java method */>> instancesProceduresMap;
+	private static final String USER_HOME_DIR = System.getProperty("user.home");
+
+	private Map<String /* instance name */, StmtConnectTo>                                                             connectionInfoMap;
+	private Map<String /* instance name */, String /* authentication query SQL */>                                     authenticationQueryMap;
+	private Map<String /* instance name */, ConnectionPoolManager>                                                     connectionPoolManagerMap;
+	private Map<String /* instance name */, Map<String /* SQL statement name */, StmtExpose>>                          whiteListMap;
+	private Map<String /* instance name */, Map<StaticStatement, ReadyResult>>                                         staticJsonsMap;
+	private Map<String /* instance name */, Queue<AsyncContext>>                                                       ongoingRequestsMap;
+	private Map<String /* instance name */, Connection>                                                                connectionMap;
+	private Map<String /* instance name */, Map<String /* stored procedure name */, String /* java method */>>         instancesProceduresMap;
+	private Map<String /* instance name */, Map<String /* js file name */, Scriptable>>                                instancesScopesMap;
+	private Map<String /* instance name */, Map<String /* js file name */, Map<String /* function name */, Function>>> instancesFunctionsMap;
 
 	private Collection<String> instances;
 
@@ -227,22 +234,23 @@ public class DbServlet extends HttpServlet {
 			/*
 			 * Getting service home directory from servlet parameter (See: 'web.xml' file)
 			 */
-			String dbConnectorsDir = servletConfig.getInitParameter(DB_CONNECTORS_DIR);
-			if (dbConnectorsDir == null || dbConnectorsDir.trim().isEmpty())
-				throw new IllegalArgumentException(DB_CONNECTORS_DIR + " is null or empty string");
-			// Preprocess name of 'home' directory (initial parameter from 'web.xml' file)
-			dbConnectorsDir = StringUtils.putVars(dbConnectorsDir);
-			if (dbConnectorsDir.endsWith("/")) // clean path from trailing slash (if specified)
-				dbConnectorsDir = dbConnectorsDir.substring(0, dbConnectorsDir.length() - 1);
+			String dbConnectorsDir = USER_HOME_DIR + "/fbsql/config/db";
+			//			String dbConnectorsDir = servletConfig.getInitParameter(DB_CONNECTORS_DIR);
+			//			if (dbConnectorsDir == null || dbConnectorsDir.trim().isEmpty())
+			//				throw new IllegalArgumentException(DB_CONNECTORS_DIR + " is null or empty string");
+			//			// Preprocess name of 'home' directory (initial parameter from 'web.xml' file)
+			//			dbConnectorsDir = StringUtils.putVars(dbConnectorsDir);
+			//			if (dbConnectorsDir.endsWith("/")) // clean path from trailing slash (if specified)
+			//				dbConnectorsDir = dbConnectorsDir.substring(0, dbConnectorsDir.length() - 1);
 			Path dbConnectorsDirPath = Paths.get(dbConnectorsDir);
-			if (dbConnectorsDirPath.isAbsolute()) {
-				Files.createDirectories(dbConnectorsDirPath);
-				Logger.out(Severity.INFO, MessageFormat.format("Database connectors directory is: \"{0}\"", dbConnectorsDir));
-			} else {
-				String message = MessageFormat.format("Bad database connectors directory: \"{0}\". Not absolute path", dbConnectorsDir);
-				Logger.out(Severity.FATAL, message);
-				throw new ServletException(message);
-			}
+			//			if (dbConnectorsDirPath.isAbsolute()) {
+			Files.createDirectories(dbConnectorsDirPath);
+			Logger.out(Severity.INFO, MessageFormat.format("Database connectors directory is: \"{0}\"", dbConnectorsDir));
+			//			} else {
+			//				String message = MessageFormat.format("Bad database connectors directory: \"{0}\". Not absolute path", dbConnectorsDir);
+			//				Logger.out(Severity.FATAL, message);
+			//				throw new ServletException(message);
+			//			}
 
 			/*
 			 * Initialize SharedCoder
@@ -256,9 +264,8 @@ public class DbServlet extends HttpServlet {
 			if (!initSqlFile.exists() || !initSqlFile.isFile())
 				Logger.out(Severity.WARN, "File not found: 'init.sql'");
 
-			Map<String /* connection name */, List<String /* SQL statements */>> initSqlMap  = new HashMap<>();
-			Path                                                                 initSqlPath = initSqlFile.toPath();
-			SqlParseUtils.processInitSqlFile(initSqlPath, initSqlMap);
+			Map<String /* connection name */, List<String /* SQL statements */>> initSqlMap = new HashMap<>();
+			SqlParseUtils.processInitSqlFiles(new File(dbConnectorsDir), initSqlMap);
 			int instancesCount = initSqlMap.size();
 
 			if (instancesCount == 0)
@@ -274,6 +281,8 @@ public class DbServlet extends HttpServlet {
 			ongoingRequestsMap       = new HashMap<>(instancesCount);
 			connectionMap            = new HashMap<>(instancesCount);
 			instancesProceduresMap   = new HashMap<>(instancesCount);
+			instancesScopesMap       = new HashMap<>(instancesCount);
+			instancesFunctionsMap    = new HashMap<>(instancesCount);
 
 			instances = new ArrayList<>(instancesCount);
 
@@ -360,9 +369,11 @@ public class DbServlet extends HttpServlet {
 
 		connectionMap.put(instanceName, connection);
 
-		Map<String /* stored procedure name */, String /* java method */>        proceduresMap     = new HashMap<>();
-		Map<String /* Cron expression */, List<String /* SQL statement name */>> schedulersMap     = new HashMap<>();
-		Map<String /* SQL statement name */, StmtExpose>                         exposedStatements = new HashMap<>();
+		Map<String /* js file name */, Scriptable>                                mapScopes         = new HashMap<>();
+		Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions      = new HashMap<>();
+		Map<String /* stored procedure name */, String /* java method */>         proceduresMap     = new HashMap<>();
+		Map<String /* Cron expression */, List<String /* SQL statement name */>>  schedulersMap     = new HashMap<>();
+		Map<String /* SQL statement name */, StmtExpose>                          exposedStatements = new HashMap<>();
 
 		whiteListMap.put(instanceName, exposedStatements);
 		try (Statement st = connection.createStatement()) {
@@ -372,19 +383,40 @@ public class DbServlet extends HttpServlet {
 			//
 
 			instancesProceduresMap.put(instanceName, proceduresMap);
+			instancesScopesMap.put(instanceName, mapScopes);
+			instancesFunctionsMap.put(instanceName, mapFunctions);
 
 			for (String statement : initList) {
 				if (DEBUG)
 					System.out.println("init.sql: -->" + statement + "<--");
-				String text = SqlParseUtils.canonizeSql(statement);
-
-				Method method = CallUtils.getCallStatementMethod(statement, proceduresMap);
-				if (method != null) { // Process CALL statement
+				String           text             = SqlParseUtils.canonizeSql(statement);
+				String           javaMethod       = CallUtils.getCallStatementMethod(statement, proceduresMap);
+				MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
+				if (methodOrFunction != null) { // Java or JavaScript
 					List<Object> parameterValues = new ArrayList<>();
 					parameterValues.add(connection);
 					parameterValues.add(instanceName);
 					CallUtils.parseSqlParameters(statement, parameterValues);
-					method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
+					Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+					if (methodOrFunction.method != null) // Java
+						methodOrFunction.method.invoke(null, parametersArray);
+					else { // JavaScript
+							//
+							// initize Rhino
+							// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+							//
+						Context ctx = Context.enter();
+						try {
+							ctx.setLanguageVersion(Context.VERSION_1_7);
+							ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+							methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							ctx.exit();
+						}
+					}
 				} //
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_DECLARE_PROCEDURE)) // Process DECLARE PROCEDURE statement
 					SqlParseUtils.parseDeclareProcedureStatement(servletConfig, statement, proceduresMap);
@@ -457,7 +489,44 @@ public class DbServlet extends HttpServlet {
 
 								String outEvent   = null;
 								String javaMethod = proceduresMap.get(storedProcedureName);
-								if (javaMethod == null) {
+
+								MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
+								if (methodOrFunction != null) { // Java or JavaScript
+									List<Object> parameterValues = new ArrayList<>();
+									parameterValues.add(dbConnection0.getConnection());
+									parameterValues.add(instanceName);
+									parameterValues.add(cronExpression);
+									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+									Object obj = null;
+									if (methodOrFunction.method != null) { // Java
+										obj = methodOrFunction.method.invoke(null, parametersArray);
+										System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+									} else { // JavaScript
+										System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+											//
+											// initize Rhino
+											// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+											//
+										Context ctx = Context.enter();
+										try {
+											ctx.setLanguageVersion(Context.VERSION_1_7);
+											ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+											obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+										} catch (Exception e) {
+											e.printStackTrace();
+										} finally {
+											ctx.exit();
+										}
+									}
+									if (obj instanceof String)
+										outEvent = (String) obj;
+									else if (obj instanceof ResultSet)
+										try (ResultSet rs = (ResultSet) obj) {
+											if (rs.next())
+												outEvent = rs.getString(1);
+										}
+								} else { // Native
 									CallableStatement cs = dbConnection0.getCallableStatement("{call " + storedProcedureName + "(?,?)}");
 									cs.setString(1, instanceName);
 									cs.setString(2, cronExpression);
@@ -467,22 +536,34 @@ public class DbServlet extends HttpServlet {
 											if (rs.next())
 												outEvent = rs.getString(1);
 										}
-								} else {
-									String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
-									String   className  = array[0];
-									String   methodName = array[1];
-
-									Class<?> clazz  = Class.forName(className);
-									Method   method = clazz.getMethod(methodName, Connection.class, String.class, String.class);
-									Object   result = method.invoke(null, dbConnection0.getConnection(), instanceName, cronExpression);
-									if (result instanceof String)
-										outEvent = (String) result;
-									else if (result instanceof ResultSet)
-										try (ResultSet rs = (ResultSet) result) {
-											if (rs.next())
-												outEvent = rs.getString(1);
-										}
 								}
+
+//								if (javaMethod == null) {
+//									CallableStatement cs = dbConnection0.getCallableStatement("{call " + storedProcedureName + "(?,?)}");
+//									cs.setString(1, instanceName);
+//									cs.setString(2, cronExpression);
+//									boolean b = cs.execute();
+//									if (b) // first result is a ResultSet object
+//										try (ResultSet rs = cs.getResultSet()) {
+//											if (rs.next())
+//												outEvent = rs.getString(1);
+//										}
+//								} else {
+//									String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
+//									String   className  = array[0];
+//									String   methodName = array[1];
+//
+//									Class<?> clazz  = Class.forName(className);
+//									Method   method = clazz.getMethod(methodName, Connection.class, String.class, String.class);
+//									Object   result = method.invoke(null, dbConnection0.getConnection(), instanceName, cronExpression);
+//									if (result instanceof String)
+//										outEvent = (String) result;
+//									else if (result instanceof ResultSet)
+//										try (ResultSet rs = (ResultSet) result) {
+//											if (rs.next())
+//												outEvent = rs.getString(1);
+//										}
+//								}
 
 								for (AsyncContext ac : ongoingRequests) {
 									if (outEvent != null) { // send if outEvent is not null
@@ -781,11 +862,12 @@ public class DbServlet extends HttpServlet {
 	private void doDbRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String[] inst_and_oper = getInstanceAndOperation(request);
 
-		String                                                            instanceName          = inst_and_oper[0];
-		StmtConnectTo                                                     connectionInfo        = connectionInfoMap.get(instanceName);
-		ConnectionPoolManager                                             connectionPoolManager = connectionPoolManagerMap.get(instanceName);
-		Map<String /* SQL statement name */, StmtExpose>                  whiteList             = whiteListMap.get(instanceName);
-		Map<String /* stored procedure name */, String /* java method */> proceduresMap         = instancesProceduresMap.get(instanceName);
+		String                                                                    instanceName          = inst_and_oper[0];
+		ConnectionPoolManager                                                     connectionPoolManager = connectionPoolManagerMap.get(instanceName);
+		Map<String /* SQL statement name */, StmtExpose>                          whiteList             = whiteListMap.get(instanceName);
+		Map<String /* stored procedure name */, String /* java method */>         proceduresMap         = instancesProceduresMap.get(instanceName);
+		Map<String /* js file name */, Scriptable>                                mapScopes             = instancesScopesMap.get(instanceName);
+		Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions          = instancesFunctionsMap.get(instanceName);
 
 		Queue<AsyncContext> ongoingRequests = ongoingRequestsMap.get(instanceName);
 
@@ -835,6 +917,8 @@ public class DbServlet extends HttpServlet {
 				connectionPoolManager, //
 				whiteList, //
 				proceduresMap, //
+				mapScopes, //
+				mapFunctions, //
 				mapJson, //
 				ongoingRequests, //
 				sharedCoder //

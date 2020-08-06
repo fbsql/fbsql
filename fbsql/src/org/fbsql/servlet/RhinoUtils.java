@@ -27,21 +27,14 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.servlet;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeJSON;
-import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 
 public class RhinoUtils {
@@ -75,54 +68,6 @@ public class RhinoUtils {
 		return object;
 	}
 
-	/**
-	 * 
-	 * @param mapScopes
-	 * @param mapFunctions
-	 * @param scriptFile
-	 * @param funcName
-	 * @param parameters
-	 * @return
-	 * @throws IOException
-	 */
-	public static Object callJavaScriptFunction(Map<String /* js file name */, Scriptable> mapScopes, Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions, String scriptFile, String funcName, Object[] parameters) throws IOException {
-		try {
-			//
-			// initize Rhino
-			// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
-			//
-			Context ctx = Context.enter();
-
-			ctx.setLanguageVersion(Context.VERSION_1_7);
-			ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-
-			Scriptable scope = mapScopes.get(scriptFile);
-			if (scope == null) {
-				String content = new String(Files.readAllBytes(Paths.get(scriptFile)), StandardCharsets.UTF_8);
-				scope = ctx.initStandardObjects();
-				ctx.evaluateString(scope, content, "script", 1, null);
-				mapScopes.put(scriptFile, scope);
-			}
-
-			Map<String /* function name */, Function> map = mapFunctions.get(scriptFile);
-			if (map == null) {
-				map = new HashMap<>();
-				mapFunctions.put(scriptFile, map);
-			}
-			Function fct = map.get(funcName);
-			if (fct == null) {
-				fct = (Function) scope.get(funcName, scope);
-				map.put(funcName, fct);
-			}
-
-			Object result = fct.call(ctx, scope, null, parameters);
-			if (result instanceof NativeObject || result instanceof NativeArray) // return JSON object that will sent to client
-				return (String) NativeJSON.stringify(ctx, scope, result, null, null);
-			return null;
-		} finally {
-			Context.exit();
-		}
-	}
 }
 
 /*

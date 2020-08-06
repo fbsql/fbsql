@@ -27,6 +27,7 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.servlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -666,23 +667,44 @@ public class SqlParseUtils {
 	}
 
 	/**
+	 * Iterate directory recursive, find 'init.sql' files, and process them.
+	 *
+	 * @param path
+	 * @param map
+	 * @throws IOException
+	 */
+	public static void processInitSqlFiles(File file, Map<String /* connection name */, List<String /* SQL statements */>> map) throws IOException {
+		if (file.isDirectory()) {
+			File[] files = file.listFiles();
+			if (files != null) {
+				for (File f : files)
+					processInitSqlFiles(f, map);
+			}
+		} else if (file.getName().equals("init.sql"))
+			processInitSqlFile(file.toPath(), map);
+	}
+
+	/**
 	 * Read 'init.sql' file, process 'includes', iterate record by record and divide it by instance name to map
 	 *
 	 * @param path
 	 * @param map
 	 * @throws IOException
 	 */
-	public static void processInitSqlFile(Path path, Map<String /* connection name */, List<String /* SQL statements */>> map) throws IOException {
+	private static void processInitSqlFile(Path path, Map<String /* connection name */, List<String /* SQL statements */>> map) throws IOException {
 		List<String /* SQL statements */> list = new ArrayList<>();
 		processIncludes(path, list);
 		separateSqlFile(list, map);
 	}
 
-	//	public static void main(String[] args) throws IOException {
-	//		Map<String /* connection name */, List<String /* SQL statements */>> map = new LinkedHashMap<>();
-	//		processInitSqlFile(Paths.get("/home/qsecofr/fbsql/config/db/my-sqlite/init.sql"), map);
-	//		System.out.println(map);
-	//	}
+	public static void main(String[] args) throws IOException {
+		Map<String /* connection name */, List<String /* SQL statements */>> map = new LinkedHashMap<>();
+		//processInitSqlFile(Paths.get("/home/qsecofr/fbsql/config/db/my-sqlite/init.sql"), map);
+		processInitSqlFiles(Paths.get("/home/qsecofr/fbsql/config/db").toFile(), map);
+		//processInitSqlFile(Paths.get("/home/qsecofr/fbsql/config/db"), map);
+		System.out.println(map);
+	}
+
 	/**
 	 * Canonize SQL statement for compare (startsWith)
 	 * 

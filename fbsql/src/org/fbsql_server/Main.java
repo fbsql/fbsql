@@ -28,7 +28,6 @@ E-Mail: fbsql.team.team@gmail.com
 package org.fbsql_server;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -41,7 +40,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,36 +131,13 @@ public class Main {
 		System.out.println("    • Connectors:");
 		Path fbsqlConfDirPath = Paths.get(fbsqlConfDir);
 
-		File[] instancesDirs  = new File(fbsqlConfDirPath.toString()).listFiles(new FileFilter() {
+		Map<String /* connection name */, List<String /* SQL statements */>> initSqlMap = new HashMap<>();
+		//Path                                                                 initSqlPath = initSqlFile.toPath();
+		SqlParseUtils.processInitSqlFiles(new File(fbsqlConfDirPath.toString()), initSqlMap);
+		for (String /* connection name */ instanceName : initSqlMap.keySet())
+			System.out.println("      • " + instanceName);
 
-									@Override
-									public boolean accept(File file) {
-										File initSqlFile = new File(file, "init.sql");
-										if (file.isDirectory() && initSqlFile.exists()) {
-											try {
-												Map<String /* connection name */, List<String /* SQL statements */>> initSqlMap  = new HashMap<>();
-												Path                                                                 initSqlPath = initSqlFile.toPath();
-												SqlParseUtils.processInitSqlFile(initSqlPath, initSqlMap);
-												for (Map.Entry<String /* connection name */, List<String /* SQL statements */>> entry : initSqlMap.entrySet()) {
-													String                            instanceName = entry.getKey();
-													List<String /* SQL statements */> initList     = entry.getValue();
-													for (String statement : initList) {
-														String text = SqlParseUtils.canonizeSql(statement);
-														if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO)) {
-															System.out.println("      • " + instanceName);
-															return true;
-														}
-													}
-
-												}
-											} catch (IOException e) {
-												e.printStackTrace();
-											}
-										}
-										return false;
-									}
-								});
-		int    instancesCount = instancesDirs.length;
+		int instancesCount = initSqlMap.size();
 		if (instancesCount == 0)
 			System.out.println("No instances found");
 		System.out.println();

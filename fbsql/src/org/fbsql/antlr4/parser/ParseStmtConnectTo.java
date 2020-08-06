@@ -253,13 +253,14 @@ public class ParseStmtConnectTo {
 
 		}, tree);
 
-		if (st.instanceName == null)	
+		if (st.instanceName == null)
 			st.instanceName = NONEXPOSABLE_PREFIX + UUID.randomUUID().toString();
 
-		if (st.password.startsWith(ENCODED_PASSWORD_PREFIX)) {
-			st.password = st.password.substring(ENCODED_PASSWORD_PREFIX.length());
-			st.password = new String(Base64.getDecoder().decode(st.password), StandardCharsets.UTF_8);
-		}
+		if (st.password != null)
+			if (st.password.startsWith(ENCODED_PASSWORD_PREFIX)) {
+				st.password = st.password.substring(ENCODED_PASSWORD_PREFIX.length());
+				st.password = new String(Base64.getDecoder().decode(st.password), StandardCharsets.UTF_8);
+			}
 		return st;
 	}
 

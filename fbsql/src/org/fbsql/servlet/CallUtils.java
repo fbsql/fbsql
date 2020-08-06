@@ -30,16 +30,27 @@ package org.fbsql.servlet;
 import static org.fbsql.servlet.SqlParseUtils.JAVA_METHOD_SEPARATOR;
 
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Scriptable;
+
 public class CallUtils {
+
+	private static final String USER_HOME_DIR = System.getProperty("user.home");
 
 	/**
 	 * Single quote character constant (string parameter wrapped in single quotes)
@@ -64,7 +75,7 @@ public class CallUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Method getCallStatementMethod(String sql, Map<String /* stored procedure name */, String /* java method */> proceduresMap) throws Exception {
+	public static String getCallStatementMethod(String sql, Map<String /* stored procedure name */, String /* java method */> proceduresMap) {
 		final String CALL_PREFIX = "CALL ";
 		if (!sql.toUpperCase(Locale.ENGLISH).startsWith(CALL_PREFIX))
 			return null; // Not a CALL statement
@@ -77,7 +88,18 @@ public class CallUtils {
 
 		procName = procName.substring(0, posLeft).trim().toUpperCase(Locale.ENGLISH);
 
-		String javaMethod = proceduresMap.get(procName);
+		return proceduresMap.get(procName);
+	}
+
+	/**
+	 * Get CALL Statement Method
+	 *
+	 * @param sql
+	 * @param proceduresMap
+	 * @return
+	 * @throws Exception
+	 */
+	public static MethodOrFunction getMethodOrFunction(String javaMethod, Map<String /* stored procedure name */, String /* java method */> proceduresMap, Map<String /* js file name */, Scriptable> mapScopes, Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions) throws Exception {
 		if (javaMethod == null)
 			return null; // No Java method declared
 
@@ -85,12 +107,60 @@ public class CallUtils {
 		String   className  = array[0];
 		String   methodName = array[1];
 
-		Class<?> clazz   = Class.forName(className);
-		Method[] methods = clazz.getMethods();
-		for (Method method : methods)
-			if (method.getName().equals(methodName))
-				return method;
-		return null; // Java method declared, but not found in the class
+		MethodOrFunction methodOrFunction = new MethodOrFunction();
+		Class<?> clazz;
+		try {
+			// Try Java
+			clazz = Class.forName(className);
+			Method[] methods = clazz.getMethods();
+			for (Method method : methods)
+				if (method.getName().equals(methodName)) {
+					methodOrFunction.method = method;
+					return methodOrFunction;
+				}
+			// Java method declared, but not found in the class
+		} catch (ClassNotFoundException e) {
+			// Try JavaScript
+			Path jsFilePath = Paths.get(USER_HOME_DIR + "/fbsql/config/js/" + (className.replace('.', '/') + ".js")); // convert className to JavaScript file name
+			if (!Files.exists(jsFilePath))
+				return null;
+
+			//
+			// initize Rhino
+			// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+			//
+			Context ctx = Context.enter();
+
+			ctx.setLanguageVersion(Context.VERSION_1_7);
+			ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+
+			Scriptable scope = mapScopes.get(className);
+			if (scope == null) {
+				String content = new String(Files.readAllBytes(jsFilePath), StandardCharsets.UTF_8);
+				scope = ctx.initStandardObjects();
+				ctx.evaluateString(scope, content, "script", 1, null);
+				mapScopes.put(className, scope);
+			}
+
+			Map<String /* function name */, Function> map = mapFunctions.get(className);
+			if (map == null) {
+				map = new HashMap<>();
+				mapFunctions.put(className, map);
+			}
+
+			Function fct = map.get(methodName);
+			if (fct == null) {
+				fct = (Function) scope.get(methodName, scope);
+				map.put(methodName, fct);
+			}
+
+			methodOrFunction.scope = scope;
+			methodOrFunction.function = fct;
+
+			return methodOrFunction;
+
+		}
+		return null;
 	}
 
 	/**

@@ -75,6 +75,12 @@ import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
 import org.fbsql.connection_pool.ConnectionPoolManager;
 import org.fbsql.connection_pool.DbConnection;
 import org.fbsql.json.parser.JsonUtils;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeJSON;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.Scriptable;
 
 /**
  * <p><strong>DbRequestProcessor</strong> contains the processing logic that
@@ -143,11 +149,14 @@ public class DbRequestProcessor implements Runnable {
 	private boolean               debug;
 	private ConnectionPoolManager connectionPoolManager;
 
-	private Map<String /* SQL statement name */, StmtExpose>                  whiteList;      // list of SQL statements
-	private Map<String /* stored procedure name */, String /* java method */> proceduresMap;
-	private Map<StaticStatement, ReadyResult>                                 mapJson;
-	private Queue<AsyncContext>                                               ongoingRequests;
-	private DbServlet.SharedCoder                                             sharedCoder;
+	private Map<String /* SQL statement name */, StmtExpose>                          whiteList;    // list of SQL statements
+	private Map<String /* stored procedure name */, String /* java method */>         proceduresMap;
+	private Map<String /* js file name */, Scriptable>                                mapScopes;
+	private Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions;
+
+	private Map<StaticStatement, ReadyResult> mapJson;
+	private Queue<AsyncContext>               ongoingRequests;
+	private DbServlet.SharedCoder             sharedCoder;
 
 	/**
 	 * Constructs DbRequestProcessor object
@@ -170,6 +179,8 @@ public class DbRequestProcessor implements Runnable {
 			ConnectionPoolManager connectionPoolManager, //
 			Map<String /* SQL statement name */, StmtExpose> whiteList, // list of SQL statements
 			Map<String /* stored procedure name */, String /* java method */> proceduresMap, //
+			Map<String /* js file name */, Scriptable> mapScopes, //
+			Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions, //
 			Map<StaticStatement, ReadyResult> mapJson, //
 			Queue<AsyncContext> ongoingRequests, //
 			DbServlet.SharedCoder sharedCoder //
@@ -180,6 +191,8 @@ public class DbRequestProcessor implements Runnable {
 		this.connectionPoolManager = connectionPoolManager;
 		this.whiteList             = whiteList;            // list of SQL statements
 		this.proceduresMap         = proceduresMap;
+		this.mapScopes             = mapScopes;
+		this.mapFunctions          = mapFunctions;
 		this.mapJson               = mapJson;
 		this.ongoingRequests       = ongoingRequests;
 		this.sharedCoder           = sharedCoder;
@@ -322,8 +335,47 @@ public class DbRequestProcessor implements Runnable {
 						try {
 							dbConnection0 = connectionPoolManager.getConnection();
 
-							String javaMethod = proceduresMap.get(validatorStoredProcedureName);
-							if (javaMethod == null) {
+							String           javaMethod       = proceduresMap.get(validatorStoredProcedureName);
+							MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
+							if (methodOrFunction != null) { // Java or JavaScript
+								List<Object> parameterValues = new ArrayList<>();
+								parameterValues.add(request);
+								parameterValues.add(response);
+								parameterValues.add(dbConnection0.getConnection());
+								parameterValues.add(instanceName);
+								parameterValues.add(userInfoJson);
+								parameterValues.add(statementInfoJson);
+								Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+								Object obj = null;
+								if (methodOrFunction.method != null) // java
+									obj = (String) methodOrFunction.method.invoke(null, parametersArray);
+								else { // JavaScript
+										//
+										// initize Rhino
+										// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+										//
+									Context ctx = Context.enter();
+									try {
+										ctx.setLanguageVersion(Context.VERSION_1_7);
+										ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+										obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+										if (obj instanceof NativeObject)
+											obj = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null); // to string
+									} catch (Exception e) {
+										e.printStackTrace();
+									} finally {
+										ctx.exit();
+									}
+								}
+								if (obj instanceof ResultSet) {
+									try (ResultSet rs = (ResultSet) obj) {
+										if (rs.next())
+											modifiedParamsJson = rs.getString(1);
+									}
+								} else if (obj instanceof CharSequence)
+									modifiedParamsJson = obj.toString();
+							} else { // Native
 								CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
 								cs.setString(1, instanceName);
 								cs.setString(2, userInfoJson);
@@ -333,14 +385,6 @@ public class DbRequestProcessor implements Runnable {
 									if (rs.next())
 										modifiedParamsJson = rs.getString(1);
 								}
-							} else {
-								String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
-								String   className  = array[0];
-								String   methodName = array[1];
-
-								Class<?> clazz  = Class.forName(className);
-								Method   method = clazz.getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, Connection.class, String.class, String.class, String.class);
-								modifiedParamsJson = (String) method.invoke(null, request, response, dbConnection0.getConnection(), instanceName, userInfoJson, statementInfoJson);
 							}
 						} finally {
 							if (dbConnection0 != null)
@@ -521,46 +565,118 @@ public class DbRequestProcessor implements Runnable {
 				}
 				DbConnection dbConnection = connectionPoolManager.getConnection();
 				try {
-					Method method = CallUtils.getCallStatementMethod(unprocessedNamedPreparedStatement, proceduresMap);
-					if (method != null) {
-						if (executeTypeUpdate) {
-							int rowCount = 0;
-							for (Map<String, Object> parametersMap : parametersListOfMaps) {
-								List<Object> parameterValues = new ArrayList<>();
+					String           javaMethod       = CallUtils.getCallStatementMethod(unprocessedNamedPreparedStatement, proceduresMap);
+					MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
+
+					if (methodOrFunction != null) { // Java or JavaScript
+						if (methodOrFunction.method != null) { // Java
+							if (executeTypeUpdate) {
+								int rowCount = 0;
+								for (Map<String, Object> parametersMap : parametersListOfMaps) {
+									List<Object> parameterValues = new ArrayList<>();
+									parameterValues.add(request);
+									parameterValues.add(response);
+									parameterValues.add(dbConnection.getConnection());
+									parameterValues.add(instanceName);
+									CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+									methodOrFunction.method.invoke(null, parametersArray);
+									rowCount++;
+								}
+								bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
+							} else if (executeTypeQuery) {
+								Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
+								List<Object>        parameterValues = new ArrayList<>();
 								parameterValues.add(request);
 								parameterValues.add(response);
 								parameterValues.add(dbConnection.getConnection());
 								parameterValues.add(instanceName);
 								CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
-								method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
-								rowCount++;
+								Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+								Object                                                       obj         = methodOrFunction.method.invoke(null, parametersArray);
+								Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+								List<Map<String /* column name */, String /* JSON value */>> list        = null;
+								if (obj instanceof ResultSet) {
+									try (ResultSet rs = (ResultSet) obj) {
+										List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+										list = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+									}
+								} else if (obj instanceof CharSequence) {
+									String jsonArrayOfObjects = obj.toString();
+									list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArrayOfObjects);
+								}
+								ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+								bs         = rr.bs;
+								etag       = rr.etag;
+								compressed = rr.compressed;
 							}
-							bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
-						} else if (executeTypeQuery) {
-							Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
-							List<Object>        parameterValues = new ArrayList<>();
-							parameterValues.add(request);
-							parameterValues.add(response);
-							parameterValues.add(dbConnection.getConnection());
-							parameterValues.add(instanceName);
-							CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
-							Object                                                       obj         = method.invoke(null, parameterValues.toArray(new Object[parameterValues.size()]));
-							Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
-							List<Map<String /* column name */, String /* JSON value */>> list        = null;
-							if (obj instanceof ResultSet) {
-								ResultSet                                                      rs                = (ResultSet) obj;
-								List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-								list = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
-							} else if (obj instanceof CharSequence) {
-								String jsonArrayOfObjects = obj.toString();
-								list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArrayOfObjects);
+						} else { // JavaScript
+							//
+							// initize Rhino
+							// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+							//
+							Context ctx = Context.enter();
+
+							try {
+								ctx.setLanguageVersion(Context.VERSION_1_7);
+								ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+
+								if (executeTypeUpdate) {
+									int rowCount = 0;
+									for (Map<String, Object> parametersMap : parametersListOfMaps) {
+										List<Object> parameterValues = new ArrayList<>();
+										parameterValues.add(request);
+										parameterValues.add(response);
+										parameterValues.add(dbConnection.getConnection());
+										parameterValues.add(instanceName);
+										CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+										Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+										methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+										rowCount++;
+									}
+									bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
+								} else if (executeTypeQuery) {
+									Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
+									List<Object>        parameterValues = new ArrayList<>();
+									parameterValues.add(request);
+									parameterValues.add(response);
+									parameterValues.add(dbConnection.getConnection());
+									parameterValues.add(instanceName);
+									CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+									Object                                                       obj         = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+									Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+									List<Map<String /* column name */, String /* JSON value */>> list        = null;
+									if (obj instanceof NativeObject || obj instanceof NativeArray) { // return JSON object that will sent to client
+										String json = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null);
+										if (json.startsWith("{") && json.endsWith("}"))
+											json = '[' + json + ']';
+										list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(json);
+									} else if (obj instanceof ResultSet) {
+										try (ResultSet rs = (ResultSet) obj) {
+											List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+											list = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+										}
+									} else if (obj instanceof CharSequence) {
+										String jsonArrayOfObjects = obj.toString();
+										list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArrayOfObjects);
+									}
+									ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+									bs         = rr.bs;
+									etag       = rr.etag;
+									compressed = rr.compressed;
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							} finally {
+								ctx.exit();
 							}
-							ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-							bs         = rr.bs;
-							etag       = rr.etag;
-							compressed = rr.compressed;
 						}
-					} else {
+					} else { // Native
 						PreparedStatement ps  = dbConnection.getPreparedStatement(preparedStatement);
 						ParameterMetaData pmd = ps.getParameterMetaData();
 						for (Map<String, Object> parametersMap : parametersListOfMaps) {
@@ -740,12 +856,53 @@ public class DbRequestProcessor implements Runnable {
 											timestamp, //
 											updateResultJson);
 
-									String       outEvent      = null;
+									String       outEvent      = null; // JSON object that will sent to client
 									DbConnection dbConnection0 = null;
 									try {
 										dbConnection0 = connectionPoolManager.getConnection();
-										String javaMethod = proceduresMap.get(notifierStoredProcedureName);
-										if (javaMethod == null) {
+										String           javaMethod       = proceduresMap.get(notifierStoredProcedureName);
+										MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
+										Object           obj;
+										if (methodOrFunction != null) { // Java or JavaScript
+											List<Object> parameterValues = new ArrayList<>();
+											parameterValues.add(selfRequest);
+											parameterValues.add(selfResponce);
+											parameterValues.add(dbConnection0.getConnection());
+											parameterValues.add(userInfoJson);
+											parameterValues.add(selfUserInfoJson);
+											parameterValues.add(statementInfoJson);
+											parameterValues.add(executionResultJson);
+											Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+											if (methodOrFunction.method != null) // Java
+												obj = methodOrFunction.method.invoke(null, parametersArray);
+											else { // JavaScript
+													//
+													// initize Rhino
+													// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+													//
+												Context ctx = Context.enter();
+												try {
+													ctx.setLanguageVersion(Context.VERSION_1_7);
+													ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+													obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+													if (obj instanceof NativeObject)
+														obj = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null);
+												} catch (Exception e) {
+													obj = null;
+													e.printStackTrace();
+												} finally {
+													ctx.exit();
+												}
+											}
+											if (obj instanceof ResultSet) {
+												try (ResultSet rs = (ResultSet) obj) {
+													if (rs.next())
+														outEvent = rs.getString(1);
+												}
+											} else if (obj instanceof CharSequence)
+												outEvent = obj.toString();
+										} else { // Native
 											CallableStatement cs = dbConnection0.getCallableStatement("{call " + notifierStoredProcedureName + "(?,?,?,?)}");
 											cs.setString(1, userInfoJson);
 											cs.setString(2, selfUserInfoJson);
@@ -756,15 +913,8 @@ public class DbRequestProcessor implements Runnable {
 												if (rs.next())
 													outEvent = rs.getString(1);
 											}
-										} else {
-											String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
-											String   className  = array[0];
-											String   methodName = array[1];
-
-											Class<?> clazz        = Class.forName(className);
-											Method   notifyMethod = clazz.getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, Connection.class, String.class, String.class, String.class, String.class);
-											outEvent = (String) notifyMethod.invoke(null, selfRequest, selfResponce, dbConnection0.getConnection(), userInfoJson, selfUserInfoJson, statementInfoJson, executionResultJson);
 										}
+
 									} finally {
 										if (dbConnection0 != null)
 											connectionPoolManager.releaseConnection(dbConnection0);
@@ -813,7 +963,9 @@ public class DbRequestProcessor implements Runnable {
 				os.write(bs);
 				os.flush();
 			}
-		} catch (Throwable e) {
+		} catch (
+
+		Throwable e) {
 			e.printStackTrace();
 			try (OutputStream os = response.getOutputStream()) {
 				os.write(("{" + q("message") + ":" + q(e.getMessage()) + "}").getBytes(StandardCharsets.UTF_8));
