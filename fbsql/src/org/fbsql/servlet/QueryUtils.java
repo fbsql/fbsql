@@ -163,6 +163,13 @@ public class QueryUtils {
 		return jlist;
 	}
 
+	public static List<Map<String /* column name */, String /* JSON value */>> resutlSetToListOfMapsJsonValues(ResultSet rs, Base64.Encoder encoder) throws SQLException, IOException {
+		try (rs) {
+			List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+			return QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, encoder);
+		}
+	}
+
 	/**
 	 * 
 	 * @param value
@@ -279,6 +286,18 @@ public class QueryUtils {
 		}
 		sb.append(']');
 		return sb.toString();
+	}
+
+	/**
+	 * Converts list with only one element (list.size() == 1) to JSON object
+	 * 
+	 * @param list            - result list with only one element (list.size() == 1) to convert
+	 * @param resultSetFormat - result set format
+	 * @return                - JSON object
+	 */
+	public static String convertToJsonObject(List<Map<String /* column name */, String /* JSON value */>> list, int resultSetFormat) {
+		String jsonArray = convertToJsonArray(list, resultSetFormat);
+		return jsonArray.substring(1, jsonArray.length() - 1);
 	}
 
 	/**

@@ -69,7 +69,7 @@ package org.fbsql.antlr4.generated;
 /* keywords */
 
 EXPOSE      : E X P O S E;
-PREFETCH    : P R E F E T C H;
+STATIC      : S T A T I C;
 ROLES       : R O L E S;
 TRIGGER     : T R I G G E R;
 BEFORE      : B E F O R E;
@@ -79,8 +79,6 @@ COMPRESSION : C O M P R E S S I O N;
 NONE        : N O N E;
 BEST        : B E S T;
 SPEED       : S P E E D;
-ON          : O N;
-OFF         : O F F;
 
 DECLARE     : D E C L A R E;
 PROCEDURE   : P R O C E D U R E;
@@ -98,6 +96,11 @@ POOL        : P O O L;
 SIZE        : S I Z E;
 MIN         : M I N;
 MAX         : M A X;
+STATEMENTS  : S T A T E M E N T S;
+ALL         : A L L;
+EXPOSED     : E X P O S E D;
+ALLOW       : A L L O W;
+CONNECTIONS : C O N N E C T I O N S;
 IF          : I F;
 EXISTS      : E X I S T S;
 
@@ -130,11 +133,6 @@ compression_level
  : NONE
  | BEST COMPRESSION
  | BEST SPEED
- ;
-
-prefetch_on_off
- : ON
- | OFF
  ;
 
 connection_alias
@@ -210,13 +208,23 @@ connect_to_stmt
       (MIN connection_pool_size_min) |
       (MAX connection_pool_size_max)
      )+
+    ) |
+	(ALLOW STATEMENTS
+	 (
+	  ALL |
+	  EXPOSED |
+	  NONE
+	 )+
+	) |
+   	(ALLOW CONNECTIONS
+     (
+      ALL |
+      NONE |
+      (IF EXISTS '(' native_sql ')')
+     )+
     )
    )*
-   (
-   EXPOSE
-   (IF EXISTS '(' native_sql ')')?
-   AS? connection_alias
-   )?
+   (AS? connection_alias)?
  ;
 
 switch_to_stmt
@@ -227,7 +235,7 @@ expose_stmt
  : EXPOSE
    '(' native_sql ')'
    (
-    ( PREFETCH prefetch_on_off) |
+    STATIC |
     ( COMPRESSION compression_level) |
     ( ROLES '(' role_name ( ',' role_name )* ')' ) |
     ( TRIGGER BEFORE trigger_before_procedure_name ) |

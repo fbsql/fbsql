@@ -30,11 +30,9 @@ package org.fbsql.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -68,7 +66,6 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
  * Supports syntax of all existing (February 2020) SQL standards. 
 */
 public class SqlParseUtils {
-	public static final String JAVA_METHOD_SEPARATOR = "::"; // Lambda static method notation: className::methodName
 
 	/**
 	 * Special FBSQL statements that
@@ -242,8 +239,6 @@ public class SqlParseUtils {
 		ParseStmtExpose parseStmtExpose = new ParseStmtExpose();
 		StmtExpose      stmtExpose      = parseStmtExpose.parse(sql);
 
-		if (stmtExpose.alias == null)
-			stmtExpose.alias = calcSha256(stmtExpose.statement);
 		stmtExpose.statement = processStatement(stmtExpose.statement);
 		return stmtExpose;
 	}
@@ -493,31 +488,6 @@ public class SqlParseUtils {
 	}
 
 	/**
-	 * Calculate SHA-256 hash of string
-	 *
-	 * @param s - source string
-	 * @return  - lower case SHA-256 hash of source string
-	 * @throws NoSuchAlgorithmException
-	 */
-	public static String calcSha256(String s) {
-		MessageDigest digest;
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-			byte[]       bs        = digest.digest(s.getBytes(StandardCharsets.UTF_8));
-			StringBuffer hexString = new StringBuffer();
-			for (int i = 0; i < bs.length; i++) {
-				String hex = Integer.toHexString(0xff & bs[i]).toLowerCase(Locale.ENGLISH);
-				if (hex.length() == 1)
-					hexString.append('0');
-				hexString.append(hex);
-			}
-			return hexString.toString();
-		} catch (NoSuchAlgorithmException e) {
-			throw new Error(e);
-		}
-	}
-
-	/**
 	 * Process SQL statement
 	 *
 	 * @param sql - SQL statement
@@ -592,19 +562,6 @@ public class SqlParseUtils {
 		}
 
 	}
-
-	//	/**
-	//	 * Read SQL script file to list of SQL statements
-	//	 *
-	//	 * @param path
-	//	 * @return
-	//	 * @throws IOException
-	//	 */
-	//	private static List<String> readSqlScriptFileToListOfStatements(Path path) throws IOException {
-	//		List<String> list = new ArrayList<>();
-	//		parseScript(StringUtils.readAsText(path), list);
-	//		return list;
-	//	}
 
 	/**
 	 * Recursive method to process "INCLUDE SCRIPT FILE" statement

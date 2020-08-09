@@ -27,14 +27,11 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.servlet;
 
-import static org.fbsql.servlet.SqlParseUtils.JAVA_METHOD_SEPARATOR;
-
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -51,6 +48,8 @@ import org.mozilla.javascript.Scriptable;
 public class CallUtils {
 
 	private static final String USER_HOME_DIR = System.getProperty("user.home");
+
+	private static final String JAVA_METHOD_SEPARATOR = "::"; // Lambda static method notation: className::methodName
 
 	/**
 	 * Single quote character constant (string parameter wrapped in single quotes)
@@ -108,7 +107,7 @@ public class CallUtils {
 		String   methodName = array[1];
 
 		MethodOrFunction methodOrFunction = new MethodOrFunction();
-		Class<?> clazz;
+		Class<?>         clazz;
 		try {
 			// Try Java
 			clazz = Class.forName(className);
@@ -154,7 +153,7 @@ public class CallUtils {
 				map.put(methodName, fct);
 			}
 
-			methodOrFunction.scope = scope;
+			methodOrFunction.scope    = scope;
 			methodOrFunction.function = fct;
 
 			return methodOrFunction;

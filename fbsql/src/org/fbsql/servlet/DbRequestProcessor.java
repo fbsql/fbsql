@@ -27,7 +27,6 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.servlet;
 
-import static org.fbsql.servlet.SqlParseUtils.JAVA_METHOD_SEPARATOR;
 import static org.fbsql.servlet.StringUtils.q;
 
 import java.io.BufferedReader;
@@ -35,12 +34,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
@@ -71,6 +68,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.fbsql.antlr4.parser.ParseStmtConnectTo;
+import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
 import org.fbsql.connection_pool.ConnectionPoolManager;
 import org.fbsql.connection_pool.DbConnection;
@@ -143,8 +142,9 @@ public class DbRequestProcessor implements Runnable {
 	private static final String FUN_REMOTE_SESSION_LAST_ACCESSED_TIME = "REMOTE_SESSION_LAST_ACCESSED_TIME()";
 	private static final String FUN_USER_INFO                         = "USER_INFO()";
 
-	private String       instanceName;
-	private AsyncContext asyncContext;
+	private String        instanceName;
+	private StmtConnectTo stmtConnectTo;
+	private AsyncContext  asyncContext;
 
 	private boolean               debug;
 	private ConnectionPoolManager connectionPoolManager;
@@ -162,18 +162,21 @@ public class DbRequestProcessor implements Runnable {
 	 * Constructs DbRequestProcessor object
 	 * 
 	 * @param instanceName
+	 * @param stmtConnectTo
 	 * @param asyncCtx
-	 * @param connectionInfo
+	 * @param debug
 	 * @param connectionPoolManager
 	 * @param whiteList
-	 * @param validatorsMap
-	 * @param notifiersMap
+	 * @param proceduresMap
+	 * @param mapScopes
+	 * @param mapFunctions
 	 * @param mapJson
 	 * @param ongoingRequests
 	 * @param sharedCoder
 	 */
 	public DbRequestProcessor( //
 			String instanceName, //
+			StmtConnectTo stmtConnectTo, //
 			AsyncContext asyncCtx, //
 			boolean debug, //
 			ConnectionPoolManager connectionPoolManager, //
@@ -186,6 +189,7 @@ public class DbRequestProcessor implements Runnable {
 			DbServlet.SharedCoder sharedCoder //
 	) {
 		this.instanceName          = instanceName;
+		this.stmtConnectTo         = stmtConnectTo;
 		this.asyncContext          = asyncCtx;
 		this.debug                 = debug;
 		this.connectionPoolManager = connectionPoolManager;
@@ -222,7 +226,6 @@ public class DbRequestProcessor implements Runnable {
 
 			boolean reject        = false;
 			String  rejectMessage = null;
-			String  rejectJson    = null;
 			//
 			String              clientInfoJson  = getClientInfo(request, sharedCoder.decoder);
 			BufferedReader      br              = getCustomDataReader(request, sharedCoder.decoder);
@@ -257,32 +260,25 @@ public class DbRequestProcessor implements Runnable {
 			boolean executeTypeQuery  = execType.equals(EXEC_TYPE_QUERY);
 			boolean executeTypeUpdate = execType.equals(EXEC_TYPE_UPDATE);
 
-			if (reject) {
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				try (OutputStream os = response.getOutputStream()) {
-					os.write(("{" + q("message") + ":" + q(rejectMessage) + "}").getBytes(StandardCharsets.UTF_8));
-					os.flush();
-				}
-				asyncContext.complete();
-				return;
-			}
-			//
-			StmtExpose stmtExpose                        = null;
-			String     unprocessedNamedPreparedStatement = null;
-			String     namedPreparedStatement            = null;
-			if (statementId == null) { // SQL statement provided
-				StringBuilder unprocessedNamedPreparedStatementSb = new StringBuilder();
-				while (true) {
-					String line = br.readLine();
-					if (line == null)
-						break;
-					unprocessedNamedPreparedStatementSb.append(' ' + line.trim() + '\n');
-				}
-				unprocessedNamedPreparedStatement = unprocessedNamedPreparedStatementSb.toString().trim();
-				namedPreparedStatement            = SqlParseUtils.processStatement(unprocessedNamedPreparedStatement);
-				if (whiteList.isEmpty())
-					reject = false;
-				else {
+			String                    unprocessedNamedPreparedStatement = null;
+			String                    namedPreparedStatement            = null;
+			List<Map<String, Object>> parametersListOfMaps              = null;
+			StmtExpose                stmtExpose                        = null;
+
+			reject = stmtConnectTo.exposeMode == ExposeMode.NONE;
+			if (reject)
+				rejectMessage = "Rejected. Frontend statement execution is not allowed when connection ALLOW STATEMENTS mode is NONE";
+			else {
+				if (statementId == null) { // SQL statement provided
+					StringBuilder unprocessedNamedPreparedStatementSb = new StringBuilder();
+					while (true) {
+						String line = br.readLine();
+						if (line == null)
+							break;
+						unprocessedNamedPreparedStatementSb.append(' ' + line.trim() + '\n');
+					}
+					unprocessedNamedPreparedStatement = unprocessedNamedPreparedStatementSb.toString().trim();
+					namedPreparedStatement            = SqlParseUtils.processStatement(unprocessedNamedPreparedStatement);
 					for (StmtExpose curStmtExpose : whiteList.values()) {
 						if (curStmtExpose.statement.equals(namedPreparedStatement)) {
 							statementId = curStmtExpose.alias;
@@ -290,129 +286,133 @@ public class DbRequestProcessor implements Runnable {
 							break;
 						}
 					}
-					reject = statementId == null;
+					reject = stmtExpose == null && stmtConnectTo.exposeMode == ExposeMode.EXPOSED;
 					if (reject)
 						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not exposed to frontend", namedPreparedStatement));
-				}
-			} else { // SQL statement name provided
-				stmtExpose = whiteList.get(statementId);
-				if (stmtExpose != null)
-					namedPreparedStatement = stmtExpose.statement;
-				reject = whiteList.isEmpty() || stmtExpose == null;
-
-				if (reject)
-					rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement name: ''{0}'' not found", statementId));
-				else
-					unprocessedNamedPreparedStatement = namedPreparedStatement;
-			}
-
-			if (stmtExpose != null) {
-				Collection<String> allowedRoles = stmtExpose.roles;
-				if (!allowedRoles.isEmpty())
-					if (!allowedRoles.contains(remoteRole)) {
-						reject        = true;
-						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not allowed for role \"{1}\"", namedPreparedStatement, remoteRole));
-					}
-			}
-
-			//
-			// validate
-			//
-			List<Map<String, Object>> parametersListOfMaps = new ArrayList<>(paramJsons.size());
-			for (String paramJson : paramJsons) {
-				if (stmtExpose != null) {
-					String validatorStoredProcedureName = stmtExpose.trigger_before_procedure_name;
-					if (validatorStoredProcedureName != null) {
-						String statementInfoJson = generateStatementInfoJson( //
-								instanceName, //
-								statementId, //
-								unprocessedNamedPreparedStatement, //
-								paramJson //
-						);
-
-						DbConnection dbConnection0      = null;
-						String       modifiedParamsJson = null;
-						try {
-							dbConnection0 = connectionPoolManager.getConnection();
-
-							String           javaMethod       = proceduresMap.get(validatorStoredProcedureName);
-							MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
-							if (methodOrFunction != null) { // Java or JavaScript
-								List<Object> parameterValues = new ArrayList<>();
-								parameterValues.add(request);
-								parameterValues.add(response);
-								parameterValues.add(dbConnection0.getConnection());
-								parameterValues.add(instanceName);
-								parameterValues.add(userInfoJson);
-								parameterValues.add(statementInfoJson);
-								Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
-
-								Object obj = null;
-								if (methodOrFunction.method != null) // java
-									obj = (String) methodOrFunction.method.invoke(null, parametersArray);
-								else { // JavaScript
-										//
-										// initize Rhino
-										// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
-										//
-									Context ctx = Context.enter();
-									try {
-										ctx.setLanguageVersion(Context.VERSION_1_7);
-										ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-										obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
-										if (obj instanceof NativeObject)
-											obj = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null); // to string
-									} catch (Exception e) {
-										e.printStackTrace();
-									} finally {
-										ctx.exit();
-									}
-								}
-								if (obj instanceof ResultSet) {
-									try (ResultSet rs = (ResultSet) obj) {
-										if (rs.next())
-											modifiedParamsJson = rs.getString(1);
-									}
-								} else if (obj instanceof CharSequence)
-									modifiedParamsJson = obj.toString();
-							} else { // Native
-								CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
-								cs.setString(1, instanceName);
-								cs.setString(2, userInfoJson);
-								cs.setString(3, statementInfoJson);
-
-								try (ResultSet rs = cs.executeQuery()) {
-									if (rs.next())
-										modifiedParamsJson = rs.getString(1);
-								}
-							}
-						} finally {
-							if (dbConnection0 != null)
-								connectionPoolManager.releaseConnection(dbConnection0);
-							if (modifiedParamsJson == null) { // reject if stored procedure return null
-								reject        = true;
-								rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\". Bad parameters: \"{1}\"", namedPreparedStatement, paramJson));
-							} else
-								paramJson = modifiedParamsJson.trim();
+				} else { // SQL statement name provided
+					reject = statementId.startsWith(ParseStmtConnectTo.NONEXPOSABLE_NAME_PREFIX);
+					final String NAME_NOT_FOUND_MSG = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement name: \"{0}\" not found", statementId));
+					if (reject) // wrong name format
+						rejectMessage = NAME_NOT_FOUND_MSG;
+					else {
+						stmtExpose = whiteList.get(statementId);
+						if (stmtExpose == null) {
+							reject        = true;
+							rejectMessage = NAME_NOT_FOUND_MSG;
+						} else {
+							namedPreparedStatement            = stmtExpose.statement;
+							unprocessedNamedPreparedStatement = namedPreparedStatement;
 						}
 					}
 				}
 
-				Map<String, String> parametersJsonStrs = JsonUtils.parseJsonObject(paramJson);
-				Map<String, Object> parametersMap      = new LinkedHashMap<>(parametersJsonStrs.size());
-				for (Map.Entry<String, String> parameterNameValueEntry : parametersJsonStrs.entrySet()) {
-					String pname      = parameterNameValueEntry.getKey();
-					String pvalueJson = parameterNameValueEntry.getValue();
-					Object pvalueObj  = JsonUtils.parseJson(pvalueJson);
-					parametersMap.put(pname, pvalueObj);
+				if (stmtExpose != null) {
+					Collection<String> allowedRoles = stmtExpose.roles;
+					if (!allowedRoles.isEmpty())
+						if (!allowedRoles.contains(remoteRole)) {
+							reject        = true;
+							rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not allowed for role \"{1}\"", namedPreparedStatement, remoteRole));
+						}
 				}
-				parametersListOfMaps.add(parametersMap);
-			}
 
+				//
+				// validate
+				//
+				parametersListOfMaps = new ArrayList<>(paramJsons.size());
+				for (String paramJson : paramJsons) {
+					if (stmtExpose != null) {
+						String validatorStoredProcedureName = stmtExpose.trigger_before_procedure_name;
+						if (validatorStoredProcedureName != null) {
+							String statementInfoJson = generateStatementInfoJson( //
+									instanceName, //
+									statementId, //
+									unprocessedNamedPreparedStatement, //
+									paramJson //
+							);
+
+							DbConnection dbConnection0      = null;
+							String       modifiedParamsJson = null;
+							try {
+								dbConnection0 = connectionPoolManager.getConnection();
+
+								String           javaMethod       = proceduresMap.get(validatorStoredProcedureName);
+								MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
+								if (methodOrFunction != null) { // Java or JavaScript
+									List<Object> parameterValues = new ArrayList<>();
+									parameterValues.add(request);
+									parameterValues.add(response);
+									parameterValues.add(dbConnection0.getConnection());
+									parameterValues.add(instanceName);
+									parameterValues.add(userInfoJson);
+									parameterValues.add(statementInfoJson);
+									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+									Object obj = null;
+									if (methodOrFunction.method != null) // java
+										obj = (String) methodOrFunction.method.invoke(null, parametersArray);
+									else { // JavaScript
+											//
+											// initize Rhino
+											// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+											//
+										Context ctx = Context.enter();
+										try {
+											ctx.setLanguageVersion(Context.VERSION_1_7);
+											ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+											obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+											if (obj instanceof NativeObject)
+												obj = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null); // to string
+										} catch (Exception e) {
+											e.printStackTrace();
+										} finally {
+											ctx.exit();
+										}
+									}
+									if (obj instanceof ResultSet)
+										try (ResultSet rs = (ResultSet) obj) {
+											if (rs.next())
+												modifiedParamsJson = rs.getString(1);
+										}
+									else if (obj instanceof CharSequence)
+										modifiedParamsJson = obj.toString();
+								} else { // Native
+									CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
+									cs.setString(1, instanceName);
+									cs.setString(2, userInfoJson);
+									cs.setString(3, statementInfoJson);
+
+									try (ResultSet rs = cs.executeQuery()) {
+										if (rs.next())
+											modifiedParamsJson = rs.getString(1);
+									}
+								}
+							} finally {
+								if (dbConnection0 != null)
+									connectionPoolManager.releaseConnection(dbConnection0);
+								if (modifiedParamsJson == null) { // reject if stored procedure return null
+									reject        = true;
+									rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\". Bad parameters: \"{1}\"", namedPreparedStatement, paramJson));
+								} else
+									paramJson = modifiedParamsJson.trim();
+							}
+						}
+					}
+
+					Map<String, String> parametersJsonStrs = JsonUtils.parseJsonObject(paramJson);
+					Map<String, Object> parametersMap      = new LinkedHashMap<>(parametersJsonStrs.size());
+					for (Map.Entry<String, String> parameterNameValueEntry : parametersJsonStrs.entrySet()) {
+						String pname      = parameterNameValueEntry.getKey();
+						String pvalueJson = parameterNameValueEntry.getValue();
+						Object pvalueObj  = JsonUtils.parseJson(pvalueJson);
+						parametersMap.put(pname, pvalueObj);
+					}
+					parametersListOfMaps.add(parametersMap);
+				}
+			}
 			if (reject) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				try (OutputStream os = response.getOutputStream()) {
-					os.write(('{' + q("message") + ':' + q(rejectMessage) + ',' + q("rejectObject") + ':' + rejectJson + '}').getBytes(StandardCharsets.UTF_8));
+					os.write(('{' + q("message") + ':' + q(rejectMessage) + '}').getBytes(StandardCharsets.UTF_8));
 					os.flush();
 				}
 				asyncContext.complete();
@@ -598,15 +598,10 @@ public class DbRequestProcessor implements Runnable {
 								Object                                                       obj         = methodOrFunction.method.invoke(null, parametersArray);
 								Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
 								List<Map<String /* column name */, String /* JSON value */>> list        = null;
-								if (obj instanceof ResultSet) {
-									try (ResultSet rs = (ResultSet) obj) {
-										List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-										list = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
-									}
-								} else if (obj instanceof CharSequence) {
-									String jsonArrayOfObjects = obj.toString();
-									list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArrayOfObjects);
-								}
+								if (obj instanceof ResultSet)
+									list = QueryUtils.resutlSetToListOfMapsJsonValues((ResultSet) obj, sharedCoder.encoder);
+								else if (obj instanceof CharSequence)
+									list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(obj.toString());
 								ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
 								bs         = rr.bs;
 								etag       = rr.etag;
@@ -656,15 +651,10 @@ public class DbRequestProcessor implements Runnable {
 										if (json.startsWith("{") && json.endsWith("}"))
 											json = '[' + json + ']';
 										list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(json);
-									} else if (obj instanceof ResultSet) {
-										try (ResultSet rs = (ResultSet) obj) {
-											List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-											list = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
-										}
-									} else if (obj instanceof CharSequence) {
-										String jsonArrayOfObjects = obj.toString();
-										list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArrayOfObjects);
-									}
+									} else if (obj instanceof ResultSet)
+										list = QueryUtils.resutlSetToListOfMapsJsonValues((ResultSet) obj, sharedCoder.encoder);
+									else if (obj instanceof CharSequence)
+										list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(obj.toString());
 									ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
 									bs         = rr.bs;
 									etag       = rr.etag;
@@ -756,19 +746,21 @@ public class DbRequestProcessor implements Runnable {
 						}
 
 						if (executeTypeQuery) { // Execute Query
-							try (ResultSet rs = ps.executeQuery()) {
-								Integer                                                        compression       = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
-								List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-								List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+							Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+							ResultSet                                                    rs          = ps.executeQuery();
+							List<Map<String /* column name */, String /* JSON value */>> list        = QueryUtils.resutlSetToListOfMapsJsonValues(rs, sharedCoder.encoder);
+							//							try (ResultSet rs = ps.executeQuery()) {
+							//								List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
+							//								List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
 
-								ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
-								bs         = rr.bs;
-								etag       = rr.etag;
-								compressed = rr.compressed;
-							} finally {
-								if (dbConnection != null)
-									connectionPoolManager.releaseConnection(dbConnection);
-							}
+							ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+							bs         = rr.bs;
+							etag       = rr.etag;
+							compressed = rr.compressed;
+							//							} finally {
+							//								if (dbConnection != null)
+							//									connectionPoolManager.releaseConnection(dbConnection);
+							//							}
 
 						} else if (executeTypeUpdate) { // Execute Update
 							List<Map<String /* column name */, Object /* JSON value */>> gkList;
@@ -781,9 +773,9 @@ public class DbRequestProcessor implements Runnable {
 							} catch (Throwable e) {
 								e.printStackTrace();
 								gkList = Collections.emptyList();
-							} finally {
-								if (dbConnection != null)
-									connectionPoolManager.releaseConnection(dbConnection);
+								//							} finally {
+								//								if (dbConnection != null)
+								//									connectionPoolManager.releaseConnection(dbConnection);
 							}
 
 							List<Map<String /* column name */, String /* JSON value */>> generatedKeys = QueryUtils.listOfMapsToListOfMapsJsonValues(gkList, sharedCoder.encoder);
@@ -895,12 +887,12 @@ public class DbRequestProcessor implements Runnable {
 													ctx.exit();
 												}
 											}
-											if (obj instanceof ResultSet) {
+											if (obj instanceof ResultSet)
 												try (ResultSet rs = (ResultSet) obj) {
 													if (rs.next())
 														outEvent = rs.getString(1);
 												}
-											} else if (obj instanceof CharSequence)
+											else if (obj instanceof CharSequence)
 												outEvent = obj.toString();
 										} else { // Native
 											CallableStatement cs = dbConnection0.getCallableStatement("{call " + notifierStoredProcedureName + "(?,?,?,?)}");

@@ -29,6 +29,7 @@ package org.fbsql.antlr4.parser;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.UUID;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -40,8 +41,8 @@ import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Compression_levelContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Expose_stmtContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Prefetch_on_offContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Role_nameContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Statement_aliasContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Trigger_after_procedure_nameContext;
@@ -54,8 +55,8 @@ public class ParseStmtExpose {
 	 * Expose particular SQL statement to frontend (can be used only in «init.sql» script)
 	 */
 	public class StmtExpose {
-		public boolean            prefetch;
 		public String             statement;
+		public boolean            prefetch;
 		public Collection<String> roles;
 		public String             trigger_before_procedure_name;
 		public String             trigger_after_procedure_name;
@@ -68,9 +69,8 @@ public class ParseStmtExpose {
 
 		@Override
 		public String toString() {
-			return "StmtExpose [prefetch=" + prefetch + ", statement=" + statement + ", roles=" + roles + ", trigger_before_procedure_name=" + trigger_before_procedure_name + ", trigger_after_procedure_name=" + trigger_after_procedure_name + ", alias=" + alias + ", compressionLevel=" + compressionLevel + "]";
+			return "StmtExpose [statement=" + statement + ", prefetch=" + prefetch + ", roles=" + roles + ", trigger_before_procedure_name=" + trigger_before_procedure_name + ", trigger_after_procedure_name=" + trigger_after_procedure_name + ", alias=" + alias + ", compressionLevel=" + compressionLevel + "]";
 		}
-
 	}
 
 	/**
@@ -108,8 +108,8 @@ public class ParseStmtExpose {
 			}
 
 			@Override
-			public void enterPrefetch_on_off(Prefetch_on_offContext ctx) {
-				st.prefetch = ctx.ON() != null;
+			public void enterExpose_stmt(Expose_stmtContext ctx) {
+				st.prefetch = ctx.STATIC() != null && ctx.STATIC().size() != 0;
 			}
 
 			@Override
@@ -146,14 +146,16 @@ public class ParseStmtExpose {
 			}
 		}, tree);
 
+		if (st.alias == null)
+			st.alias = ParseStmtConnectTo.NONEXPOSABLE_NAME_PREFIX + UUID.randomUUID().toString();
 		return st;
 	}
 
 	public static void main(String[] args) {
-		String                     sql = "EXPOSE  ( SELECT log AS x FROM t1 \n" +                                                                  //
-				"GROUP BY x /* aaaa */ \n" +                                                                                                       //
-				"HAVING count(*) >= 4 \n" +                                                                                                        //
-				"ORDER BY max(n) + 0 ) PREFETCH ON COMPRESSION BEST SPEED TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
+		String                     sql = "EXPOSE ( SELECT log AS x FROM t1 \n" +                                                                 //
+				"GROUP BY x /* aaaa */ \n" +                                                                                                     //
+				"HAVING count(*) >= 4 \n" +                                                                                                      //
+				"ORDER BY max(n) + 0 )  prefetch COMPRESSION BEST SPEED TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
 		ParseStmtExpose            p   = new ParseStmtExpose();
 		ParseStmtExpose.StmtExpose se  = p.parse(sql);
 		System.out.println(se);

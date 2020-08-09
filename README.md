@@ -56,7 +56,6 @@ Work (secure) with your backend database within HTML<br>
 <li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
 <li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
 <li><a href="#secure_our_backend_with_expose_statement" title="How to secure our backend with EXPOSE statement.">Expose our database to frontend</a></li>
-<li><a href="#reference_statements_by_their_hash" title="How to reference statements by their SHA-256 hash.">Reference statements by their SHA-256 hash</a></li>
 <li><a href="#reference_statements_by_custom_names" title="How to use custom names as statements references.">Reference statements by name</a></li>
 <li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
 <li><a href="#parametrized_statements" title="How to use parametrized statements.">Parametrized statements</a></li>
@@ -366,68 +365,6 @@ SELECT 'Hello, World!' AS HELLO;
             /* Error! Not in whitelist! */
             const ps2 = conn.prepareStatement("SELECT 'Bye, World!' AS BYE");
             ps2.executeQuery().then(resultSet => alert(resultSet[0].BYE));
-        </script>
-    </body>
-</html>
-```
-<hr>
-<a id="reference_statements_by_their_hash"></a>
-<h2>Reference statements by their SHA-256 hash</h2>
-<p><i>
-In this chapter we will learn how to reference statements by their SHA-256 hash.
-</i></p>
-
-FBSQL supports custom statement names in whitelist.<br>
-SHA-256 hash is a default statement reference name if no custom name was provided in whitelist:
-
-
-<strong>Backend:</strong><br>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
- */
-
-CONNECT TO 'jdbc:sqlite:sample';
-
-ADD WHITELIST 'my-whitelist.sql';
-
-```
-
-```sql
-/*
- * my-whitelist.sql
- */
-
-SELECT 'Hello, World!' AS HELLO;
-
-```
-
-<strong>Frontend:</strong><br>
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection('my-sqlite'); 
-
-            const ps1 = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
-            ps1.executeQuery().then(resultSet => alert("First: " + resultSet[0].HELLO));
-
-            /* 
-             * Reference SQL statement form whitelist by it SHA-256 hash
-             * After each change of statement content SHA-256 references must be recalculated.
-             */
-            const ps2 = conn.prepareStatement("#bb7df2faf8e72324d1b515078ed2ec961e808940850ddba738cad50a479e1ce0");
-            ps2.executeQuery().then(resultSet => alert("Second: " + resultSet[0].HELLO));
         </script>
     </body>
 </html>
@@ -1443,6 +1380,24 @@ EXPOSE IF EXISTS ( SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:p
 
 <br><br>
 
+<h3>SWITCH TO</h3>
+
+```EBNF
+switch_to_stmt
+::= SWITCH TO connection_alias
+ ;
+
+```
+<img src="switch_to_stmt.png"><br><br>
+<i>Examples</i><br>
+
+```sql
+
+/* Switch to MySQLite connection */
+SWITCH TO MySQLite;
+```
+<br><br>
+
 <h3>EXPOSE</h3>
 
 ```EBNF
@@ -1450,7 +1405,7 @@ expose_stmt
 ::= EXPOSE
    '(' native_sql ')'
    (
-    ( PREFETCH prefetch_on_off) |
+    STATIC |
     ( COMPRESSION compression_level) |
     ( ROLES '(' role_name ( ',' role_name )* ')' ) |
     ( TRIGGER BEFORE trigger_before_procedure_name ) |

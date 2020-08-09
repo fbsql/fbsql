@@ -27,7 +27,6 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.servlet;
 
-import static org.fbsql.servlet.SqlParseUtils.JAVA_METHOD_SEPARATOR;
 import static org.fbsql.servlet.SqlParseUtils.parseConnectStatement;
 import static org.fbsql.servlet.SqlParseUtils.parseExposeStatement;
 import static org.fbsql.servlet.SqlParseUtils.parseNamedPreparedStatement;
@@ -39,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -169,7 +167,6 @@ public class DbServlet extends HttpServlet {
 	private static final String USER_HOME_DIR = System.getProperty("user.home");
 
 	private Map<String /* instance name */, StmtConnectTo>                                                             connectionInfoMap;
-	private Map<String /* instance name */, String /* authentication query SQL */>                                     authenticationQueryMap;
 	private Map<String /* instance name */, ConnectionPoolManager>                                                     connectionPoolManagerMap;
 	private Map<String /* instance name */, Map<String /* SQL statement name */, StmtExpose>>                          whiteListMap;
 	private Map<String /* instance name */, Map<StaticStatement, ReadyResult>>                                         staticJsonsMap;
@@ -277,7 +274,6 @@ public class DbServlet extends HttpServlet {
 			whiteListMap             = new HashMap<>(instancesCount);
 			staticJsonsMap           = new HashMap<>(instancesCount);
 			connectionInfoMap        = new HashMap<>(instancesCount);
-			authenticationQueryMap   = new HashMap<>(instancesCount);
 			ongoingRequestsMap       = new HashMap<>(instancesCount);
 			connectionMap            = new HashMap<>(instancesCount);
 			instancesProceduresMap   = new HashMap<>(instancesCount);
@@ -323,7 +319,6 @@ public class DbServlet extends HttpServlet {
 					Logger.out(Severity.INFO, MessageFormat.format("Can't connect to ''{0}''. Bad 'CONNECT TO' statement: ''{1}''. No JDBC URL provided.", instanceName, statement));
 					return;
 				}
-				authenticationQueryMap.put(instanceName, info.authenticationQuery);
 			}
 		}
 
@@ -446,27 +441,25 @@ public class DbServlet extends HttpServlet {
 				// prefetch:
 				// «warmed up» static queries with no interaction with underlying database
 				//
-				try (ResultSet rs = st.executeQuery(sql)) {
-					List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-					List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
+				ResultSet                                                    rs   = st.executeQuery(sql);
+				List<Map<String /* column name */, String /* JSON value */>> list = QueryUtils.resutlSetToListOfMapsJsonValues(rs, sharedCoder.encoder);
 
-					//
-					// cover all possible result set output formats
-					//
+				//
+				// cover all possible result set output formats
+				//
 
-					// In this case we ignore user defined compression level and use maximal compression level
-					// because we prepare result offline.
+				// In this case we ignore user defined compression level and use maximal compression level
+				// because we prepare result offline.
 
-					// array of objects
-					StaticStatement staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_OBJECTS);
-					ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION, sharedCoder.encoder);
-					mapReadyResults.put(staticStatement, readyResult);
+				// array of objects
+				StaticStatement staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_OBJECTS);
+				ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION, sharedCoder.encoder);
+				mapReadyResults.put(staticStatement, readyResult);
 
-					// array of arrays
-					staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_ARRAYS);
-					readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION, sharedCoder.encoder);
-					mapReadyResults.put(staticStatement, readyResult);
-				}
+				// array of arrays
+				staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_ARRAYS);
+				readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION, sharedCoder.encoder);
+				mapReadyResults.put(staticStatement, readyResult);
 			}
 		}
 
@@ -499,11 +492,9 @@ public class DbServlet extends HttpServlet {
 									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
 									Object obj = null;
-									if (methodOrFunction.method != null) { // Java
+									if (methodOrFunction.method != null) // Java
 										obj = methodOrFunction.method.invoke(null, parametersArray);
-										System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-									} else { // JavaScript
-										System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+									else { // JavaScript
 											//
 											// initize Rhino
 											// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
@@ -531,40 +522,13 @@ public class DbServlet extends HttpServlet {
 									cs.setString(1, instanceName);
 									cs.setString(2, cronExpression);
 									boolean b = cs.execute();
-									if (b) // first result is a ResultSet object
+									if (b) { // first result is a ResultSet object
 										try (ResultSet rs = cs.getResultSet()) {
 											if (rs.next())
 												outEvent = rs.getString(1);
 										}
+									}
 								}
-
-//								if (javaMethod == null) {
-//									CallableStatement cs = dbConnection0.getCallableStatement("{call " + storedProcedureName + "(?,?)}");
-//									cs.setString(1, instanceName);
-//									cs.setString(2, cronExpression);
-//									boolean b = cs.execute();
-//									if (b) // first result is a ResultSet object
-//										try (ResultSet rs = cs.getResultSet()) {
-//											if (rs.next())
-//												outEvent = rs.getString(1);
-//										}
-//								} else {
-//									String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
-//									String   className  = array[0];
-//									String   methodName = array[1];
-//
-//									Class<?> clazz  = Class.forName(className);
-//									Method   method = clazz.getMethod(methodName, Connection.class, String.class, String.class);
-//									Object   result = method.invoke(null, dbConnection0.getConnection(), instanceName, cronExpression);
-//									if (result instanceof String)
-//										outEvent = (String) result;
-//									else if (result instanceof ResultSet)
-//										try (ResultSet rs = (ResultSet) result) {
-//											if (rs.next())
-//												outEvent = rs.getString(1);
-//										}
-//								}
-
 								for (AsyncContext ac : ongoingRequests) {
 									if (outEvent != null) { // send if outEvent is not null
 										Writer writer = ac.getResponse().getWriter();
@@ -671,7 +635,7 @@ public class DbServlet extends HttpServlet {
 
 		String instanceName = inst_and_oper[0];
 
-		if (instanceName.startsWith(ParseStmtConnectTo.NONEXPOSABLE_PREFIX) || !connectionInfoMap.containsKey(instanceName)) {
+		if (instanceName.startsWith(ParseStmtConnectTo.NONEXPOSABLE_NAME_PREFIX) || !connectionInfoMap.containsKey(instanceName)) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, StringUtils.formatMessage("Instance Not Found: \"{0}\"", instanceName));
 			return;
 		}
@@ -707,8 +671,16 @@ public class DbServlet extends HttpServlet {
 						CUSTOM_HTTP_HEADER_ROLE //
 		);
 
-		String authenticationQuery = authenticationQueryMap.get(instanceName);
-		if (authenticationQuery != null) {
+		StmtConnectTo stmtConnectTo = connectionInfoMap.get(instanceName);
+		if (stmtConnectTo == null) {
+			authorizationError(response, "Unknown instance name: " + instanceName);
+			return;
+		}
+		if (!stmtConnectTo.allowConnections && stmtConnectTo.authenticationQuery == null) {
+			authorizationError(response, "Unknown instance name: " + instanceName);
+			return;
+		}
+		if (stmtConnectTo.authenticationQuery != null) {
 			String authorization = request.getHeader(HTTP_HEADER_AUTHORIZATION);
 			if (authorization != null && authorization.toLowerCase(Locale.ENGLISH).startsWith("basic")) {
 				String base64Credentials = authorization.substring("Basic".length()).trim();
@@ -733,7 +705,7 @@ public class DbServlet extends HttpServlet {
 					Connection    connection          = connectionMap.get(instanceName);
 					StringBuilder preparedStatementSb = new StringBuilder();
 
-					Map<String /* name */, List<Integer /* index */>> paramsIndexes = parseNamedPreparedStatement(authenticationQuery, preparedStatementSb);
+					Map<String /* name */, List<Integer /* index */>> paramsIndexes = parseNamedPreparedStatement(stmtConnectTo.authenticationQuery, preparedStatementSb);
 					PreparedStatement                                 ps            = connection.prepareStatement(preparedStatementSb.toString());
 					ParameterMetaData                                 pmd           = ps.getParameterMetaData();
 
@@ -762,6 +734,7 @@ public class DbServlet extends HttpServlet {
 				} catch (SQLException e) {
 					e.printStackTrace();
 					authorizationError(response, "Authorization query error. Authorization Failed.");
+					return;
 				}
 
 				request.setAttribute(REQUEST_ATTRIBUTE_USER, user);
@@ -863,6 +836,7 @@ public class DbServlet extends HttpServlet {
 		String[] inst_and_oper = getInstanceAndOperation(request);
 
 		String                                                                    instanceName          = inst_and_oper[0];
+		StmtConnectTo                                                             stmtConnectTo         = connectionInfoMap.get(instanceName);
 		ConnectionPoolManager                                                     connectionPoolManager = connectionPoolManagerMap.get(instanceName);
 		Map<String /* SQL statement name */, StmtExpose>                          whiteList             = whiteListMap.get(instanceName);
 		Map<String /* stored procedure name */, String /* java method */>         proceduresMap         = instancesProceduresMap.get(instanceName);
@@ -912,6 +886,7 @@ public class DbServlet extends HttpServlet {
 		}, request, response);
 		new DbRequestProcessor( //
 				instanceName, //
+				stmtConnectTo, //
 				asyncCtx, //
 				DEBUG, //
 				connectionPoolManager, //

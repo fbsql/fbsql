@@ -70,12 +70,6 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCompression_level(FbsqlParser.Compression_levelContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link FbsqlParser#prefetch_on_off}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#connection_alias}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

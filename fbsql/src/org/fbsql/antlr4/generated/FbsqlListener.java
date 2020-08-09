@@ -87,16 +87,6 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitCompression_level(FbsqlParser.Compression_levelContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#prefetch_on_off}.
-	 * @param ctx the parse tree
-	 */
-	void enterPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#prefetch_on_off}.
-	 * @param ctx the parse tree
-	 */
-	void exitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#connection_alias}.
 	 * @param ctx the parse tree
 	 */

@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.servlet.ServletConfig;
@@ -44,6 +45,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
+import org.fbsql.antlr4.generated.FbsqlParser.Connect_to_stmtContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_aliasContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_maxContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_pool_size_minContext;
@@ -53,6 +55,8 @@ import org.fbsql.antlr4.generated.FbsqlParser.Jdbc_urlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.PasswordContext;
 import org.fbsql.antlr4.generated.FbsqlParser.UserContext;
+import org.fbsql.servlet.CommonUtils;
+import org.fbsql.servlet.ExposeMode;
 import org.fbsql.servlet.SqlParseUtils;
 import org.fbsql.servlet.StringUtils;
 
@@ -82,11 +86,12 @@ import org.fbsql.servlet.StringUtils;
  * ;
  */
 public class ParseStmtConnectTo {
-	public static final String  NONEXPOSABLE_PREFIX     = "NONEXPOSABLE:";
-	private static final String ENCODED_PASSWORD_PREFIX = "base64:";
+	public static final String  NONEXPOSABLE_NAME_PREFIX = "NONEXPOSABLE_NAME:";
+	private static final String ENCODED_PASSWORD_PREFIX  = "base64:";
 
 	private static final int DEFAULT_CONNECTION_POOL_SIZE_MIN = 1;
 	private static final int DEFAULT_CONNECTION_POOL_SIZE_MAX = 100;
+	private static final int DEFAULT_EXPOSE_MODE              = ExposeMode.NONE;
 
 	/**
 	 * DTO (Data Transfer Object) that holds RDBMS connection meta data
@@ -137,10 +142,14 @@ public class ParseStmtConnectTo {
 		 */
 		public int connectionPoolSizeMax = DEFAULT_CONNECTION_POOL_SIZE_MAX;
 
+		public int exposeMode = DEFAULT_EXPOSE_MODE;
+
 		/**
 		 * Value from "IF EXISTS" clause
 		 */
 		public String authenticationQuery;
+
+		public boolean allowConnections;
 
 		/**
 		 * Value from "AS" clause
@@ -149,10 +158,14 @@ public class ParseStmtConnectTo {
 
 		@Override
 		public String toString() {
-			return "StmtConnectTo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", authenticationQuery=" + authenticationQuery + ", instanceName=" + instanceName + "]";
+			return "StmtConnectTo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", exposeMode=" + exposeMode + ", authenticationQuery=" + authenticationQuery + ", allowConnections=" + allowConnections + ", instanceName=" + instanceName + "]";
 		}
 
 	}
+
+	private static final String[] ALLOW_CONNECTIONS_ALL    = new String[] { "ALLOW", "CONNECTIONS", "ALL" };
+	private static final String[] ALLOW_STATEMENTS_ALL     = new String[] { "ALLOW", "STATEMENTS", "ALL" };
+	private static final String[] ALLOW_STATEMENTS_EXPOSED = new String[] { "ALLOW", "STATEMENTS", "EXPOSED" };
 
 	/**
 	 * StmtConnectTo transfer object
@@ -178,6 +191,22 @@ public class ParseStmtConnectTo {
 		ParseTree   tree   = parser.connect_to_stmt();
 
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
+
+			@Override
+			public void enterConnect_to_stmt(Connect_to_stmtContext ctx) {
+				String[] array = new String[ctx.children.size()];
+				int      n     = 0;
+				for (ParseTree parseTree : ctx.children)
+					array[n++] = parseTree.getText().toUpperCase(Locale.ENGLISH);
+
+				if (CommonUtils.indexOf(array, ALLOW_STATEMENTS_ALL) != -1)
+					st.exposeMode = ExposeMode.ALL;
+				else if (CommonUtils.indexOf(array, ALLOW_STATEMENTS_EXPOSED) != -1)
+					st.exposeMode = ExposeMode.EXPOSED;
+
+				if (CommonUtils.indexOf(array, ALLOW_CONNECTIONS_ALL) != -1)
+					st.allowConnections = true;
+			}
 
 			@Override
 			public void enterJdbc_url(Jdbc_urlContext ctx) {
@@ -254,7 +283,7 @@ public class ParseStmtConnectTo {
 		}, tree);
 
 		if (st.instanceName == null)
-			st.instanceName = NONEXPOSABLE_PREFIX + UUID.randomUUID().toString();
+			st.instanceName = NONEXPOSABLE_NAME_PREFIX + UUID.randomUUID().toString();
 
 		if (st.password != null)
 			if (st.password.startsWith(ENCODED_PASSWORD_PREFIX)) {
@@ -265,9 +294,10 @@ public class ParseStmtConnectTo {
 	}
 
 	public static void main(String[] args) {
-		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' USER uuu EXPOSE IF EXISTS (SELECT * from USERS where USER=:user) AS ali";
-		ParseStmtConnectTo p   = new ParseStmtConnectTo();
-		StmtConnectTo      se  = p.parse(null, sql);
+		String sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' ALLOW STATEMENTS exposed USER uuu ALLOW CONNECTIONS IF EXISTS (SELECT * from USERS where USER=:user) AS ali";
+		//		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' ALLOW STATEMENTS EXPOSED USER uuu ALLOW CONNECTIONS NONE AS ali";
+		ParseStmtConnectTo p  = new ParseStmtConnectTo();
+		StmtConnectTo      se = p.parse(null, sql);
 		System.out.println(se);
 	}
 }

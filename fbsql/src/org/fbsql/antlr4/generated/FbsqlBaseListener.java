@@ -105,18 +105,6 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitPrefetch_on_off(FbsqlParser.Prefetch_on_offContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterConnection_alias(FbsqlParser.Connection_aliasContext ctx) { }
 	/**
 	 * {@inheritDoc}
