@@ -1,4 +1,4 @@
-// Generated from Fbsql.g4 by ANTLR 4.8
+// Generated from /home/qsecofr/git/fbsql/fbsql/Fbsql.g4 by ANTLR 4.8
 
 /*
 MIT License
@@ -247,15 +247,15 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitSwitch_to_stmt(FbsqlParser.Switch_to_stmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#expose_stmt}.
+	 * Enter a parse tree produced by {@link FbsqlParser#declare_statement_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void enterExpose_stmt(FbsqlParser.Expose_stmtContext ctx);
+	void enterDeclare_statement_stmt(FbsqlParser.Declare_statement_stmtContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#expose_stmt}.
+	 * Exit a parse tree produced by {@link FbsqlParser#declare_statement_stmt}.
 	 * @param ctx the parse tree
 	 */
-	void exitExpose_stmt(FbsqlParser.Expose_stmtContext ctx);
+	void exitDeclare_statement_stmt(FbsqlParser.Declare_statement_stmtContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#declare_procedure_stmt}.
 	 * @param ctx the parse tree

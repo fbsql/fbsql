@@ -1,4 +1,4 @@
-// Generated from Fbsql.g4 by ANTLR 4.8
+// Generated from /home/qsecofr/git/fbsql/fbsql/Fbsql.g4 by ANTLR 4.8
 
 /*
 MIT License
@@ -297,13 +297,13 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExpose_stmt(FbsqlParser.Expose_stmtContext ctx) { }
+	@Override public void enterDeclare_statement_stmt(FbsqlParser.Declare_statement_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExpose_stmt(FbsqlParser.Expose_stmtContext ctx) { }
+	@Override public void exitDeclare_statement_stmt(FbsqlParser.Declare_statement_stmtContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

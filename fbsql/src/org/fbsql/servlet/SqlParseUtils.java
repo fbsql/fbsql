@@ -46,8 +46,8 @@ import org.fbsql.antlr4.parser.ParseStmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure;
 import org.fbsql.antlr4.parser.ParseStmtDeclareProcedure.StmtDeclareProcedure;
-import org.fbsql.antlr4.parser.ParseStmtExpose;
-import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
+import org.fbsql.antlr4.parser.ParseStmtDeclareStatement;
+import org.fbsql.antlr4.parser.ParseStmtDeclareStatement.StmtDeclareStatement;
 import org.fbsql.antlr4.parser.ParseStmtInclude;
 import org.fbsql.antlr4.parser.ParseStmtScheduleAt;
 import org.fbsql.antlr4.parser.ParseStmtScheduleAt.StmtScheduleAt;
@@ -75,7 +75,7 @@ public class SqlParseUtils {
 	public static final String SPECIAL_STATEMENT_SWITCH_TO         = canonizeSql("SWITCH TO");         // Switch connection to database instance (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_DECLARE_PROCEDURE = canonizeSql("DECLARE PROCEDURE"); // Declare non native stored procedure written in one of JVM languages
 	public static final String SPECIAL_STATEMENT_SCHEDULE          = canonizeSql("SCHEDULE");          // Add scheduled stored procedure (can be used only in «init.sql» script)
-	public static final String SPECIAL_STATEMENT_EXPOSE            = canonizeSql("EXPOSE");            // Expose corresponding native SQL statement to frontend
+	public static final String SPECIAL_STATEMENT_DECLARE_STATEMENT = canonizeSql("DECLARE STATEMENT"); // Expose corresponding native SQL statement to frontend
 	public static final String SPECIAL_STATEMENT_INCLUDE           = canonizeSql("INCLUDE");           // Include script file(s) (can be used only in «init.sql» script)
 
 	/**
@@ -230,17 +230,17 @@ public class SqlParseUtils {
 	 * @param sql - EXPOSE statement
 	 * @throws NoSuchAlgorithmException 
 	 */
-	public static StmtExpose parseExposeStatement(ServletConfig servletConfig, String sql) {
+	public static StmtDeclareStatement parseExposeStatement(ServletConfig servletConfig, String sql) {
 		sql = stripComments(sql).trim();
 		sql = sql.replace('\n', ' ');
 		sql = sql.replace('\r', ' ');
 		sql = processStatement(sql);
 
-		ParseStmtExpose parseStmtExpose = new ParseStmtExpose();
-		StmtExpose      stmtExpose      = parseStmtExpose.parse(sql);
+		ParseStmtDeclareStatement parseStmtDeclareStatement = new ParseStmtDeclareStatement();
+		StmtDeclareStatement      stmtDeclareStatement      = parseStmtDeclareStatement.parse(sql);
 
-		stmtExpose.statement = processStatement(stmtExpose.statement);
-		return stmtExpose;
+		stmtDeclareStatement.statement = processStatement(stmtDeclareStatement.statement);
+		return stmtDeclareStatement;
 	}
 
 	/**

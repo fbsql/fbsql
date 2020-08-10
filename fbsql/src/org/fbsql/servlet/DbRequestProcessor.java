@@ -70,7 +70,7 @@ import javax.servlet.http.HttpSession;
 
 import org.fbsql.antlr4.parser.ParseStmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
-import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
+import org.fbsql.antlr4.parser.ParseStmtDeclareStatement.StmtDeclareStatement;
 import org.fbsql.connection_pool.ConnectionPoolManager;
 import org.fbsql.connection_pool.DbConnection;
 import org.fbsql.json.parser.JsonUtils;
@@ -149,7 +149,7 @@ public class DbRequestProcessor implements Runnable {
 	private boolean               debug;
 	private ConnectionPoolManager connectionPoolManager;
 
-	private Map<String /* SQL statement name */, StmtExpose>                          whiteList;    // list of SQL statements
+	private Map<String /* SQL statement name */, StmtDeclareStatement>                declaredStatementsMap; // list of SQL statements
 	private Map<String /* stored procedure name */, String /* java method */>         proceduresMap;
 	private Map<String /* js file name */, Scriptable>                                mapScopes;
 	private Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions;
@@ -166,7 +166,7 @@ public class DbRequestProcessor implements Runnable {
 	 * @param asyncCtx
 	 * @param debug
 	 * @param connectionPoolManager
-	 * @param whiteList
+	 * @param declaredStatementsMap
 	 * @param proceduresMap
 	 * @param mapScopes
 	 * @param mapFunctions
@@ -180,7 +180,7 @@ public class DbRequestProcessor implements Runnable {
 			AsyncContext asyncCtx, //
 			boolean debug, //
 			ConnectionPoolManager connectionPoolManager, //
-			Map<String /* SQL statement name */, StmtExpose> whiteList, // list of SQL statements
+			Map<String /* SQL statement name */, StmtDeclareStatement> declaredStatementsMap, // list of SQL statements
 			Map<String /* stored procedure name */, String /* java method */> proceduresMap, //
 			Map<String /* js file name */, Scriptable> mapScopes, //
 			Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions, //
@@ -193,7 +193,7 @@ public class DbRequestProcessor implements Runnable {
 		this.asyncContext          = asyncCtx;
 		this.debug                 = debug;
 		this.connectionPoolManager = connectionPoolManager;
-		this.whiteList             = whiteList;            // list of SQL statements
+		this.declaredStatementsMap = declaredStatementsMap; // list of SQL statements
 		this.proceduresMap         = proceduresMap;
 		this.mapScopes             = mapScopes;
 		this.mapFunctions          = mapFunctions;
@@ -263,7 +263,7 @@ public class DbRequestProcessor implements Runnable {
 			String                    unprocessedNamedPreparedStatement = null;
 			String                    namedPreparedStatement            = null;
 			List<Map<String, Object>> parametersListOfMaps              = null;
-			StmtExpose                stmtExpose                        = null;
+			StmtDeclareStatement      stmtDeclareStatement              = null;
 
 			reject = stmtConnectTo.exposeMode == ExposeMode.NONE;
 			if (reject)
@@ -279,14 +279,14 @@ public class DbRequestProcessor implements Runnable {
 					}
 					unprocessedNamedPreparedStatement = unprocessedNamedPreparedStatementSb.toString().trim();
 					namedPreparedStatement            = SqlParseUtils.processStatement(unprocessedNamedPreparedStatement);
-					for (StmtExpose curStmtExpose : whiteList.values()) {
-						if (curStmtExpose.statement.equals(namedPreparedStatement)) {
-							statementId = curStmtExpose.alias;
-							stmtExpose  = whiteList.get(statementId);
+					for (StmtDeclareStatement curDeclareStatement : declaredStatementsMap.values()) {
+						if (curDeclareStatement.statement.equals(namedPreparedStatement)) {
+							statementId          = curDeclareStatement.alias;
+							stmtDeclareStatement = declaredStatementsMap.get(statementId);
 							break;
 						}
 					}
-					reject = stmtExpose == null && stmtConnectTo.exposeMode == ExposeMode.EXPOSED;
+					reject = stmtDeclareStatement == null && stmtConnectTo.exposeMode == ExposeMode.EXPOSED;
 					if (reject)
 						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not exposed to frontend", namedPreparedStatement));
 				} else { // SQL statement name provided
@@ -295,19 +295,19 @@ public class DbRequestProcessor implements Runnable {
 					if (reject) // wrong name format
 						rejectMessage = NAME_NOT_FOUND_MSG;
 					else {
-						stmtExpose = whiteList.get(statementId);
-						if (stmtExpose == null) {
+						stmtDeclareStatement = declaredStatementsMap.get(statementId);
+						if (stmtDeclareStatement == null) {
 							reject        = true;
 							rejectMessage = NAME_NOT_FOUND_MSG;
 						} else {
-							namedPreparedStatement            = stmtExpose.statement;
+							namedPreparedStatement            = stmtDeclareStatement.statement;
 							unprocessedNamedPreparedStatement = namedPreparedStatement;
 						}
 					}
 				}
 
-				if (stmtExpose != null) {
-					Collection<String> allowedRoles = stmtExpose.roles;
+				if (stmtDeclareStatement != null) {
+					Collection<String> allowedRoles = stmtDeclareStatement.roles;
 					if (!allowedRoles.isEmpty())
 						if (!allowedRoles.contains(remoteRole)) {
 							reject        = true;
@@ -320,8 +320,8 @@ public class DbRequestProcessor implements Runnable {
 				//
 				parametersListOfMaps = new ArrayList<>(paramJsons.size());
 				for (String paramJson : paramJsons) {
-					if (stmtExpose != null) {
-						String validatorStoredProcedureName = stmtExpose.trigger_before_procedure_name;
+					if (stmtDeclareStatement != null) {
+						String validatorStoredProcedureName = stmtDeclareStatement.trigger_before_procedure_name;
 						if (validatorStoredProcedureName != null) {
 							String statementInfoJson = generateStatementInfoJson( //
 									instanceName, //
@@ -596,7 +596,7 @@ public class DbRequestProcessor implements Runnable {
 								Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
 								Object                                                       obj         = methodOrFunction.method.invoke(null, parametersArray);
-								Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+								Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
 								List<Map<String /* column name */, String /* JSON value */>> list        = null;
 								if (obj instanceof ResultSet)
 									list = QueryUtils.resutlSetToListOfMapsJsonValues((ResultSet) obj, sharedCoder.encoder);
@@ -644,7 +644,7 @@ public class DbRequestProcessor implements Runnable {
 									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
 									Object                                                       obj         = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
-									Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+									Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
 									List<Map<String /* column name */, String /* JSON value */>> list        = null;
 									if (obj instanceof NativeObject || obj instanceof NativeArray) { // return JSON object that will sent to client
 										String json = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null);
@@ -746,7 +746,7 @@ public class DbRequestProcessor implements Runnable {
 						}
 
 						if (executeTypeQuery) { // Execute Query
-							Integer                                                      compression = stmtExpose == null ? CompressionLevel.BEST_COMPRESSION : stmtExpose.compressionLevel;
+							Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
 							ResultSet                                                    rs          = ps.executeQuery();
 							List<Map<String /* column name */, String /* JSON value */>> list        = QueryUtils.resutlSetToListOfMapsJsonValues(rs, sharedCoder.encoder);
 							//							try (ResultSet rs = ps.executeQuery()) {
@@ -820,8 +820,8 @@ public class DbRequestProcessor implements Runnable {
 
 				if (!ongoingRequests.isEmpty()) {
 					long timestamp = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
-					if (stmtExpose != null) {
-						String notifierStoredProcedureName = stmtExpose.trigger_after_procedure_name;
+					if (stmtDeclareStatement != null) {
+						String notifierStoredProcedureName = stmtDeclareStatement.trigger_after_procedure_name;
 						for (AsyncContext ac : ongoingRequests) {
 							try {
 								HttpServletRequest  selfRequest  = (HttpServletRequest) ac.getRequest();

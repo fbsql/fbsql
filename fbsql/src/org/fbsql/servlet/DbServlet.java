@@ -79,7 +79,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.fbsql.antlr4.parser.ParseStmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
-import org.fbsql.antlr4.parser.ParseStmtExpose.StmtExpose;
+import org.fbsql.antlr4.parser.ParseStmtDeclareStatement.StmtDeclareStatement;
 import org.fbsql.connection_pool.ConnectionPoolManager;
 import org.fbsql.connection_pool.DbConnection;
 import org.fbsql.servlet.Logger.Severity;
@@ -168,7 +168,7 @@ public class DbServlet extends HttpServlet {
 
 	private Map<String /* instance name */, StmtConnectTo>                                                             connectionInfoMap;
 	private Map<String /* instance name */, ConnectionPoolManager>                                                     connectionPoolManagerMap;
-	private Map<String /* instance name */, Map<String /* SQL statement name */, StmtExpose>>                          whiteListMap;
+	private Map<String /* instance name */, Map<String /* SQL statement name */, StmtDeclareStatement>>                instancesDeclaredStatementsMap;
 	private Map<String /* instance name */, Map<StaticStatement, ReadyResult>>                                         staticJsonsMap;
 	private Map<String /* instance name */, Queue<AsyncContext>>                                                       ongoingRequestsMap;
 	private Map<String /* instance name */, Connection>                                                                connectionMap;
@@ -270,15 +270,15 @@ public class DbServlet extends HttpServlet {
 			else
 				Logger.out(Severity.INFO, MessageFormat.format("{0} connection instance(s) found", instancesCount));
 
-			connectionPoolManagerMap = new HashMap<>(instancesCount);
-			whiteListMap             = new HashMap<>(instancesCount);
-			staticJsonsMap           = new HashMap<>(instancesCount);
-			connectionInfoMap        = new HashMap<>(instancesCount);
-			ongoingRequestsMap       = new HashMap<>(instancesCount);
-			connectionMap            = new HashMap<>(instancesCount);
-			instancesProceduresMap   = new HashMap<>(instancesCount);
-			instancesScopesMap       = new HashMap<>(instancesCount);
-			instancesFunctionsMap    = new HashMap<>(instancesCount);
+			connectionPoolManagerMap       = new HashMap<>(instancesCount);
+			instancesDeclaredStatementsMap = new HashMap<>(instancesCount);
+			staticJsonsMap                 = new HashMap<>(instancesCount);
+			connectionInfoMap              = new HashMap<>(instancesCount);
+			ongoingRequestsMap             = new HashMap<>(instancesCount);
+			connectionMap                  = new HashMap<>(instancesCount);
+			instancesProceduresMap         = new HashMap<>(instancesCount);
+			instancesScopesMap             = new HashMap<>(instancesCount);
+			instancesFunctionsMap          = new HashMap<>(instancesCount);
 
 			instances = new ArrayList<>(instancesCount);
 
@@ -364,13 +364,13 @@ public class DbServlet extends HttpServlet {
 
 		connectionMap.put(instanceName, connection);
 
-		Map<String /* js file name */, Scriptable>                                mapScopes         = new HashMap<>();
-		Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions      = new HashMap<>();
-		Map<String /* stored procedure name */, String /* java method */>         proceduresMap     = new HashMap<>();
-		Map<String /* Cron expression */, List<String /* SQL statement name */>>  schedulersMap     = new HashMap<>();
-		Map<String /* SQL statement name */, StmtExpose>                          exposedStatements = new HashMap<>();
+		Map<String /* js file name */, Scriptable>                                mapScopes                     = new HashMap<>();
+		Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions                  = new HashMap<>();
+		Map<String /* stored procedure name */, String /* java method */>         proceduresMap                 = new HashMap<>();
+		Map<String /* Cron expression */, List<String /* SQL statement name */>>  schedulersMap                 = new HashMap<>();
+		Map<String /* SQL statement name */, StmtDeclareStatement>                declareStatementStatementsMap = new HashMap<>();
 
-		whiteListMap.put(instanceName, exposedStatements);
+		instancesDeclaredStatementsMap.put(instanceName, declareStatementStatementsMap);
 		try (Statement st = connection.createStatement()) {
 			//
 			// Execute all statements from 'init.sql' script
@@ -417,9 +417,9 @@ public class DbServlet extends HttpServlet {
 					SqlParseUtils.parseDeclareProcedureStatement(servletConfig, statement, proceduresMap);
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SCHEDULE))
 					SqlParseUtils.parseScheduleStatement(servletConfig, statement, schedulersMap);
-				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_EXPOSE)) {
-					StmtExpose stmtExpose = parseExposeStatement(servletConfig, statement);
-					exposedStatements.put(stmtExpose.alias, stmtExpose);
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_DECLARE_STATEMENT)) {
+					StmtDeclareStatement stmtDeclareStatement = parseExposeStatement(servletConfig, statement);
+					declareStatementStatementsMap.put(stmtDeclareStatement.alias, stmtDeclareStatement);
 				} //
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO))
 					; // ignore
@@ -432,7 +432,7 @@ public class DbServlet extends HttpServlet {
 
 			}
 
-			for (StmtExpose stmtExpose : exposedStatements.values()) {
+			for (StmtDeclareStatement stmtExpose : declareStatementStatementsMap.values()) {
 				if (!stmtExpose.prefetch)
 					continue;
 
@@ -595,7 +595,7 @@ public class DbServlet extends HttpServlet {
 				iterator.remove();
 			}
 			connectionInfoMap.remove(instanceName);
-			whiteListMap.remove(instanceName);
+			instancesDeclaredStatementsMap.remove(instanceName);
 			staticJsonsMap.remove(instanceName);
 			Connection connection = connectionMap.remove(instanceName);
 			if (connection != null)
@@ -838,7 +838,7 @@ public class DbServlet extends HttpServlet {
 		String                                                                    instanceName          = inst_and_oper[0];
 		StmtConnectTo                                                             stmtConnectTo         = connectionInfoMap.get(instanceName);
 		ConnectionPoolManager                                                     connectionPoolManager = connectionPoolManagerMap.get(instanceName);
-		Map<String /* SQL statement name */, StmtExpose>                          whiteList             = whiteListMap.get(instanceName);
+		Map<String /* SQL statement name */, StmtDeclareStatement>                declaredStatementsMap = instancesDeclaredStatementsMap.get(instanceName);
 		Map<String /* stored procedure name */, String /* java method */>         proceduresMap         = instancesProceduresMap.get(instanceName);
 		Map<String /* js file name */, Scriptable>                                mapScopes             = instancesScopesMap.get(instanceName);
 		Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions          = instancesFunctionsMap.get(instanceName);
@@ -890,7 +890,7 @@ public class DbServlet extends HttpServlet {
 				asyncCtx, //
 				DEBUG, //
 				connectionPoolManager, //
-				whiteList, //
+				declaredStatementsMap, //
 				proceduresMap, //
 				mapScopes, //
 				mapFunctions, //

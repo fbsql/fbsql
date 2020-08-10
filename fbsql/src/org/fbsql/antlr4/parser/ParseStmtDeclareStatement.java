@@ -41,7 +41,7 @@ import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Compression_levelContext;
-import org.fbsql.antlr4.generated.FbsqlParser.Expose_stmtContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Declare_statement_stmtContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Role_nameContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Statement_aliasContext;
@@ -49,12 +49,12 @@ import org.fbsql.antlr4.generated.FbsqlParser.Trigger_after_procedure_nameContex
 import org.fbsql.antlr4.generated.FbsqlParser.Trigger_before_procedure_nameContext;
 import org.fbsql.servlet.CompressionLevel;
 
-public class ParseStmtExpose {
+public class ParseStmtDeclareStatement {
 	/**
 	 * EXPOSE statement transfer object
 	 * Expose particular SQL statement to frontend (can be used only in «init.sql» script)
 	 */
-	public class StmtExpose {
+	public class StmtDeclareStatement {
 		public String             statement;
 		public boolean            prefetch;
 		public Collection<String> roles;
@@ -76,10 +76,10 @@ public class ParseStmtExpose {
 	/**
 	 * StmtExpose transfer object
 	 */
-	private StmtExpose st;
+	private StmtDeclareStatement st;
 
-	public ParseStmtExpose() {
-		st       = new StmtExpose();
+	public ParseStmtDeclareStatement() {
+		st       = new StmtDeclareStatement();
 		st.roles = new HashSet<>();
 	}
 
@@ -91,10 +91,10 @@ public class ParseStmtExpose {
 	 * @param sql
 	 * @return
 	 */
-	public StmtExpose parse(String sql) {
+	public StmtDeclareStatement parse(String sql) {
 		Lexer       lexer  = new FbsqlLexer(CharStreams.fromString(sql));
 		FbsqlParser parser = new FbsqlParser(new CommonTokenStream(lexer));
-		ParseTree   tree   = parser.expose_stmt();
+		ParseTree   tree   = parser.declare_statement_stmt();
 
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
 
@@ -108,7 +108,7 @@ public class ParseStmtExpose {
 			}
 
 			@Override
-			public void enterExpose_stmt(Expose_stmtContext ctx) {
+			public void enterDeclare_statement_stmt(Declare_statement_stmtContext ctx) {
 				st.prefetch = ctx.STATIC() != null && ctx.STATIC().size() != 0;
 			}
 
@@ -152,12 +152,12 @@ public class ParseStmtExpose {
 	}
 
 	public static void main(String[] args) {
-		String                     sql = "EXPOSE ( SELECT log AS x FROM t1 \n" +                                                                 //
-				"GROUP BY x /* aaaa */ \n" +                                                                                                     //
-				"HAVING count(*) >= 4 \n" +                                                                                                      //
-				"ORDER BY max(n) + 0 )  prefetch COMPRESSION BEST SPEED TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
-		ParseStmtExpose            p   = new ParseStmtExpose();
-		ParseStmtExpose.StmtExpose se  = p.parse(sql);
+		String                                         sql = "DECLARE STATEMENT ( SELECT log AS x FROM t1 \n" +                                //
+				"GROUP BY x /* aaaa */ \n" +                                                                                                   //
+				"HAVING count(*) >= 4 \n" +                                                                                                    //
+				"ORDER BY max(n) + 0 )  static COMPRESSION BEST SPEED TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
+		ParseStmtDeclareStatement                      p   = new ParseStmtDeclareStatement();
+		ParseStmtDeclareStatement.StmtDeclareStatement se  = p.parse(sql);
 		System.out.println(se);
 	}
 }

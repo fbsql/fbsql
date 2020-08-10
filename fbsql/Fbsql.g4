@@ -83,6 +83,7 @@ SPEED       : S P E E D;
 DECLARE     : D E C L A R E;
 PROCEDURE   : P R O C E D U R E;
 FOR         : F O R;
+STATEMENT   : S T A T E M E N T;
 
 CONNECT     : C O N N E C T;
 TO          : T O;
@@ -98,9 +99,10 @@ MIN         : M I N;
 MAX         : M A X;
 STATEMENTS  : S T A T E M E N T S;
 ALL         : A L L;
-EXPOSED     : E X P O S E D;
-ALLOW       : A L L O W;
+DECLARED    : D E C L A R E D;
 CONNECTIONS : C O N N E C T I O N S;
+ALLOW       : A L L O W;
+REJECT      : R E J E C T;
 IF          : I F;
 EXISTS      : E X I S T S;
 
@@ -209,19 +211,19 @@ connect_to_stmt
       (MAX connection_pool_size_max)
      )+
     ) |
-	(ALLOW STATEMENTS
+	(EXPOSE STATEMENTS
 	 (
-	  ALL |
-	  EXPOSED |
-	  NONE
-	 )+
+	  ALLOW ALL |
+	  ALLOW DECLARED |
+	  REJECT ALL
+	 )
 	) |
-   	(ALLOW CONNECTIONS
+   	(EXPOSE CONNECTIONS
      (
-      ALL |
-      NONE |
-      (IF EXISTS '(' native_sql ')')
-     )+
+      ALLOW ALL |
+      (ALLOW IF EXISTS '(' native_sql ')') |
+      REJECT ALL
+     )
     )
    )*
    (AS? connection_alias)?
@@ -231,8 +233,8 @@ switch_to_stmt
  : SWITCH TO connection_alias
  ;
 
-expose_stmt
- : EXPOSE
+declare_statement_stmt
+ : DECLARE STATEMENT
    '(' native_sql ')'
    (
     STATIC |

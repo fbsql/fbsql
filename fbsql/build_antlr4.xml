@@ -1,4 +1,5 @@
-/*
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
 MIT License
 
 Copyright (c) 2020 FBSQL Team
@@ -23,21 +24,30 @@ SOFTWARE.
 
 Home:   https://fbsql.github.io
 E-Mail: fbsql.team.team@gmail.com
-*/
-package org.fbsql.antlr4.tools;
+-->
 
-import org.antlr.v4.Tool;
+<project default="main">
+	<echo>${ant.version}</echo>
+	<echo>
+	</echo>
 
-public class GeneraeAntlr4 {
+	<target name="main">
+		<property name="bin" value="${basedir}/bin" />
 
-	public static void main(String[] args) {
-		args = new String[] { //
-				"Fbsql.g4", //
-				"-o", //
-				"src/org/fbsql/antlr4/generated", //
-				"-visitor", //
-		};
-		Tool.main(args);
-	}
+		<java classname="org.antlr.v4.Tool" fork="yes" classpath="${basedir}/WEB-INF/lib/antlr-4.8-complete.jar">
+			<arg value="${basedir}/Fbsql.g4" />
+			<arg value="-o" />
+			<arg value="${basedir}/src/org/fbsql/antlr4/generated" />
+			<arg value="-visitor" />
+		</java>
 
-}
+	</target>
+</project>
+
+<!--
+Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+or visit https://fbsql.github.io if you need additional
+information or have any questions.
+-->
+
+<!-- EOF -->

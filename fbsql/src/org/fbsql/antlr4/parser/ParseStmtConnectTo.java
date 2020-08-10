@@ -163,9 +163,9 @@ public class ParseStmtConnectTo {
 
 	}
 
-	private static final String[] ALLOW_CONNECTIONS_ALL    = new String[] { "ALLOW", "CONNECTIONS", "ALL" };
-	private static final String[] ALLOW_STATEMENTS_ALL     = new String[] { "ALLOW", "STATEMENTS", "ALL" };
-	private static final String[] ALLOW_STATEMENTS_EXPOSED = new String[] { "ALLOW", "STATEMENTS", "EXPOSED" };
+	private static final String[] EXPOSE_CONNECTIONS_ALLOW_ALL = new String[] { "EXPOSE", "CONNECTIONS", "ALLOW", "ALL" };
+	private static final String[] EXPOSE_STATEMENTS_ALL        = new String[] { "EXPOSE", "STATEMENTS", "ALLOW", "ALL" };
+	private static final String[] EXPOSE_STATEMENTS_EXPOSED    = new String[] { "EXPOSE", "STATEMENTS", "ALLOW", "DECLARED" };
 
 	/**
 	 * StmtConnectTo transfer object
@@ -199,12 +199,12 @@ public class ParseStmtConnectTo {
 				for (ParseTree parseTree : ctx.children)
 					array[n++] = parseTree.getText().toUpperCase(Locale.ENGLISH);
 
-				if (CommonUtils.indexOf(array, ALLOW_STATEMENTS_ALL) != -1)
+				if (CommonUtils.indexOf(array, EXPOSE_STATEMENTS_ALL) != -1)
 					st.exposeMode = ExposeMode.ALL;
-				else if (CommonUtils.indexOf(array, ALLOW_STATEMENTS_EXPOSED) != -1)
+				else if (CommonUtils.indexOf(array, EXPOSE_STATEMENTS_EXPOSED) != -1)
 					st.exposeMode = ExposeMode.EXPOSED;
 
-				if (CommonUtils.indexOf(array, ALLOW_CONNECTIONS_ALL) != -1)
+				if (CommonUtils.indexOf(array, EXPOSE_CONNECTIONS_ALLOW_ALL) != -1)
 					st.allowConnections = true;
 			}
 
@@ -294,7 +294,7 @@ public class ParseStmtConnectTo {
 	}
 
 	public static void main(String[] args) {
-		String sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' ALLOW STATEMENTS exposed USER uuu ALLOW CONNECTIONS IF EXISTS (SELECT * from USERS where USER=:user) AS ali";
+		String sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' ALLOW STATEMENTS exposed USER uuu INCOMING CONNECTIONS ALLOW IF EXISTS (SELECT * from USERS where USER=:user) AS ali";
 		//		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' ALLOW STATEMENTS EXPOSED USER uuu ALLOW CONNECTIONS NONE AS ali";
 		ParseStmtConnectTo p  = new ParseStmtConnectTo();
 		StmtConnectTo      se = p.parse(null, sql);

@@ -1,4 +1,4 @@
-// Generated from Fbsql.g4 by ANTLR 4.8
+// Generated from /home/qsecofr/git/fbsql/fbsql/Fbsql.g4 by ANTLR 4.8
 
 /*
 MIT License
@@ -166,11 +166,11 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSwitch_to_stmt(FbsqlParser.Switch_to_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link FbsqlParser#expose_stmt}.
+	 * Visit a parse tree produced by {@link FbsqlParser#declare_statement_stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpose_stmt(FbsqlParser.Expose_stmtContext ctx);
+	T visitDeclare_statement_stmt(FbsqlParser.Declare_statement_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#declare_procedure_stmt}.
 	 * @param ctx the parse tree

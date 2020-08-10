@@ -1,4 +1,4 @@
-// Generated from Fbsql.g4 by ANTLR 4.8
+// Generated from /home/qsecofr/git/fbsql/fbsql/Fbsql.g4 by ANTLR 4.8
 
 /*
 MIT License
@@ -193,7 +193,7 @@ public class FbsqlBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExpose_stmt(FbsqlParser.Expose_stmtContext ctx) { return visitChildren(ctx); }
+	@Override public T visitDeclare_statement_stmt(FbsqlParser.Declare_statement_stmtContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
