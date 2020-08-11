@@ -265,149 +265,144 @@ public class DbRequestProcessor implements Runnable {
 			List<Map<String, Object>> parametersListOfMaps              = null;
 			StmtDeclareStatement      stmtDeclareStatement              = null;
 
-			reject = stmtConnectTo.exposeMode == ExposeMode.NONE;
-			if (reject)
-				rejectMessage = "Rejected. Frontend statement execution is not allowed when connection ALLOW STATEMENTS mode is NONE";
-			else {
-				if (statementId == null) { // SQL statement provided
-					StringBuilder unprocessedNamedPreparedStatementSb = new StringBuilder();
-					while (true) {
-						String line = br.readLine();
-						if (line == null)
-							break;
-						unprocessedNamedPreparedStatementSb.append(' ' + line.trim() + '\n');
-					}
-					unprocessedNamedPreparedStatement = unprocessedNamedPreparedStatementSb.toString().trim();
-					namedPreparedStatement            = SqlParseUtils.processStatement(unprocessedNamedPreparedStatement);
-					for (StmtDeclareStatement curDeclareStatement : declaredStatementsMap.values()) {
-						if (curDeclareStatement.statement.equals(namedPreparedStatement)) {
-							statementId          = curDeclareStatement.alias;
-							stmtDeclareStatement = declaredStatementsMap.get(statementId);
-							break;
-						}
-					}
-					reject = stmtDeclareStatement == null && stmtConnectTo.exposeMode == ExposeMode.EXPOSED;
-					if (reject)
-						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not exposed to frontend", namedPreparedStatement));
-				} else { // SQL statement name provided
-					reject = statementId.startsWith(ParseStmtConnectTo.NONEXPOSABLE_NAME_PREFIX);
-					final String NAME_NOT_FOUND_MSG = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement name: \"{0}\" not found", statementId));
-					if (reject) // wrong name format
-						rejectMessage = NAME_NOT_FOUND_MSG;
-					else {
+			if (statementId == null) { // SQL statement provided
+				StringBuilder unprocessedNamedPreparedStatementSb = new StringBuilder();
+				while (true) {
+					String line = br.readLine();
+					if (line == null)
+						break;
+					unprocessedNamedPreparedStatementSb.append(' ' + line.trim() + '\n');
+				}
+				unprocessedNamedPreparedStatement = unprocessedNamedPreparedStatementSb.toString().trim();
+				namedPreparedStatement            = SqlParseUtils.processStatement(unprocessedNamedPreparedStatement);
+				for (StmtDeclareStatement curDeclareStatement : declaredStatementsMap.values()) {
+					if (curDeclareStatement.statement.equals(namedPreparedStatement)) {
+						statementId          = curDeclareStatement.alias;
 						stmtDeclareStatement = declaredStatementsMap.get(statementId);
-						if (stmtDeclareStatement == null) {
-							reject        = true;
-							rejectMessage = NAME_NOT_FOUND_MSG;
-						} else {
-							namedPreparedStatement            = stmtDeclareStatement.statement;
-							unprocessedNamedPreparedStatement = namedPreparedStatement;
-						}
+						break;
 					}
 				}
-
-				if (stmtDeclareStatement != null) {
-					Collection<String> allowedRoles = stmtDeclareStatement.roles;
-					if (!allowedRoles.isEmpty())
-						if (!allowedRoles.contains(remoteRole)) {
-							reject        = true;
-							rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not allowed for role \"{1}\"", namedPreparedStatement, remoteRole));
-						}
+				reject = stmtDeclareStatement == null && !stmtConnectTo.exposeUndeclaredStatements;
+				if (reject)
+					rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not exposed to frontend", namedPreparedStatement));
+			} else { // SQL statement name provided
+				reject = statementId.startsWith(ParseStmtConnectTo.NONEXPOSABLE_NAME_PREFIX);
+				final String NAME_NOT_FOUND_MSG = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement name: \"{0}\" not found", statementId));
+				if (reject) // wrong name format
+					rejectMessage = NAME_NOT_FOUND_MSG;
+				else {
+					stmtDeclareStatement = declaredStatementsMap.get(statementId);
+					if (stmtDeclareStatement == null) {
+						reject        = true;
+						rejectMessage = NAME_NOT_FOUND_MSG;
+					} else {
+						namedPreparedStatement            = stmtDeclareStatement.statement;
+						unprocessedNamedPreparedStatement = namedPreparedStatement;
+					}
 				}
+			}
 
-				//
-				// validate
-				//
-				parametersListOfMaps = new ArrayList<>(paramJsons.size());
-				for (String paramJson : paramJsons) {
-					if (stmtDeclareStatement != null) {
-						String validatorStoredProcedureName = stmtDeclareStatement.trigger_before_procedure_name;
-						if (validatorStoredProcedureName != null) {
-							String statementInfoJson = generateStatementInfoJson( //
-									instanceName, //
-									statementId, //
-									unprocessedNamedPreparedStatement, //
-									paramJson //
-							);
+			if (stmtDeclareStatement != null) {
+				Collection<String> allowedRoles = stmtDeclareStatement.roles;
+				if (!allowedRoles.isEmpty())
+					if (!allowedRoles.contains(remoteRole)) {
+						reject        = true;
+						rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not allowed for role \"{1}\"", namedPreparedStatement, remoteRole));
+					}
+			}
 
-							DbConnection dbConnection0      = null;
-							String       modifiedParamsJson = null;
-							try {
-								dbConnection0 = connectionPoolManager.getConnection();
+			//
+			// validate
+			//
+			parametersListOfMaps = new ArrayList<>(paramJsons.size());
+			for (String paramJson : paramJsons) {
+				if (stmtDeclareStatement != null) {
+					String validatorStoredProcedureName = stmtDeclareStatement.trigger_before_procedure_name;
+					if (validatorStoredProcedureName != null) {
+						String statementInfoJson = generateStatementInfoJson( //
+								instanceName, //
+								statementId, //
+								unprocessedNamedPreparedStatement, //
+								paramJson //
+						);
 
-								String           javaMethod       = proceduresMap.get(validatorStoredProcedureName);
-								MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
-								if (methodOrFunction != null) { // Java or JavaScript
-									List<Object> parameterValues = new ArrayList<>();
-									parameterValues.add(request);
-									parameterValues.add(response);
-									parameterValues.add(dbConnection0.getConnection());
-									parameterValues.add(instanceName);
-									parameterValues.add(userInfoJson);
-									parameterValues.add(statementInfoJson);
-									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+						DbConnection dbConnection0      = null;
+						String       modifiedParamsJson = null;
+						try {
+							dbConnection0 = connectionPoolManager.getConnection();
 
-									Object obj = null;
-									if (methodOrFunction.method != null) // java
-										obj = (String) methodOrFunction.method.invoke(null, parametersArray);
-									else { // JavaScript
-											//
-											// initize Rhino
-											// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
-											//
-										Context ctx = Context.enter();
-										try {
-											ctx.setLanguageVersion(Context.VERSION_1_7);
-											ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-											obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
-											if (obj instanceof NativeObject)
-												obj = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null); // to string
-										} catch (Exception e) {
-											e.printStackTrace();
-										} finally {
-											ctx.exit();
-										}
+							String           javaMethod       = proceduresMap.get(validatorStoredProcedureName);
+							MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
+							if (methodOrFunction != null) { // Java or JavaScript
+								List<Object> parameterValues = new ArrayList<>();
+								parameterValues.add(request);
+								parameterValues.add(response);
+								parameterValues.add(dbConnection0.getConnection());
+								parameterValues.add(instanceName);
+								parameterValues.add(userInfoJson);
+								parameterValues.add(statementInfoJson);
+								Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+								Object obj = null;
+								if (methodOrFunction.method != null) // java
+									obj = (String) methodOrFunction.method.invoke(null, parametersArray);
+								else { // JavaScript
+										//
+										// initize Rhino
+										// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+										//
+									Context ctx = Context.enter();
+									try {
+										ctx.setLanguageVersion(Context.VERSION_1_7);
+										ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+										obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+										if (obj instanceof NativeObject)
+											obj = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null); // to string
+									} catch (Exception e) {
+										e.printStackTrace();
+									} finally {
+										ctx.exit();
 									}
-									if (obj instanceof ResultSet)
-										try (ResultSet rs = (ResultSet) obj) {
-											if (rs.next())
-												modifiedParamsJson = rs.getString(1);
-										}
-									else if (obj instanceof CharSequence)
-										modifiedParamsJson = obj.toString();
-								} else { // Native
-									CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
-									cs.setString(1, instanceName);
-									cs.setString(2, userInfoJson);
-									cs.setString(3, statementInfoJson);
-
-									try (ResultSet rs = cs.executeQuery()) {
+								}
+								if (obj instanceof ResultSet)
+									try (ResultSet rs = (ResultSet) obj) {
 										if (rs.next())
 											modifiedParamsJson = rs.getString(1);
 									}
+								else if (obj instanceof CharSequence)
+									modifiedParamsJson = obj.toString();
+							} else { // Native
+								CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
+								cs.setString(1, instanceName);
+								cs.setString(2, userInfoJson);
+								cs.setString(3, statementInfoJson);
+
+								try (ResultSet rs = cs.executeQuery()) {
+									if (rs.next())
+										modifiedParamsJson = rs.getString(1);
 								}
-							} finally {
-								if (dbConnection0 != null)
-									connectionPoolManager.releaseConnection(dbConnection0);
-								if (modifiedParamsJson == null) { // reject if stored procedure return null
-									reject        = true;
-									rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\". Bad parameters: \"{1}\"", namedPreparedStatement, paramJson));
-								} else
-									paramJson = modifiedParamsJson.trim();
 							}
+						} finally {
+							if (dbConnection0 != null)
+								connectionPoolManager.releaseConnection(dbConnection0);
+							if (modifiedParamsJson == null) { // reject if stored procedure return null
+								reject        = true;
+								rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\". Bad parameters: \"{1}\"", namedPreparedStatement, paramJson));
+							} else
+								paramJson = modifiedParamsJson.trim();
 						}
 					}
-
-					Map<String, String> parametersJsonStrs = JsonUtils.parseJsonObject(paramJson);
-					Map<String, Object> parametersMap      = new LinkedHashMap<>(parametersJsonStrs.size());
-					for (Map.Entry<String, String> parameterNameValueEntry : parametersJsonStrs.entrySet()) {
-						String pname      = parameterNameValueEntry.getKey();
-						String pvalueJson = parameterNameValueEntry.getValue();
-						Object pvalueObj  = JsonUtils.parseJson(pvalueJson);
-						parametersMap.put(pname, pvalueObj);
-					}
-					parametersListOfMaps.add(parametersMap);
 				}
+
+				Map<String, String> parametersJsonStrs = JsonUtils.parseJsonObject(paramJson);
+				Map<String, Object> parametersMap      = new LinkedHashMap<>(parametersJsonStrs.size());
+				for (Map.Entry<String, String> parameterNameValueEntry : parametersJsonStrs.entrySet()) {
+					String pname      = parameterNameValueEntry.getKey();
+					String pvalueJson = parameterNameValueEntry.getValue();
+					Object pvalueObj  = JsonUtils.parseJson(pvalueJson);
+					parametersMap.put(pname, pvalueObj);
+				}
+				parametersListOfMaps.add(parametersMap);
 			}
 			if (reject) {
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

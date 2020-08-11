@@ -75,6 +75,7 @@ TRIGGER     : T R I G G E R;
 BEFORE      : B E F O R E;
 AFTER       : A F T E R;
 AS          : A S;
+NO          : N O;
 COMPRESSION : C O M P R E S S I O N;
 NONE        : N O N E;
 BEST        : B E S T;
@@ -97,9 +98,9 @@ POOL        : P O O L;
 SIZE        : S I Z E;
 MIN         : M I N;
 MAX         : M A X;
+UNDECLARED  : U N D E C L A R E D;
 STATEMENTS  : S T A T E M E N T S;
-ALL         : A L L;
-DECLARED    : D E C L A R E D;
+INCOMING    : I N C O M I N G;
 CONNECTIONS : C O N N E C T I O N S;
 ALLOW       : A L L O W;
 REJECT      : R E J E C T;
@@ -132,7 +133,7 @@ trigger_after_procedure_name
  ;
 
 compression_level
- : NONE
+ : NO COMPRESSION
  | BEST COMPRESSION
  | BEST SPEED
  ;
@@ -211,19 +212,9 @@ connect_to_stmt
       (MAX connection_pool_size_max)
      )+
     ) |
-	(EXPOSE STATEMENTS
-	 (
-	  ALLOW ALL |
-	  ALLOW DECLARED |
-	  REJECT ALL
-	 )
-	) |
-   	(EXPOSE CONNECTIONS
-     (
-      ALLOW ALL |
-      (ALLOW IF EXISTS '(' native_sql ')') |
-      REJECT ALL
-     )
+    (EXPOSE UNDECLARED STATEMENTS) |
+    (
+     ALLOW INCOMING CONNECTIONS ( IF EXISTS '(' native_sql ')' )?
     )
    )*
    (AS? connection_alias)?
@@ -243,7 +234,7 @@ declare_statement_stmt
     ( TRIGGER BEFORE trigger_before_procedure_name ) |
     ( TRIGGER AFTER trigger_after_procedure_name )
    )*
-   AS? statement_alias?
+   (AS? statement_alias)?
  ;
 
 declare_procedure_stmt

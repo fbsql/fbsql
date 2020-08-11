@@ -1415,7 +1415,7 @@ expose_stmt
  ;
 ```
 
-<img src="expose_stmt.png"><br><br>
+<img src="declare_statement_stmt.png"><br><br>
 <i>Examples</i><br>
 
 ```sql

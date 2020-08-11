@@ -56,7 +56,6 @@ import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.PasswordContext;
 import org.fbsql.antlr4.generated.FbsqlParser.UserContext;
 import org.fbsql.servlet.CommonUtils;
-import org.fbsql.servlet.ExposeMode;
 import org.fbsql.servlet.SqlParseUtils;
 import org.fbsql.servlet.StringUtils;
 
@@ -91,7 +90,6 @@ public class ParseStmtConnectTo {
 
 	private static final int DEFAULT_CONNECTION_POOL_SIZE_MIN = 1;
 	private static final int DEFAULT_CONNECTION_POOL_SIZE_MAX = 100;
-	private static final int DEFAULT_EXPOSE_MODE              = ExposeMode.NONE;
 
 	/**
 	 * DTO (Data Transfer Object) that holds RDBMS connection meta data
@@ -142,7 +140,7 @@ public class ParseStmtConnectTo {
 		 */
 		public int connectionPoolSizeMax = DEFAULT_CONNECTION_POOL_SIZE_MAX;
 
-		public int exposeMode = DEFAULT_EXPOSE_MODE;
+		public boolean exposeUndeclaredStatements;
 
 		/**
 		 * Value from "IF EXISTS" clause
@@ -158,14 +156,13 @@ public class ParseStmtConnectTo {
 
 		@Override
 		public String toString() {
-			return "StmtConnectTo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", exposeMode=" + exposeMode + ", authenticationQuery=" + authenticationQuery + ", allowConnections=" + allowConnections + ", instanceName=" + instanceName + "]";
+			return "StmtConnectTo [jdbcUrl=" + jdbcUrl + ", driverClassName=" + driverClassName + ", driverJars=" + driverJars + ", user=" + user + ", password=" + password + ", jdbcPropertiesFile=" + jdbcPropertiesFile + ", connectionPoolSizeMin=" + connectionPoolSizeMin + ", connectionPoolSizeMax=" + connectionPoolSizeMax + ", exposeUndeclaredStatements=" + exposeUndeclaredStatements + ", authenticationQuery=" + authenticationQuery + ", allowConnections=" + allowConnections + ", instanceName=" + instanceName + "]";
 		}
 
 	}
 
-	private static final String[] EXPOSE_CONNECTIONS_ALLOW_ALL = new String[] { "EXPOSE", "CONNECTIONS", "ALLOW", "ALL" };
-	private static final String[] EXPOSE_STATEMENTS_ALL        = new String[] { "EXPOSE", "STATEMENTS", "ALLOW", "ALL" };
-	private static final String[] EXPOSE_STATEMENTS_EXPOSED    = new String[] { "EXPOSE", "STATEMENTS", "ALLOW", "DECLARED" };
+	private static final String[] ALOW_INCOMING_CONNECTIONS    = new String[] { "ALLOW", "INCOMING", "CONNECTIONS" };
+	private static final String[] EXPOSE_UNDECLARED_STATEMENTS = new String[] { "EXPOSE", "UNDECLARED", "STATEMENTS" };
 
 	/**
 	 * StmtConnectTo transfer object
@@ -199,12 +196,10 @@ public class ParseStmtConnectTo {
 				for (ParseTree parseTree : ctx.children)
 					array[n++] = parseTree.getText().toUpperCase(Locale.ENGLISH);
 
-				if (CommonUtils.indexOf(array, EXPOSE_STATEMENTS_ALL) != -1)
-					st.exposeMode = ExposeMode.ALL;
-				else if (CommonUtils.indexOf(array, EXPOSE_STATEMENTS_EXPOSED) != -1)
-					st.exposeMode = ExposeMode.EXPOSED;
+				if (CommonUtils.indexOf(array, EXPOSE_UNDECLARED_STATEMENTS) != -1)
+					st.exposeUndeclaredStatements = true;
 
-				if (CommonUtils.indexOf(array, EXPOSE_CONNECTIONS_ALLOW_ALL) != -1)
+				if (CommonUtils.indexOf(array, ALOW_INCOMING_CONNECTIONS) != -1)
 					st.allowConnections = true;
 			}
 
