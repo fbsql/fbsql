@@ -201,23 +201,23 @@ cron_expression
 connect_to_stmt
  : CONNECT TO jdbc_url
    (
-    (USER user) |
-    (PASSWORD password) |
-    (PROPERTIES jdbc_connection_properties) |
-    (DRIVER jdbc_driver_class_name) |
-    (LIB jar_file ( ',' jar_file )* ) |
-    (CONNECTION POOL
+    ( USER user ) |
+    ( PASSWORD password ) |
+    ( PROPERTIES jdbc_connection_properties ) |
+    ( DRIVER jdbc_driver_class_name ) |
+    ( LIB jar_file ( ',' jar_file )* ) |
+    ( CONNECTION POOL
      (
-      (MIN connection_pool_size_min) |
-      (MAX connection_pool_size_max)
+      ( MIN connection_pool_size_min ) |
+      ( MAX connection_pool_size_max )
      )+
     ) |
-    (EXPOSE UNDECLARED STATEMENTS) |
+    ( EXPOSE UNDECLARED STATEMENTS ) |
     (
      ALLOW INCOMING CONNECTIONS ( IF EXISTS '(' native_sql ')' )?
-    )
+    ) |
+   ( AS? connection_alias )
    )*
-   (AS? connection_alias)?
  ;
 
 switch_to_stmt
@@ -229,12 +229,12 @@ declare_statement_stmt
    '(' native_sql ')'
    (
     STATIC |
-    ( COMPRESSION compression_level) |
+    ( COMPRESSION compression_level ) |
     ( ROLES '(' role_name ( ',' role_name )* ')' ) |
     ( TRIGGER BEFORE trigger_before_procedure_name ) |
-    ( TRIGGER AFTER trigger_after_procedure_name )
+    ( TRIGGER AFTER trigger_after_procedure_name ) |
+    ( AS? statement_alias )
    )*
-   (AS? statement_alias)?
  ;
 
 declare_procedure_stmt
