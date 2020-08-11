@@ -1401,8 +1401,8 @@ SWITCH TO MySQLite;
 <h3>EXPOSE</h3>
 
 ```EBNF
-expose_stmt
-::= EXPOSE
+declare_statement_stmt
+ : DECLARE STATEMENT
    '(' native_sql ')'
    (
     STATIC |
@@ -1411,8 +1411,9 @@ expose_stmt
     ( TRIGGER BEFORE trigger_before_procedure_name ) |
     ( TRIGGER AFTER trigger_after_procedure_name )
    )*
-   AS? statement_alias?
+   (AS? statement_alias)?
  ;
+
 ```
 
 <img src="declare_statement_stmt.png"><br><br>
