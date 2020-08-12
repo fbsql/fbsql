@@ -20,6 +20,9 @@ Work (secure) with your backend database within HTML<br>
 	FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, Microsoft SQL Server, IBM Db2 etc.
 	All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.<br>
 	<br>
+	<strong>What about security?</strong><br>
+	FBSQL security based on principle of least privilege (<abbr title="Principle of Least Privilege">POLP</abbr>). By default, FBSQL does not accept incoming connections. It also rejects all SQL statements that were not declared explicitly. Pre-execution triggers can be used to verify and modify input parameters before execution or completely reject execution by custom conditions. Users must implement their own authentication and authorization mechanism.<br>
+	<br>
 	<strong>What about performance?</strong><br>
 	FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimization and response compression.<br>
 
@@ -122,7 +125,13 @@ To expose our database to frontend we need create the initialization script <cod
  * any operations that you want to be executed at start up time
  */
 
-CONNECT TO 'jdbc:sqlite:sample' EXPOSE AS MySQLite;
+/*
+ * Connect to SQLite instance
+ */
+CONNECT TO 'jdbc:sqlite:sample'
+EXPOSE UNDECLARED STATEMENTS
+ALLOW INCOMING CONNECTIONS
+AS MySQLite;
 ```
 Internally FBSQL use JDBC API, which allow a client to access a database.
 FBSQL use JDBC URL to create database connection.<br>
