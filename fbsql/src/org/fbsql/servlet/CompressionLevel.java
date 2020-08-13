@@ -27,13 +27,28 @@ E-Mail: fbsql.team.team@gmail.com
 
 package org.fbsql.servlet;
 
+import java.util.zip.Deflater;
+
+/**
+ * Results compression level (0 - no compression, 1 - best speed, 9 - best compression)
+ */
 public interface CompressionLevel {
-	//
-	// Results compression mode (0 - none, 1 - best speed, 2 - best compression)
-	//
-	int NONE             = 0; // no compression
-	int BEST_SPEED       = 1; // best speed strategy
-	int BEST_COMPRESSION = 2; // best compression strategy (default)
+
+	/**
+	 * Compression level for no compression.
+	 */
+	int NO_COMPRESSION = Deflater.NO_COMPRESSION; // 0: no compression
+
+	/**
+	 * Compression level for fastest compression.
+	 */
+	int BEST_SPEED = Deflater.BEST_SPEED; // 1: best speed strategy
+
+	/**
+	 * Compression level for best compression.
+	 */
+	int BEST_COMPRESSION = Deflater.BEST_COMPRESSION; // 9: best compression strategy (default)
+
 }
 
 /*

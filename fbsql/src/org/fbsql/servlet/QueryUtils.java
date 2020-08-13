@@ -106,32 +106,32 @@ public class QueryUtils {
 	 * @throws SQLException
 	 * @throws IOException 
 	 */
-	public static ReadyResult createReadyResult(List<Map<String /* column name */, String /* JSON value */>> list, int resultSetFormat, int compressionMode, Base64.Encoder encoder) throws SQLException, IOException {
+	public static ReadyResult createReadyResult(List<Map<String /* column name */, String /* JSON value */>> list, int resultSetFormat, int compressionLevel, Base64.Encoder encoder) throws SQLException, IOException {
 		String json = convertToJsonArray(list, resultSetFormat);
 
 		//
 		// Compression optimization for "too short" results.
 		// We need prevent compression in case empty result set, because output
-		// compressed array (even in best compression mode) will have length = 10
+		// compressed array (even in best compression level) will have length = 10
 		// and no compressed array have length = 2 for string "[]",
-		// so, we override user-declared compression mode with COMPRESSION_NONE value
+		// so, we override user-declared compression level with NO COMPRESSION value
 		//
 		if (json.length() == 2) // empty result set case: []
-			compressionMode = CompressionLevel.NONE;
+			compressionLevel = CompressionLevel.NO_COMPRESSION;
 
 		ReadyResult readyResult = new ReadyResult();
 
 		readyResult.bs = json.getBytes(StandardCharsets.UTF_8);
-		if (compressionMode == CompressionLevel.BEST_SPEED) {
+		if (compressionLevel == CompressionLevel.BEST_SPEED) {
 			readyResult.compressed = true;
 			readyResult.bs         = compress(readyResult.bs, Deflater.BEST_SPEED);
-		} else if (compressionMode == CompressionLevel.BEST_COMPRESSION) {
+		} else if (compressionLevel == CompressionLevel.BEST_COMPRESSION) {
 			readyResult.compressed = true;
 			readyResult.bs         = compress(readyResult.bs, Deflater.BEST_COMPRESSION);
-		} else if (compressionMode == CompressionLevel.NONE)
+		} else if (compressionLevel == CompressionLevel.NO_COMPRESSION)
 			readyResult.compressed = false;
 		else
-			throw new IllegalArgumentException(Integer.toString(compressionMode));
+			throw new IllegalArgumentException(Integer.toString(compressionLevel));
 		readyResult.etag = "\"" + Integer.toHexString(Murmur3.hash32(readyResult.bs)) + "\""; // Murmur3 32-bit variant
 
 		return readyResult;

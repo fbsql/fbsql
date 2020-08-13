@@ -77,7 +77,6 @@ AFTER       : A F T E R;
 AS          : A S;
 NO          : N O;
 COMPRESSION : C O M P R E S S I O N;
-NONE        : N O N E;
 BEST        : B E S T;
 SPEED       : S P E E D;
 

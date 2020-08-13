@@ -63,7 +63,7 @@ public class ParseStmtDeclareStatement {
 		public String             alias;
 
 		/**
-		 * Results compression mode (0 - no compression, 1 - compression with best speed strategy, 2 - compression with best compression strategy (default))
+		 * Results compression mode (0 - no compression, 1 - compression with best speed strategy, 9 - compression with best compression strategy (default))
 		 */
 		public int compressionLevel;
 
@@ -119,7 +119,7 @@ public class ParseStmtDeclareStatement {
 				else if (ctx.BEST() != null && ctx.SPEED() != null)
 					st.compressionLevel = CompressionLevel.BEST_SPEED;
 				else
-					st.compressionLevel = CompressionLevel.NONE;
+					st.compressionLevel = CompressionLevel.NO_COMPRESSION;
 			}
 
 			@Override

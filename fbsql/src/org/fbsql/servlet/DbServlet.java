@@ -161,7 +161,6 @@ public class DbServlet extends HttpServlet {
 	 */
 	public static final String REQUEST_ATTRIBUTE_SESSION_ID = "REQUEST_ATTRIBUTE_SESSION_ID";
 
-	public static final String DB_CONNECTORS_DIR = "DB_CONNECTORS_DIR";
 	public static final String CORS_ALLOW_ORIGIN = "CORS_ALLOW_ORIGIN";
 
 	private static final String USER_HOME_DIR = System.getProperty("user.home");
@@ -228,26 +227,10 @@ public class DbServlet extends HttpServlet {
 				Logger.out(Severity.INFO, MessageFormat.format("JDBC driver registered: \"{0}\"", driver.getClass().getName()));
 			}
 
-			/*
-			 * Getting service home directory from servlet parameter (See: 'web.xml' file)
-			 */
-			String dbConnectorsDir = USER_HOME_DIR + "/fbsql/config/db";
-			//			String dbConnectorsDir = servletConfig.getInitParameter(DB_CONNECTORS_DIR);
-			//			if (dbConnectorsDir == null || dbConnectorsDir.trim().isEmpty())
-			//				throw new IllegalArgumentException(DB_CONNECTORS_DIR + " is null or empty string");
-			//			// Preprocess name of 'home' directory (initial parameter from 'web.xml' file)
-			//			dbConnectorsDir = StringUtils.putVars(dbConnectorsDir);
-			//			if (dbConnectorsDir.endsWith("/")) // clean path from trailing slash (if specified)
-			//				dbConnectorsDir = dbConnectorsDir.substring(0, dbConnectorsDir.length() - 1);
-			Path dbConnectorsDirPath = Paths.get(dbConnectorsDir);
-			//			if (dbConnectorsDirPath.isAbsolute()) {
+			String dbConnectorsDir     = USER_HOME_DIR + "/fbsql/config/db";
+			Path   dbConnectorsDirPath = Paths.get(dbConnectorsDir);
 			Files.createDirectories(dbConnectorsDirPath);
 			Logger.out(Severity.INFO, MessageFormat.format("Database connectors directory is: \"{0}\"", dbConnectorsDir));
-			//			} else {
-			//				String message = MessageFormat.format("Bad database connectors directory: \"{0}\". Not absolute path", dbConnectorsDir);
-			//				Logger.out(Severity.FATAL, message);
-			//				throw new ServletException(message);
-			//			}
 
 			/*
 			 * Initialize SharedCoder
