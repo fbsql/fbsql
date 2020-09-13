@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.parser;
@@ -37,6 +37,7 @@ import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Cron_expressionContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Procedure_nameContext;
+import org.fbsql.servlet.DbServlet;
 import org.fbsql.servlet.StringUtils;
 
 public class ParseStmtScheduleAt {
@@ -89,12 +90,15 @@ public class ParseStmtScheduleAt {
 			}
 		}, tree);
 
+		if (DbServlet.DEBUG)
+			System.out.println(st);
+
 		return st;
 	}
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

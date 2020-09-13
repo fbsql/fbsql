@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 -->
 <web-app
 	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
@@ -40,7 +40,7 @@ E-Mail: fbsql.team.team@gmail.com
 		<init-param>
 			<!--                                                           -->
 			<!-- Database connectors directory                             -->
-			<!-- Default value: ${user.home}/fbsql/config/db               -->
+			<!-- Default value: ${user.home}/fbsql/config/init             -->
 			<!--                                                           -->
 			<!-- WARNING!                                                  -->
 			<!--        - Absolute path required.                          -->
@@ -57,29 +57,7 @@ E-Mail: fbsql.team.team@gmail.com
 			<!--                                                           -->
 			<description>Database connectors directory</description>
 			<param-name>DB_CONNECTORS_DIR</param-name>
-			<param-value>${user.home}/fbsql/config/db</param-value>
-		</init-param>
-		<init-param>
-			<!--                                                           -->
-			<!-- JavaScript plugins directory                              -->
-			<!-- Default value: ${user.home}/fbsql/config/plugins          -->
-			<!--                                                           -->
-			<!-- WARNING!                                                  -->
-			<!--        - Absolute path required.                          -->
-			<!--        - No trailing slash '/'.                           -->
-			<!--                                                           -->
-			<!-- Syntax ${myvar} is used for Java System Properties values -->
-			<!-- Syntax  $[myvar] is used for OS environment variables     -->
-			<!--                                                           -->
-			<!-- Useful System Properties accessible as variables:         -->
-			<!-- ${user.home};                                             -->
-			<!-- ${user.dir};                                              -->
-			<!-- ${java.home};                                             -->
-			<!-- ${java.io.tmpdir}.                                        -->
-			<!--                                                           -->
-			<description>JavaScript plugins directory</description>
-			<param-name>JS_PLUGINS_DIR</param-name>
-			<param-value>${user.home}/fbsql/config/plugins</param-value>
+			<param-value>${user.home}/fbsql/config/init</param-value>
 		</init-param>
 		<init-param>
 			<!--
@@ -126,7 +104,7 @@ E-Mail: fbsql.team.team@gmail.com
 </web-app>
 
 <!--
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 -->

@@ -28,7 +28,9 @@ E-Mail: fbsql.team@gmail.com
 package org.fbsql.antlr4.parser;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -38,60 +40,83 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
-import org.fbsql.antlr4.generated.FbsqlParser.Sql_script_fileContext;
-import org.fbsql.servlet.DbServlet;
-import org.fbsql.servlet.StringUtils;
+import org.fbsql.antlr4.generated.FbsqlParser.ProcedureContext;
 
-public class ParseStmtInclude {
+public class ParseNativeStmt {
+
 	/**
-	 * DECLARE PROCEDURE statement transfer object
-	 * Declare stored procedure or function (can be used only in «init.sql» script)
+	 * Procedure transfer object
 	 */
-	public class StmtInclude {
-		public List<String> fileNames;
+	public class Procedure {
+		public String       name;
+		public boolean      hasNestedProcedures;
+		public int          startIndex;
+		public int          stopIndex;
+		public List<String> parameters = new ArrayList<>();
 
 		@Override
 		public String toString() {
-			return "StmtIncludeScriptFile [fileNames=" + fileNames + "]";
+			return "Procedure [name=" + name + ", hasNestedProcedures=" + hasNestedProcedures + ", startIndex=" + startIndex + ", stopIndex=" + stopIndex + ", parameters=" + parameters + "]";
 		}
+
+	}
+
+	private Collection<String /* stored procedure name */> nonNativeProceduresNames;
+	private Procedure                                      procedure;
+
+	public ParseNativeStmt(Collection<String /* stored procedure name */> nonNativeProceduresNames) {
+		this.nonNativeProceduresNames = nonNativeProceduresNames;
 	}
 
 	/**
-	 * StmtInclude transfer object
-	 */
-	private StmtInclude st;
-
-	public ParseStmtInclude() {
-		st           = new StmtInclude();
-		st.fileNames = new ArrayList<>();
-	}
-
-	/**
-	 * DECLARE PROCEDURE Statement parser
-	 *
-	 * E.g.: DECLARE PROCEDURE GET_EMPLOYEES FOR "org.fbsql.examples.StoredProcedures::getEmployees";
+	 * Native statement parser
 	 *
 	 * @param sql
 	 * @return
 	 */
-	public StmtInclude parse(String sql) {
+	public Procedure parse(String sql) {
 		Lexer       lexer  = new FbsqlLexer(CharStreams.fromString(sql));
 		FbsqlParser parser = new FbsqlParser(new CommonTokenStream(lexer));
-		ParseTree   tree   = parser.include_script_file_stmt();
+		ParseTree   tree   = parser.native_stmt();
 
+		List<Procedure> procedures = new ArrayList<>();
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
 
 			@Override
-			public void enterSql_script_file(Sql_script_fileContext ctx) {
-				st.fileNames.add(StringUtils.unquote(ctx.getText()));
+			public void enterProcedure(ProcedureContext ctx) {
+				String procedureName = ctx.children.get(0).getText().toUpperCase(Locale.ENGLISH);
+				if (!nonNativeProceduresNames.contains(procedureName))
+					return;
+				procedure = new Procedure();
+				procedures.add(procedure);
+				procedure.name = procedureName;
+				for (int i = 1; i < ctx.children.size(); i++) {
+					String s = ctx.children.get(i).getText();
+					char   c = s.charAt(0);
+					if (c == ',' || c == '(' || c == ')')
+						continue;
+					if (s.endsWith(")"))
+						procedure.hasNestedProcedures = true;
+					procedure.parameters.add(s);
+				}
+				procedure.startIndex = ctx.start.getStartIndex();
+				procedure.stopIndex  = ctx.stop.getStopIndex();
 			}
-
 		}, tree);
+		return getFirstUnNestedProcedure(procedures);
+	}
 
-		if (DbServlet.DEBUG)
-			System.out.println(st);
-
-		return st;
+	/**
+	 * 
+	 * @return first un-nested procedure
+	 */
+	private static Procedure getFirstUnNestedProcedure(List<Procedure> procedures) {
+		for (Procedure procedure : procedures) {
+			if (procedure.hasNestedProcedures)
+				continue;
+			return procedure;
+		}
+		return null;
 	}
 }
 

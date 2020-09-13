@@ -22,49 +22,84 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.servlet;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.imageio.stream.FileImageInputStream;
+
+import org.fbsql.antlr4.parser.ParseNativeStmt;
+import org.fbsql.antlr4.parser.ParseNativeStmt.Procedure;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 
 public class CallUtils {
 
-	private static final String USER_HOME_DIR = System.getProperty("user.home");
+	/* JS */
+	private static final String PLT_OPTIONS_JS_FILE     = "file";
+	private static final String PLT_OPTIONS_JS_FUNCTION = "function";
 
-	private static final String JAVA_METHOD_SEPARATOR = "::"; // Lambda static method notation: className::methodName
+	/* JVM */
+	private static final String PLT_OPTIONS_JVM_CLASS  = "class";
+	private static final String PLT_OPTIONS_JVM_METHOD = "method";
 
-	/**
-	 * Single quote character constant (string parameter wrapped in single quotes)
-	 */
-	private static final char Q1 = '\''; // single quote
+	/* OS */
+	private static final String PLT_OPTIONS_OS_FILE = "file";
 
-	/**
-	 * Double quote character constant (string parameter wrapped in double quotes)
-	 */
-	private static final char Q2 = '"'; // double quote
+	/* URL */
+	private static final String PLT_OPTIONS_URL_URL = "url";
 
-	/**
-	 * Comma character constant (parameters separator)
-	 */
-	private static final char COMMA = ','; // comma
+	//	public static String replace(String sql, Map<String /* stored procedure name */, NonNativeProcedure> proceduresMap, Connection connection, String instanceName, List<Object> parameterValues) throws Exception {
+	//		ParseNativeStmt p          = new ParseNativeStmt();
+	//		Procedure procedure = p.parse(sql);
+	//		NonNativeProcedure nonNativeProcedure = proceduresMap.get(procedure.name);
+	//		if (nonNativeProcedure.procedureType == ProcedureType.JVM) {
+	//			Method method = getMethod(nonNativeProcedure.optionsJson);
+	//
+	//			List<Object> parameterValues = new ArrayList<>();
+	//			parameterValues.add(connection);
+	//			parameterValues.add(instanceName);
+	//			CallUtils2.parseSqlParameters(procedure, parameterValues);
+	//			Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+	//
+	//			Object result = method.invoke(null, parametersArray);
+	//			String sresult;
+	//			if (result == null)
+	//				sresult = "NULL";
+	//			else if (result instanceof Boolean)
+	//				sresult = ((Boolean) result).toString().toUpperCase(Locale.ENGLISH);
+	//			else if (result instanceof Number)
+	//				sresult = result.toString();
+	//			else
+	//				sresult = '\'' + result.toString() + '\'';
+	//			return sql.substring(0, procedure.startIndex) + sresult + sql.substring(procedure.stopIndex + 1);
+	//		}
+	//		return null;
+	//
+	//	}
 
 	/**
 	 * Get CALL Statement Method
@@ -74,92 +109,160 @@ public class CallUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String getCallStatementMethod(String sql, Map<String /* stored procedure name */, String /* java method */> proceduresMap) {
-		final String CALL_PREFIX = "CALL ";
-		if (!sql.toUpperCase(Locale.ENGLISH).startsWith(CALL_PREFIX))
+	public static NonNativeProcedure getCallStatementNonNativeProcedure(String sql, Map<String /* stored procedure name */, NonNativeProcedure> proceduresMap) {
+		String text = SqlParseUtils.canonizeSql(sql);
+		if (!text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CALL))
 			return null; // Not a CALL statement
-		int    OFFSET   = CALL_PREFIX.length(); // "CALL " length: 5
-		String procName = sql.substring(OFFSET);
 
-		int posLeft = procName.indexOf('(');
-		if (posLeft == -1)
-			return null; // Syntax error: missing left parenthesis
+		ParseNativeStmt parseNativeStmt = new ParseNativeStmt(proceduresMap.keySet());
+		Procedure       procedure       = parseNativeStmt.parse(sql);
+		return proceduresMap.get(procedure.name);
+	}
 
-		procName = procName.substring(0, posLeft).trim().toUpperCase(Locale.ENGLISH);
+	public static String executeOsProgramm(String instanceDirectory, String optionsJson, Object[] parameters) throws Exception {
+		Map<String, Object> options  = RhinoUtils.asMap(optionsJson);
+		String              fileName = (String) options.get(PLT_OPTIONS_OS_FILE);
+		Path                pgmPath;
+		if (fileName.charAt(0) == '/')
+			pgmPath = Paths.get(fileName);
+		else
+			pgmPath = Paths.get(instanceDirectory + '/' + fileName);
 
-		return proceduresMap.get(procName);
+		List<String> cmds = new ArrayList<>(parameters.length);
+		cmds.add(pgmPath.toString());
+		for (Object parameter : parameters)
+			cmds.add(parameter.toString());
+
+		ProcessBuilder processBuilder = new ProcessBuilder(cmds);
+		try {
+
+			Process process = processBuilder.start();
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+			StringBuilder sb = new StringBuilder();
+			String        line;
+			while ((line = reader.readLine()) != null)
+				sb.append(line);
+			int exitCode = process.waitFor();
+			return sb.toString().trim();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static String executeUrl(String instanceDirectory, String optionsJson, Map<String, Object> parametersMap) throws Exception {
+		Map<String, Object> options = RhinoUtils.asMap(optionsJson);
+		String              urlStr  = (String) options.get(PLT_OPTIONS_URL_URL);
+		Path path;
+		InputStream is;
+		if (urlStr.charAt(0) == '/') {
+			path = Paths.get(urlStr);
+			is = new FileInputStream(path.toFile());
+		} else if (!urlStr.startsWith("http://") && !urlStr.startsWith("https://")) {
+			path = Paths.get(instanceDirectory + '/' + urlStr);
+			is = new FileInputStream(path.toFile());
+		} else {
+			boolean first = true;
+			for (Map.Entry<String, Object> entry : parametersMap.entrySet()) {
+				String name  = entry.getKey();
+				String value = URLEncoder.encode(entry.getValue().toString().trim(), StandardCharsets.UTF_8.name());
+				if (first) {
+					first   = false;
+					urlStr += '?';
+				} else
+					urlStr += '&';
+				urlStr += name + '=' + value;
+			}
+			URL url = new URL(urlStr);
+			is = url.openStream();
+		}
+		try (is) {
+			return StringUtils.inputSreamToString(is);
+		}
+	}
+
+	public static String executeFile(String instanceDirectory, String text) throws Exception {
+		return executeUrl(instanceDirectory, "file://" + text, Collections.EMPTY_MAP);
 	}
 
 	/**
-	 * Get CALL Statement Method
+	 * Get Java Method
 	 *
-	 * @param sql
-	 * @param proceduresMap
+	 * @param text
 	 * @return
 	 * @throws Exception
 	 */
-	public static MethodOrFunction getMethodOrFunction(String javaMethod, Map<String /* stored procedure name */, String /* java method */> proceduresMap, Map<String /* js file name */, Scriptable> mapScopes, Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions) throws Exception {
-		if (javaMethod == null)
-			return null; // No Java method declared
+	public static Method getMethod(String text) throws Exception {
+		Map<String, Object> cfg        = RhinoUtils.asMap(text);
+		String              className  = (String) cfg.get(PLT_OPTIONS_JVM_CLASS);
+		String              methodName = (String) cfg.get(PLT_OPTIONS_JVM_METHOD);
 
-		String[] array      = javaMethod.split(JAVA_METHOD_SEPARATOR);
-		String   className  = array[0];
-		String   methodName = array[1];
+		Class<?> clazz   = Class.forName(className);
+		Method[] methods = clazz.getMethods();
+		for (Method method : methods)
+			if (method.getName().equals(methodName))
+				return method;
+		throw new Exception("Java method declared, but not found in the class");
+	}
 
-		MethodOrFunction methodOrFunction = new MethodOrFunction();
-		Class<?>         clazz;
-		try {
-			// Try Java
-			clazz = Class.forName(className);
-			Method[] methods = clazz.getMethods();
-			for (Method method : methods)
-				if (method.getName().equals(methodName)) {
-					methodOrFunction.method = method;
-					return methodOrFunction;
-				}
-			// Java method declared, but not found in the class
-		} catch (ClassNotFoundException e) {
-			// Try JavaScript
-			Path jsFilePath = Paths.get(USER_HOME_DIR + "/fbsql/config/js/" + (className.replace('.', '/') + ".js")); // convert className to JavaScript file name
-			if (!Files.exists(jsFilePath))
-				return null;
+	/**
+	 * Get JavaScript Function
+	 *
+	 * @param text
+	 * @param mapScopes
+	 * @param mapFunctions
+	 * @return
+	 * @throws Exception
+	 */
+	public static JsFunction getFunction(String instanceDirectory, String text, Map<String /* js file name */, Scriptable> mapScopes, Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions) throws Exception {
+		Map<String, Object> cfg          = RhinoUtils.asMap(text);
+		String              jsFileName   = (String) cfg.get(PLT_OPTIONS_JS_FILE);
+		String              functionName = (String) cfg.get(PLT_OPTIONS_JS_FUNCTION);
 
-			//
-			// initize Rhino
-			// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
-			//
-			Context ctx = Context.enter();
+		Path jsFilePath;
+		if (jsFileName.charAt(0) == '/')
+			jsFilePath = Paths.get(jsFileName); // convert className to JavaScript file name
+		else
+			jsFilePath = Paths.get(instanceDirectory + '/' + jsFileName); // convert className to JavaScript file name
 
-			ctx.setLanguageVersion(Context.VERSION_1_7);
-			ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+		//
+		// initize Rhino
+		// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+		//
+		Context ctx = Context.enter();
 
-			Scriptable scope = mapScopes.get(className);
-			if (scope == null) {
-				String content = new String(Files.readAllBytes(jsFilePath), StandardCharsets.UTF_8);
-				scope = ctx.initStandardObjects();
-				ctx.evaluateString(scope, content, "script", 1, null);
-				mapScopes.put(className, scope);
-			}
+		ctx.setLanguageVersion(Context.VERSION_1_7);
+		ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
 
-			Map<String /* function name */, Function> map = mapFunctions.get(className);
-			if (map == null) {
-				map = new HashMap<>();
-				mapFunctions.put(className, map);
-			}
-
-			Function fct = map.get(methodName);
-			if (fct == null) {
-				fct = (Function) scope.get(methodName, scope);
-				map.put(methodName, fct);
-			}
-
-			methodOrFunction.scope    = scope;
-			methodOrFunction.function = fct;
-
-			return methodOrFunction;
-
+		Scriptable scope = mapScopes.get(jsFileName);
+		if (scope == null) {
+			String content = new String(Files.readAllBytes(jsFilePath), StandardCharsets.UTF_8);
+			scope = ctx.initStandardObjects();
+			ctx.evaluateString(scope, content, "script", 1, null);
+			mapScopes.put(jsFileName, scope);
 		}
-		return null;
+
+		Map<String /* function name */, Function> map = mapFunctions.get(jsFileName);
+		if (map == null) {
+			map = new HashMap<>();
+			mapFunctions.put(jsFileName, map);
+		}
+
+		Function fct = map.get(functionName);
+		if (fct == null) {
+			fct = (Function) scope.get(functionName, scope);
+			map.put(functionName, fct);
+		}
+
+		JsFunction jsFunction = new JsFunction();
+		jsFunction.scope    = scope;
+		jsFunction.function = fct;
+
+		return jsFunction;
 	}
 
 	/**
@@ -170,22 +273,24 @@ public class CallUtils {
 	 * @param parameterValues
 	 * @throws Exception
 	 */
-	public static void getCallStatementParameterValues(String sql, Map<String /* parameter name */, Object /* parameter value */> namedParametersMap, List<Object> parameterValues) throws Exception {
-		int posLeft = sql.indexOf('(');
-		if (posLeft == -1)
-			throw new IllegalArgumentException(MessageFormat.format("Syntax error: missing left parenthesis: {0}", sql));
+	public static void getCallStatementParameterValues(ParseNativeStmt parseNativeStmt, String sql, Map<String /* parameter name */, Object /* parameter value */> namedParametersMap, List<Object> parameterValues) throws Exception {
+		Procedure procedure = parseNativeStmt.parse(sql);
 
-		int posRight = sql.lastIndexOf(')');
-		if (posRight != sql.length() - 1)
-			throw new IllegalArgumentException(MessageFormat.format("Syntax error: missing right parenthesis: {0}", sql));
+		//		int posLeft = sql.indexOf('(');
+		//		if (posLeft == -1)
+		//			throw new IllegalArgumentException(MessageFormat.format("Syntax error: missing left parenthesis: {0}", sql));
+		//
+		//		int posRight = sql.lastIndexOf(')');
+		//		if (posRight != sql.length() - 1)
+		//			throw new IllegalArgumentException(MessageFormat.format("Syntax error: missing right parenthesis: {0}", sql));
 
-		String params = sql.substring(posLeft + 1, posRight).trim();
+		//String params = sql.substring(posLeft + 1, posRight).trim();
 
 		List<String> parameterNames = new ArrayList<>();
 		for (Object value : parameterValues) // add corresponding entries to parameterNames 
 			parameterNames.add(null);
 		//
-		parseNamedSqlParameters(params, parameterNames, parameterValues);
+		parseNamedSqlParameters(procedure.parameters, parameterNames, parameterValues);
 
 		for (int i = 0; i < parameterNames.size(); i++) {
 			String parameterName  = parameterNames.get(i);
@@ -204,8 +309,7 @@ public class CallUtils {
 	 * @param parameterNames  - parsed parameter names (output)
 	 * @param parameterValues - parsed parameter values (output)
 	 */
-	private static void parseNamedSqlParameters(String s, List<String> parameterNames, List<Object> parameterValues) {
-		List<String> strParameters = parseSqlParametersString(s);
+	private static void parseNamedSqlParameters(List<String> strParameters, List<String> parameterNames, List<Object> parameterValues) {
 		for (String strParameter : strParameters) {
 			String parameterName;
 			Object parameterValue;
@@ -237,9 +341,10 @@ public class CallUtils {
 	 * @param s               - parameters string E.g "'John', 123.45, NULL"
 	 * @param parameterValues - parsed parameter values (output)
 	 */
-	public static void parseSqlParameters(String s, List<Object> parameterValues) {
-		List<String> strParameters = parseSqlParametersString(s);
-		for (String strParameter : strParameters) {
+	public static void parseSqlParameters(ParseNativeStmt parseNativeStmt, String s, List<Object> parameterValues) {
+		Procedure procedure = parseNativeStmt.parse(s);
+
+		for (String strParameter : procedure.parameters) {
 			Object parameterValue;
 			if (strParameter.startsWith("'") || strParameter.startsWith("\""))
 				parameterValue = strParameter.substring(1, strParameter.length() - 1);
@@ -257,56 +362,10 @@ public class CallUtils {
 		}
 	}
 
-	/**
-	 * Parse SQL parameters string
-	 *
-	 * @param s - parameters string E.g "'John', 123.45, NULL, :price"
-	 * @return  - parsed parameter values
-	 */
-	private static List<String> parseSqlParametersString(String s) {
-		List<String> parameters = new ArrayList<>();
-		if (s.isEmpty())
-			return parameters;
-
-		StringBuilder sb             = new StringBuilder();
-		boolean       inSingleQuotes = false;
-		boolean       inDoubleQuotes = false;
-
-		for (char c : s.toCharArray()) {
-			if (inDoubleQuotes) {
-				if (c == Q2) {
-					inDoubleQuotes = false;
-					sb.append(c);
-				} else
-					sb.append(c);
-			} else if (inSingleQuotes) {
-				if (c == Q1) {
-					inSingleQuotes = false;
-					sb.append(c);
-				} else
-					sb.append(c);
-			} else {
-				if (c == Q2) {
-					inDoubleQuotes = true;
-					sb.append(Q2);
-				} else if (c == Q1) {
-					inSingleQuotes = true;
-					sb.append(Q1);
-				} else if (c == COMMA) {
-					parameters.add(sb.toString().trim());
-					sb = new StringBuilder();
-				} else
-					sb.append(c);
-			}
-		}
-		parameters.add(sb.toString().trim());
-
-		return parameters;
-	}
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

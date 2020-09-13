@@ -44,7 +44,7 @@ For instructions on how to set-up classpath, refer to the documentation for your
 • Deploy fbsql.war to your Java Application Server. For instructions on how to deploy a .war file, refer to the documentation for your Java Application Server.
 
 • Put your connection SQL scripts files to directory specified into parameter DB_CONNECTORS_DIR (Database connectors directory) in '/WEB-INF/web.xml' file inside fbsql.war.
-Default DB_CONNECTORS_DIR value is: '~/fbsql/config/db'
+Default DB_CONNECTORS_DIR value is: '~/fbsql/config/init'
 
 • Start your Java Application Server.
 

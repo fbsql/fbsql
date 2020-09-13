@@ -22,10 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.parser;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Locale;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -36,6 +41,12 @@ import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Declare_procedure_stmtContext;
+import org.fbsql.antlr4.generated.FbsqlParser.JsonContext;
+import org.fbsql.antlr4.generated.FbsqlParser.Json_fileContext;
+import org.fbsql.servlet.DbServlet;
+import org.fbsql.servlet.NonNativeProcedure;
+import org.fbsql.servlet.ProcedureType;
+import org.fbsql.servlet.StringUtils;
 
 public class ParseStmtDeclareProcedure {
 	/**
@@ -43,15 +54,17 @@ public class ParseStmtDeclareProcedure {
 	 * Declare stored procedure or function (can be used only in «init.sql» script)
 	 */
 	public class StmtDeclareProcedure {
-		public String procedure;
-		public String javaMethod;
+		public String             procedure;
+		public NonNativeProcedure nonNativeProcedure;
 
 		@Override
 		public String toString() {
-			return "DeclareProcedure [procedure=" + procedure + ", javaMethod=" + javaMethod + "]";
+			return "StmtDeclareProcedure [procedure=" + procedure + ", nonNativeProcedure=" + nonNativeProcedure + "]";
 		}
 
 	}
+
+	private static final String USER_HOME_DIR = System.getProperty("user.home");
 
 	/**
 	 * StmtDeclareProcedure transfer object
@@ -79,25 +92,46 @@ public class ParseStmtDeclareProcedure {
 
 			@Override
 			public void enterDeclare_procedure_stmt(Declare_procedure_stmtContext ctx) {
-				st.procedure  = ctx.getChild(2).getText();
-				st.javaMethod = ctx.getChild(4).getText();
-				st.javaMethod = st.javaMethod.substring(1, st.javaMethod.length() - 1);
+				st.procedure = ctx.getChild(2).getText();
+				String procedureTypeStr = ctx.getChild(4).getText().toUpperCase(Locale.ENGLISH);
+				st.nonNativeProcedure               = new NonNativeProcedure();
+				st.nonNativeProcedure.procedureType = ProcedureType.valueOf(procedureTypeStr);
 			}
+
+			@Override
+			public void enterJson(JsonContext ctx) {
+				st.nonNativeProcedure.optionsJson = StringUtils.unquote(ctx.getText().trim());
+			}
+
+			@Override
+			public void enterJson_file(Json_fileContext ctx) {
+				String fileName = StringUtils.unquote(ctx.getText()).trim();
+				String url;
+				if (fileName.startsWith("http://") || fileName.startsWith("https://"))
+					url = fileName;
+				else if (fileName.charAt(0) == '/')
+					url = "file://" + fileName;
+				else
+					url = "file://" + USER_HOME_DIR + "/fbsql/config/init/" + fileName;
+
+				try (InputStream is = new URL(url).openStream()) {
+					st.nonNativeProcedure.optionsJson = StringUtils.inputSreamToString(is);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
 		}, tree);
 
-		return st;
-	}
+		if (DbServlet.DEBUG)
+			System.out.println(st);
 
-	public static void main(String[] args) {
-		String                                         sql = "DECLARE PROCEDURE GET_EMPLOYEES FOR 'org.fbsql.examples.StoredProcedures::getEmployees';";
-		ParseStmtDeclareProcedure                      p   = new ParseStmtDeclareProcedure();
-		ParseStmtDeclareProcedure.StmtDeclareProcedure se  = p.parse(sql);
-		System.out.println(se);
+		return st;
 	}
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

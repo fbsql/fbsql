@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 -->
 
 <project default="main">
@@ -41,11 +41,31 @@ E-Mail: fbsql.team.team@gmail.com
 			<arg value="-visitor" />
 		</java>
 
+		<property name="remove-comment-script" value="${java.io.tmpdir}/remove-comment.sh" />
+		<delete file="${remove-comment-script}" failonerror="false" />
+
+		<echo file="${remove-comment-script}" append="true">
+			<![CDATA[for entry in "${basedir}/src/org/fbsql/antlr4/generated"/*.java${line.separator}]]>
+		</echo>
+		<echo file="${remove-comment-script}" append="true">
+			<![CDATA[do${line.separator}]]>
+		</echo>
+		<echo file="${remove-comment-script}" append="true">
+			<![CDATA[  tail -n +3 "$entry" > /tmp/tmpfile; mv /tmp/tmpfile "$entry"${line.separator}]]></echo>
+		<echo file="${remove-comment-script}" append="true">
+			<![CDATA[done${line.separator}]]>
+		</echo>
+
+		<chmod file="${remove-comment-script}" perm="ugo+rx" />
+
+		<exec dir="${basedir}" executable="/bin/bash">
+			<arg value="${remove-comment-script}" />
+		</exec>
 	</target>
 </project>
 
 <!--
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 -->

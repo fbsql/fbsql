@@ -8,7 +8,7 @@
 NOTE: Modified by FBSQL Team team.
 NOTE: This source has minor modifications of original source of H2 Group please see source comments for more info)
 
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

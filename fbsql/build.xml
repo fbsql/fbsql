@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 -->
 
 <!--
@@ -53,6 +53,7 @@ E.g.:
 	<target name="main">
 		<property name="bin" value="${basedir}/bin" />
 		<property name="result-fbsql-js" value="${tmpdir-war}/fbsql.min.js" />
+		<property name="result-fbsql-debug-js" value="${tmpdir-war}/fbsql-debug.min.js" />
 
 		<mkdir dir="${tmpdir-war}" />
 
@@ -71,10 +72,17 @@ E.g.:
 		<!--
 		<copy file="${basedir}/js/fbsql.js" tofile="${result-fbsql-js}" overwrite="true" />
 		-->
+
+		<minify input="${basedir}/js/fbsql-debug.js" output="${result-fbsql-debug-js}" />
+		<!--
+		<copy file="${basedir}/js/fbsql-debug.js" tofile="${result-fbsql-debug-js}" overwrite="true" />
+		-->
+
 		<delete file="${war-file}" failonerror="false" />
 		<war destfile="${war-file}" webxml="${basedir}/WEB-INF/web.xml" manifest="${basedir}/META-INF/MANIFEST.MF">
 			<fileset dir="${basedir}" includes="META-INF/**" />
 			<fileset file="${result-fbsql-js}" />
+			<fileset file="${result-fbsql-debug-js}" />
 			<fileset file="${basedir}/js/index.html" />
 			<classes dir="${bin}" />
 			<lib dir="${basedir}/WEB-INF/lib" />
@@ -83,7 +91,7 @@ E.g.:
 </project>
 
 <!--
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 -->

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 
 ------------------------------------------------------------------------------
 
@@ -46,13 +46,6 @@ Minified version of this script 'fbsql.min.js' hosted by FBSQL servlet/server
 "use strict";
 
 /**
- * Default connection name
- * This name defined by server at start-up time
- * See FBSQL start-up script and server Java implementation for more information
- */
-//const DEFAULT_CONNECTION_NAME = 'fbsql-default' // this connection name used also by server side !!! not in use !!!
-
-/**
  * Custom HTTP header to send data with GET method
  * WARNING! This constant used also in Java part
  */
@@ -72,6 +65,15 @@ const EXEC_TYPE_QUERY  = 'Q';
  */
 const EXEC_TYPE_UPDATE = 'U';
 
+class Constants {
+	static get FBSQL_REMOTE_USER()                       { return "FBSQL_REMOTE_USER                      "; }
+	static get FBSQL_REMOTE_ROLE()                       { return "FBSQL_REMOTE_ROLE                      "; }
+	static get FBSQL_REMOTE_SESSION_ID()                 { return "FBSQL_REMOTE_SESSION_ID                "; }
+	static get FBSQL_REMOTE_SESSION_CREATION_TIME()      { return "FBSQL_REMOTE_SESSION_CREATION_TIME     "; }
+	static get FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME() { return "FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME"; }
+	static get FBSQL_USER_INFO()                         { return "FBSQL_USER_INFO                        "; }
+}
+
 /** 
  * Represents connection (session) with a specific database.
  * This class provide Database Connection layer for client side JavaScript interaction.
@@ -88,14 +90,16 @@ class Connection {
 	 * @param {String}        role     - optional user role
 	 */
 	constructor(url, username, password, role) {
-		this.url = url;
-		if (this.url instanceof URL)
-			this.url = this.url.href;
-		if (!this.url.startsWith('https://') && !this.url.startsWith('http://')) // instance name provided
-			this.url = getDbUrl() + this.url;
-		if (this.url.endsWith('/'))
-			this.url = this.url.substring(0, this.url.length - 1);
+		this.url = url === undefined ? null : url;
 
+		if (this.url !== null) {
+			if (this.url instanceof URL)
+				this.url = this.url.href;
+			if (!this.url.startsWith('https://') && !this.url.startsWith('http://')) // instance name provided
+				this.url = getDbUrl() + this.url;
+			if (this.url.endsWith('/'))
+				this.url = this.url.substring(0, this.url.length - 1);
+		}
 		this.username = username === undefined ? null : username;
 		this.password = password === undefined ? null : password;
 		this.role     = role     === undefined ? null : role;
@@ -111,16 +115,19 @@ class Connection {
 	 * Add database events listener
 	 */
 	addDatabaseEventListener(listener) {
-		let con = this;
+		let connection = this;
 
 		this.listeners.push(listener);
+
+		if (this.url === null || this.url === undefined)
+			return;
 
 		if (!window.WritableStream)
 			return;
 
 		let dest = new WritableStream({
 			write (json) {
-				con.listeners.forEach(listener => listener(json));
+				connection.listeners.forEach(listener => listener(json));
 			}
 		});
 
@@ -158,30 +165,15 @@ class Connection {
 				.pipeThrough(parseJSON())
 				.pipeTo(dest);
 			})
-			.catch( (error) => {
-				console.log("FETCH ERROR");
-				console.log(error);
-			});
+			.catch(error => console.log(error));
 	}
 
 	/**
-	 * Utility method that print out database events
-	 * 
-	 * @param {DOMElement} parent - parent DOM element
+	 * Fires mock database event
 	 */
-	logDatabaseEvents(parent, prepend) {
-		if (!window.WritableStream)
-			return;
-
-		this.addDatabaseEventListener(event => {
-			let div = document.createElement('div');
-			div.style = 'font-family: monospace; white-space: pre; border: 1px solid #ccc; margin-bottom: .5rem; padding: .5rem';
-			div.innerHTML = '<small style="float: right; color: Gray">' + new Date().toISOString() + '</small><br>' + printJson(event);
-			if (prepend)
-				parent.prepend(div);
-			else
-				parent.append(div);
-		});
+	fireMockDatabaseEvent(fireEventFunc) {
+		let json = fireEventFunc();
+		this.listeners.forEach(listener => listener(json));
 	}
 }
 
@@ -205,8 +197,8 @@ class PreparedStatement {
 	 * #1                     - SQL statement with index = 1 (second in list) in white list
 	 * #my                    - SQL statement with name "my"
 	 */
-	constructor(con, arg) {
-		this.con = con;
+	constructor(connection, arg) {
+		this.connection = connection;
 		this.format = PreparedStatement.FORMAT_ARRAY_OF_OBJECTS;
 
 		if (arg instanceof Element) {
@@ -245,97 +237,11 @@ class PreparedStatement {
 	}
 
 	/**
-	 * Execute SQL statement and print results
-	 * This is internal method, please use logExecuteQuery() or logExecuteUpdate() instead.
-	 *
-	 * @param {String} execType   - optional parameters
-	 * @param {Object} parameters - optional parameters
-	 * @param {DOMElement} parent - optional parent DOM element
+	 * Set execute mock function
 	 */
-	logExecute(execType, parent, prepend, parameters) {
-		let div = document.createElement('div');
-		div.style = 'font-family: monospace; white-space: pre; border: 1px solid #ccc; margin-bottom: .5rem; padding: .5rem';
-
-		if (prepend)
-			parent.prepend(div);
-		else
-			parent.append(div);
-
-		let startTime = performance.now();
-		let ps = this;
-		let statementId = ps.getStatementId();
-		let statement = ps.getStatement();
-		let s = '<small style="float: right; color: Gray">' + new Date().toISOString() + '</small><br>'
-		if (statementId === null)
-			s += '<strong>' + printSql(statement) + '</strong><br><br>';
-		else
-			s += 'Statement ID: <strong>' + statementId + '</strong><br><br>';
-
-		if (parameters !== undefined)
-			s += 'Parameters:<br>' + printJson(parameters) + '<br><br>';
-		let promise;
-		if (execType === EXEC_TYPE_QUERY)
-			promise = this.executeQuery(parameters);
-		else if (execType === EXEC_TYPE_UPDATE)
-			promise = this.executeUpdate(parameters);
-
-		s += 'Output format: <span style="color: MediumBlue">';
-		if (this.format == PreparedStatement.FORMAT_ARRAY_OF_OBJECTS)
-			s += 'PreparedStatement.FORMAT_ARRAY_OF_OBJECTS';
-		else if (this.format == PreparedStatement.FORMAT_ARRAY_OF_ARRAYS)
-			s += 'PreparedStatement.FORMAT_ARRAY_OF_ARRAYS';
-		else if (this.format == PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
-			s += 'PreparedStatement.FORMAT_OBJECT_OF_ARRAYS';
-		s += '</span><br><br>';
-
-		if (execType === EXEC_TYPE_QUERY)
-			promise
-			.then((resultSet) => {
-				s += 'Result Set:<br>' + printJson(resultSet) + '<br><br>'
-				s += '<span style="color: DarkOrange">' + resultSet.length + '</span> record(s) selected in: <span style="color: DarkOrange">' + ((performance.now() - startTime)) + '</span> ms';
-				div.innerHTML = s;
-			})
-			.catch((error)=> {
-				div.innerHTML = '<span style="color: Red">ERROR:<br>' + JSON.stringify(error.message, null, '    ') + '</span>';
-			})
-		else if (execType === EXEC_TYPE_UPDATE)
-			promise
-			.then((result) => {
-				let rowCount = Array.isArray(result.rowCount) ? result.rowCount.reduce((a, b) => { return a + b; }, 0) : result.rowCount;
-				s += 'Result:<br>' + printJson(result) + '<br><br>'
-				s += '<span style="color: DarkOrange">' + rowCount + '</span> record(s) updated in: <span style="color: DarkOrange">' + ((performance.now() - startTime)) + '</span> ms';
-				div.innerHTML = s;
-			})
-			.catch((error)=> {
-				div.innerHTML = '<span style="color: Red">ERROR:<br>' + JSON.stringify(error.message, null, '    ') + '</span>';
-			})
-		return promise;
-	}
-
-	/**
-	 * Utility method that execute DQL (Data Query Language) SQL statement and print results
-	 * Send GET request
-	 *
-	 * SELECT etc.
-	 *
-	 * @param {DOMElement} parent - parent DOM element
-	 * @param {Object} parameters - optional parameters
-	 */
-	logExecuteQuery(parent, prepend, parameters) {
-		return this.logExecute(EXEC_TYPE_QUERY, parent, prepend, parameters);
-	}
-
-	/**
-	 * Utility method that execute DML (Data Manipulation Language) SQL statement
-	 * Send POST request
-	 *
-	 * INSERT, UPDATE, DELETE etc.
-	 *
-	 * @param {DOMElement} parent - parent DOM element
-	 * @param {Object} parameters - optional parameters
-	 */
-	logExecuteUpdate(parent, prepend, parameters) {
-		return this.logExecute(EXEC_TYPE_UPDATE, parent, prepend, parameters);
+	setExecuteMock(executeFunc) {
+		this.executeFunc  = executeFunc;
+		return this;
 	}
 
 	/**
@@ -348,68 +254,77 @@ class PreparedStatement {
 	 */
 	executeQuery(parameters) {
 		return new Promise((resolve, reject) => {
-			let json = {
-				statementId: this.statementId,
-				execType: EXEC_TYPE_QUERY // execution type («Q» - query, «U» - update)
-			};
-
-			//
-			// Format PreparedStatement.FORMAT_OBJECT_OF_ARRAYS supported on client side,
-			// so we send to server PreparedStatement.FORMAT_ARRAY_OF_OBJECTS and
-			// then convert received array of objects to pivoted object of arrays
-			//
-			json['format'] = this.format === PreparedStatement.FORMAT_OBJECT_OF_ARRAYS ? PreparedStatement.FORMAT_ARRAY_OF_OBJECTS : this.format;
-
 			if (parameters === undefined || parameters == null)
 				parameters = {};
-
+			
 			for (const [key, value] of Object.entries(parameters))
 				if (value instanceof ArrayBuffer)
 					parameters[key] = arrayBufferToBase64(value);
 				else if (value instanceof Date)
 					parameters[key] = value.toISOString();
 
-			json['parameters'] = parameters;
+			if (this.executeFunc === undefined) {
+				// NOTE
+				// Format PreparedStatement.FORMAT_OBJECT_OF_ARRAYS supported on client side,
+				// so we send to server PreparedStatement.FORMAT_ARRAY_OF_OBJECTS and
+				// then convert received array of objects to pivoted object of arrays
 
-			/**
-			 * Fetch options
-			 */
-			let options = {
-				method: 'GET',
-				mode: 'cors',
-			};
-
-			let body = JSON.stringify(json, null, 0) + '\n' + this.sql;
-
-			let headers = new Headers();
-			headers.set('Cache-Control', 'no-cache');
-			headers.set(CUSTOM_HTTP_HEADER_STATEMENT, window.btoa(unescape(encodeURIComponent(body))));
-			headers.set(CUSTOM_HTTP_HEADER_CLIENT_INFO, window.btoa(unescape(encodeURIComponent(JSON.stringify(getClientInfo(), null, 0)))));
-
-			// user role (optional)
-			if (this.con.role !== null)
-				headers.set(CUSTOM_HTTP_HEADER_ROLE, this.con.role);
-
-			// authentication (optional)
-			if (this.con.username !== null)
-				headers.set('Authorization', 'Basic ' + window.btoa(this.con.username + ":" + this.con.password));
-
-			options['headers'] = headers;
-
-			if (isHttp()) // not 'file://' protocol
-				options['credentials'] = 'include';
-
-			fetch(this.con.url + '?h='+ MurmurHash3.hashString(body, body.length, 0), options)
-			.then(response => response.json())
-			.then(data => {
+				let json = {
+					statementId: this.statementId,
+					execType: EXEC_TYPE_QUERY, // execution type («Q» - query, «U» - update)
+					parameters: parameters,
+					format: this.format === PreparedStatement.FORMAT_OBJECT_OF_ARRAYS ? PreparedStatement.FORMAT_ARRAY_OF_OBJECTS : this.format
+				};
+	
+	
+				/**
+				 * Fetch options
+				 */
+				let options = {
+					method: 'GET',
+					mode: 'cors',
+				};
+	
+				let body = JSON.stringify(json, null, 0) + '\n' + this.sql;
+	
+				let headers = new Headers();
+				headers.set('Cache-Control', 'no-cache');
+				headers.set(CUSTOM_HTTP_HEADER_STATEMENT, window.btoa(unescape(encodeURIComponent(body))));
+				headers.set(CUSTOM_HTTP_HEADER_CLIENT_INFO, window.btoa(unescape(encodeURIComponent(JSON.stringify(getClientInfo(), null, 0)))));
+	
+				// user role (optional)
+				if (this.connection.role !== null)
+					headers.set(CUSTOM_HTTP_HEADER_ROLE, this.connection.role);
+	
+				// authentication (optional)
+				if (this.connection.username !== null)
+					headers.set('Authorization', 'Basic ' + window.btoa(this.connection.username + ":" + this.connection.password));
+	
+				options['headers'] = headers;
+	
+				if (isHttp()) // not 'file://' protocol
+					options['credentials'] = 'include';
+	
+				fetch(this.connection.url + '?h='+ MurmurHash3.hashString(body, body.length, 0), options)
+				.then(response => response.json())
+				.then(data => {
+					if (data instanceof Array) {
+						if (this.format === PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
+							data = pivot(data);
+						resolve(data);
+					} else
+						reject(data);
+				})
+				.catch(error => reject(error));
+			} else {
+				let data = this.executeFunc(this, parameters);
 				if (data instanceof Array) {
 					if (this.format === PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
 						data = pivot(data);
 					resolve(data);
 				} else
 					reject(data);
-			})
-			.catch(err => reject(err));
+			}
 		});
 	}
 
@@ -423,20 +338,6 @@ class PreparedStatement {
 	 */
 	executeUpdate(parameters) {
 		return new Promise((resolve, reject) => {
-			let json = {
-				statementId: this.statementId,
-				execType: EXEC_TYPE_UPDATE // execution type («Q» - query, «U» - update)
-			};
-
-			//
-			// To support JDBC PreparedStatement.RETURN_GENERATED_KEYS feature we need format for ResultSet returned by Statement.getGeneratedKeys()
-			//
-			// Format PreparedStatement.FORMAT_OBJECT_OF_ARRAYS supported on client side,
-			// so we send to server PreparedStatement.FORMAT_ARRAY_OF_OBJECTS and
-			// then convert received array of objects to pivoted object of arrays
-			//
-			json['format'] = this.format === PreparedStatement.FORMAT_OBJECT_OF_ARRAYS ? PreparedStatement.FORMAT_ARRAY_OF_OBJECTS : this.format;
-
 			if (parameters === undefined || parameters == null)
 				parameters = {};
 
@@ -446,36 +347,60 @@ class PreparedStatement {
 				else if (value instanceof Date)
 					parameters[key] = value.toISOString();
 
-			json['parameters'] = parameters;
-
-			/**
-			 * Fetch options
-			 */
-			let options = {
-				method: 'POST',
-				mode: 'cors',
-				body: JSON.stringify(json, null, 0) + '\n' + this.sql
-			};
-
-			let headers = new Headers();
-
-			// user role (optional)
-			if (this.con.role !== null)
-				headers.set(CUSTOM_HTTP_HEADER_ROLE, this.con.role);
-			headers.set(CUSTOM_HTTP_HEADER_CLIENT_INFO, window.btoa(unescape(encodeURIComponent(JSON.stringify(getClientInfo(), null, 0)))));
-
-			// authentication (optional)
-			if (this.con.username !== null)
-				headers.set('Authorization', 'Basic ' + window.btoa(this.con.username + ":" + this.con.password));
-
-			options['headers'] = headers;
-
-			if (isHttp()) // not 'file://' protocol
-				options['credentials'] = 'include';
-
-			fetch(this.con.url, options)
-			.then(response => response.json())
-			.then(data => {
+			if (this.executeFunc === undefined) {
+				// NOTE
+				// To support JDBC PreparedStatement.RETURN_GENERATED_KEYS feature we need format for ResultSet returned by Statement.getGeneratedKeys()
+				//
+				// Format PreparedStatement.FORMAT_OBJECT_OF_ARRAYS supported on client side,
+				// so we send to server PreparedStatement.FORMAT_ARRAY_OF_OBJECTS and
+				// then convert received array of objects to pivoted object of arrays
+	
+				let json = {
+					statementId: this.statementId,
+					execType: EXEC_TYPE_UPDATE, // execution type («Q» - query, «U» - update)
+					parameters: parameters,
+					format: this.format === PreparedStatement.FORMAT_OBJECT_OF_ARRAYS ? PreparedStatement.FORMAT_ARRAY_OF_OBJECTS : this.format
+				};
+	
+				/**
+				 * Fetch options
+				 */
+				let options = {
+					method: 'POST',
+					mode: 'cors',
+					body: JSON.stringify(json, null, 0) + '\n' + this.sql
+				};
+	
+				let headers = new Headers();
+	
+				// user role (optional)
+				if (this.connection.role !== null)
+					headers.set(CUSTOM_HTTP_HEADER_ROLE, this.connection.role);
+				headers.set(CUSTOM_HTTP_HEADER_CLIENT_INFO, window.btoa(unescape(encodeURIComponent(JSON.stringify(getClientInfo(), null, 0)))));
+	
+				// authentication (optional)
+				if (this.connection.username !== null)
+					headers.set('Authorization', 'Basic ' + window.btoa(this.connection.username + ":" + this.connection.password));
+	
+				options['headers'] = headers;
+	
+				if (isHttp()) // not 'file://' protocol
+					options['credentials'] = 'include';
+	
+				fetch(this.connection.url, options)
+				.then(response => response.json())
+				.then(data => {
+					if (data['message'] !== undefined)
+						reject(data);
+					else {
+						if (this.format === PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
+							data['generatedKeys'] = pivot(data['generatedKeys']);
+						resolve(data);
+					}
+				})
+				.catch(error => reject(error));
+			} else {
+				let data = this.executeFunc(this, parameters);
 				if (data['message'] !== undefined)
 					reject(data);
 				else {
@@ -483,8 +408,7 @@ class PreparedStatement {
 						data['generatedKeys'] = pivot(data['generatedKeys']);
 					resolve(data);
 				}
-			})
-			.catch(err => reject(err));
+			}
 		});
 	}
 }
@@ -625,10 +549,12 @@ function parseJSON() {
  */
 function getDbUrl() {
 	let script = document.querySelector('script[src$="/fbsql.min.js"],[src$="/fbsql.js"]');
+	if (script == null)
+		return '';
 	let src = script.src;
 	let pos = src.lastIndexOf('/');
 	src = src.substring(0, pos);
-	return src + '/db/';
+	return src + '/db/'; // Defined in: "servlet-mapping/url-pattern" in web.xml
 }
 
 /**
@@ -668,100 +594,8 @@ function getClientInfo() {
 	};
 }
 
-/**
- * Replace value with 'colorized' span element
- *
- * @param match
- * @param pIndent
- * @param pKey
- * @param pVal
- * @param pEnd
- * @returns
- *
- * Note: This is modified version from:
- * Pretty Print JSON Data in Color
- * http://jsfiddle.net/unLSJ
- */
-function replacer(match, pIndent, pKey, pVal, pEnd) {
-	let key             = '<span style="color: Brown">';
-	let valString       = '<span style="color: DarkOliveGreen">';
-	let valBooleanFalse = '<span style="color: Red">';
-	let valBooleanTrue  = '<span style="color: Green">';
-	let valNull         = '<span style="color: Gray">';
-	let valNumeric      = '<span style="color: DarkOrange">';
-
-	var r = pIndent || '';
-	if (pKey)
-		r = r + key + pKey.replace(/[": ]/g, '') + '</span>: ';
-	if (pVal) {
-		if (pVal[0] == '"')
-			r = r + valString + pVal + '</span>';
-		else if (isDigit(pVal[0]) || pVal[0] === '-')
-			r = r + valNumeric + pVal + '</span>';
-		else if (pVal === 'true')
-			r = r + valBooleanTrue + pVal + '</span>';
-		else if (pVal === 'false')
-			r = r + valBooleanFalse + pVal + '</span>';
-		else if (pVal === 'null')
-			r = r + valNull + pVal + '</span>';
-	}
-	return r + (pEnd || '');
-}
-
-/**
- * Print JSON in color
- *
- * @param obj
- * @returns
- *
- * Note: This is modified version from:
- * Pretty Print JSON Data in Color
- * http://jsfiddle.net/unLSJ
- */
-function printJson(obj) {
-	let jsonLine = /^( *)("[\w-]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/mg;
-	return JSON.stringify(obj, null, 3)
-		.replace(/&/g, '&amp;').replace(/\\"/g, '&quot;')
-		.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-		.replace(jsonLine, replacer);
-}
-
-/**
- * Print SQL in color
- *
- * @param s
- * @returns
- *
- * Note: This is modified version from:
- * https://idiallo.com/blog/javascript-syntax-highlighter
- * How to create a Javascript Syntax highlighter
- * By Ibrahim Diallo
- */
-function printSql(s) {
-	let regSingleQuotedString = /'(.*?)'/g;
-	let regDoubleQuotedString = /"(.*?)"/g;
-	let regSQL                = /\b(CREATE|ALL|DATABASE|TABLE|VIEW|INDEX|CONSTRAINT|CHECK|UNIQUE|DISTINCT|EXISTS|KEY|PRIMARY|FOREIGN|DEFAULT|GRANT|REVOKE|PRIVILEGES|USER|ROLE|IDENTIFIED|LEFT|RIGHT|OUTER|INNER|JOIN|FLUSH|DROP|ALTER|WITH|SELECT|CALL|UPDATE|SET|DELETE|INSERT|INTO|VALUES|FROM|WHERE|HAVING|ORDER|BY|GROUP|LIMIT|INNER|OUTER|AS|ON|COUNT|CASE|TO|IF|WHEN|BETWEEN|NOT|AND|OR|IN|NULL|TRUE|FALSE|OBJECT|XML|JSON|TEXT|STRING|CHAR|CHARACTER|VARCHAR|LONGVARCHAR|BINARY|VARBINARY|LONGVARBINARY|LONG|SMALL|SHORT|BIG|NUMBER|INTEGER|FLOAT|DOUBLE|BYTE|WORD|BIT|BOOL|BOOLEAN|DATE|TIME|TIMESTAMP|CURRENT_DATE|CURRENT_TIME|CURRENT_TIMESTAMP|CURRENT_USER)(?=[^\w])/gi;
-	let regComment            = /(\/\*.*\*\/)/g;
-	let regParameter          = /(:[\w]*)/g;
-	let regNumumber           = /((-|\d|\.)[*]*)/g;
-
-	s = s.replace(regSingleQuotedString, "<span class=x_string>'$1'</span>");
-	s = s.replace(regDoubleQuotedString, '<span class=x_string>"$1"</span>');
-	s = s.replace(regSQL,                '<span class=x_sql>$1</span>');
-	s = s.replace(regComment,            '<span class=x_comment>$1</span>');
-	s = s.replace(regParameter,          '<span class=x_parameters>$1</span>');
-	s = s.replace(regNumumber,           '<span class=x_number>$1</span>');
-
-	s = '<style>.x_parameters {color: Brown;} .x_sql {color: MediumBlue;} .x_comment {color: Gray;} .x_number {color: DarkOrange;} .x_string {color: DarkOliveGreen;}</style>' + s
-	return s;
-}
-
-function isDigit(c) {
-	return c >= '0' && c <= '9';
-}
-
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

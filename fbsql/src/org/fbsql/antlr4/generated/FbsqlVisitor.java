@@ -1,5 +1,3 @@
-// Generated from /home/qsecofr/git/fbsql/fbsql/Fbsql.g4 by ANTLR 4.8
-
 /*
 MIT License
 
@@ -24,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.generated;
@@ -45,6 +43,18 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitNative_sql(FbsqlParser.Native_sqlContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#parameter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameter(FbsqlParser.ParameterContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#procedure}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProcedure(FbsqlParser.ProcedureContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#role_name}.
 	 * @param ctx the parse tree
@@ -88,11 +98,11 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProcedure_name(FbsqlParser.Procedure_nameContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link FbsqlParser#java_method_name}.
+	 * Visit a parse tree produced by {@link FbsqlParser#json}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitJava_method_name(FbsqlParser.Java_method_nameContext ctx);
+	T visitJson(FbsqlParser.JsonContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#jdbc_url}.
 	 * @param ctx the parse tree
@@ -148,6 +158,12 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSql_script_file(FbsqlParser.Sql_script_fileContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#json_file}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJson_file(FbsqlParser.Json_fileContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link FbsqlParser#cron_expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -189,4 +205,10 @@ public interface FbsqlVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSchedule_stmt(FbsqlParser.Schedule_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FbsqlParser#native_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNative_stmt(FbsqlParser.Native_stmtContext ctx);
 }

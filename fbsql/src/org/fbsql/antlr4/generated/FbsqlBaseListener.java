@@ -1,5 +1,3 @@
-// Generated from /home/qsecofr/git/fbsql/fbsql/Fbsql.g4 by ANTLR 4.8
-
 /*
 MIT License
 
@@ -24,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.generated;
@@ -52,6 +50,30 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitNative_sql(FbsqlParser.Native_sqlContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParameter(FbsqlParser.ParameterContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParameter(FbsqlParser.ParameterContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterProcedure(FbsqlParser.ProcedureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitProcedure(FbsqlParser.ProcedureContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -141,13 +163,13 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJava_method_name(FbsqlParser.Java_method_nameContext ctx) { }
+	@Override public void enterJson(FbsqlParser.JsonContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJava_method_name(FbsqlParser.Java_method_nameContext ctx) { }
+	@Override public void exitJson(FbsqlParser.JsonContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -261,6 +283,18 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterJson_file(FbsqlParser.Json_fileContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitJson_file(FbsqlParser.Json_fileContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCron_expression(FbsqlParser.Cron_expressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -340,6 +374,18 @@ public class FbsqlBaseListener implements FbsqlListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSchedule_stmt(FbsqlParser.Schedule_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNative_stmt(FbsqlParser.Native_stmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNative_stmt(FbsqlParser.Native_stmtContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

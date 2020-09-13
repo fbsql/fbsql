@@ -5,6 +5,7 @@ Work (secure) with your backend database within HTML<br>
 	<ul>
 		<li>Prepared statements</li>
 		<li>Batch execution</li>
+		<li>Database agnostic stored procedures</li>
 		<li>Database events notification</li>
 		<li>Background jobs</li>
 	</ul>	
@@ -24,12 +25,12 @@ Work (secure) with your backend database within HTML<br>
 	FBSQL security based on principle of least privilege (<abbr title="Principle of Least Privilege">POLP</abbr>). By default, FBSQL does not accept incoming connections. It also rejects all SQL statements that were not declared explicitly. Pre-execution triggers can be used to verify and modify input parameters before execution or completely reject execution by custom conditions. Users must implement their own authentication and authorization mechanism.<br>
 	<br>
 	<strong>What about performance?</strong><br>
-	FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimization and response compression.<br>
+	FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimized communication and response compression.<br>
 
 <h3>FBSQL distributions</h3>
 <table>
 <tr>
-<th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL Server Plus</th>
+<th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL Server Db</th>
 </tr>
 <tr>
 <td>FBSQL engine (servlet)         </td><td>&check;</td><td>&check;</td><td>&check;</td>
@@ -58,16 +59,15 @@ Work (secure) with your backend database within HTML<br>
 <li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Basic example</a></li>
 <li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
 <li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
-<li><a href="#secure_our_backend_with_expose_statement" title="How to secure our backend with EXPOSE statement.">Expose our database to frontend</a></li>
-<li><a href="#reference_statements_by_custom_names" title="How to use custom names as statements references.">Reference statements by name</a></li>
+<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
 <li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
-<li><a href="#parametrized_statements" title="How to use parametrized statements.">Parametrized statements</a></li>
-<li><a href="#batch_execution" title="How to use batch execution">Batch execution</a></li>
 <li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
 <li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
 <li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
 <li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
 <li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
+<li><a href="#debug_utility" title="Debug utility fbsql-debug.min.js.">Debug utility</a></li>
+
 </ul>
 
 
@@ -79,27 +79,17 @@ Work (secure) with your backend database within HTML<br>
 
 <a id="installation_and_basic_example"></a>
 <h2>Basic example</h2>
-<h6>In this chapter we will learn how to install FBSQL, create database connector and use CONNECT TO statement. We also write simple «Hello, world!» HTML page which execute query and get data from our backend database.</h6>
 
 <strong>Backend:</strong><br>
 
-The <i>«FBSQL ServerPlus»</i> edition is good point to start, because
-it already equipped with set of popular embedded databases and their drivers:
-<ul>
-	<li>SQLite</li>
-	<li>Apache Derby</li>
-	<li>H2</li>
-	<li>HSQLDB</li>
-</ul>
 <br>
 <ol>
 <li>
 Install FBSQL:<br><br>
 <ul>
 <li>Download the latest <i>«FBSQL Server Plus»</i> release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest «FBSQL Server Plus» release">fbsql-1.2-linux-x86-64.zip</a></li>
-<li>Unzip the downloaded file on your machine</li>
+<li>Unzip the downloaded file on your machine:</li>
 </ul>
-Expanding the archive yields the following folder structure:<br>
 
 ```text
 
@@ -112,39 +102,28 @@ fbsql-server-plus-2.3.4-linux-x86-64 ─┐
 </li>
 
 <li>
-Create the initialization script:<br><br>
-Assume our database is SQLite. Let's give some name E.g. <code>MySQLite</code> to our connection.<br><br>
-To expose our database to frontend we need create the initialization script <code>init.sql</code> into the <code>~/fbsql/config/db</code> directory:
+Put the initialization script <code>init.sql</code> into the <code>~/fbsql/config/init</code> directory:
 
 ```sql
 /*
  * init.sql
  *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under ".../fbsql/config/init" directory.
  */
 
-/*
- * Connect to SQLite instance
- */
-CONNECT TO 'jdbc:sqlite:sample'
-EXPOSE UNDECLARED STATEMENTS
-ALLOW INCOMING CONNECTIONS
-AS MySQLite;
+CONNECT TO 'jdbc:sqlite:hello_world_db'
+           EXPOSE UNDECLARED STATEMENTS
+           ALLOW INCOMING CONNECTIONS
+           AS HelloWorldExample;
+
 ```
-Internally FBSQL use JDBC API, which allow a client to access a database.
-FBSQL use JDBC URL to create database connection.<br>
-In our case string <code>'jdbc:sqlite:sample'</code> is the JDBC URL.
-
-<blockquote>
-The JDBC driver implements the protocol for transferring the SQL statements and results between client and database.<br>
-Typically the JDBC driver available for download from the database vendor site.<br>
-Connection parameters are provided in JDBC URL. JDBC URLs always starts with 'jdbc:' prefix.<br>
-See your JDBC driver documentation for available JDBC URL formats and examples.
-</blockquote>
-</li>
-
 <li>
 Start FBSQL server:<br><br>
 <ul>
@@ -160,28 +139,29 @@ Start FBSQL server:<br><br>
 
 <strong>Frontend:</strong><br>
 
+<ol>
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection('MySQLite');
-            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
-            ps.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
+            const conn = new Connection("HelloWorldExample");
+            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS greeting");
+            ps.executeQuery()
+            .then(resultSet => alert(resultSet[0].greeting));
         </script>
     </body>
 </html>
 ```
-<blockquote>
-FBSQL JavaScript API (client) is self-hosted by FBSQL Server, so we need just place &lt;script&gt; tag with appropriate URL in &lt;head&gt; section of our HTML.
-</blockquote>
-
+</ol>
 <strong>Result:</strong><br><br>
-<img src="hello-world-alert.png">
-
+<ol>
+<img src="images/hello-world-alert.png">
+</ol>
 <hr>
 <a id="add_simple_authentication"></a>
 <h2>Authentication</h2>
@@ -196,33 +176,37 @@ We are going to authenticate our users by username and password.
 /*
  * init.sql
  *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under ".../fbsql/config/init" directory.
  */
 
+CONNECT TO 'jdbc:sqlite:auth_example_db'
+           EXPOSE UNDECLARED STATEMENTS
+           ALLOW INCOMING CONNECTIONS IF EXISTS (SELECT TRUE FROM USERS WHERE USERNAME=:user AND PASSWORD=:password)
+           AS AuthenticationExample;
+
+
 /*
+ * Authentication. Implement your own authentication logic here!
+ *
  * WARNING!
  * In this example we are store passwords as plain text only for educational purposes.
  * It's strongly not recommended way to store passwords in production environment.
  * Passwords should be hashed.
  */
 
-CONNECT TO 'jdbc:sqlite:sample' EXPOSE IF EXISTS (
-    SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password
-) AS MySQLite;
-
-/*
- * Authentication. Implement your own authentication logic here!
- */
-
+/* Users */
 DROP TABLE IF EXISTS USERS;
-
-CREATE TABLE IF NOT EXISTS USERS (
+CREATE TABLE USERS (
     USERNAME VARCHAR(15) NOT NULL PRIMARY KEY,
     PASSWORD VARCHAR(15) NOT NULL
 );
-
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('john',  'secret'   );
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('tim',   'secret123');
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
@@ -234,14 +218,14 @@ INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
-            /* connection name: 'MySQLite', user: 'john', password: 'secret' */
-            const conn = new Connection('MySQLite', 'john', 'secret');
-            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
-            ps.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
+            const conn = new Connection("AuthenticationExample", "john", "secret");
+            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS greeting");
+            ps.executeQuery()
+            .then(resultSet => alert(resultSet[0].greeting));
         </script>
     </body>
 </html>
@@ -260,46 +244,53 @@ We are going to authenticate our users by username and password, and authorize b
 /*
  * init.sql
  *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under ".../fbsql/config/init" directory.
  */
 
+CONNECT TO 'jdbc:sqlite:role_based_auth_db'
+           EXPOSE UNDECLARED STATEMENTS
+           ALLOW INCOMING CONNECTIONS IF EXISTS (
+               SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
+                   SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role
+               )
+           )
+           AS RoleBasedAuthorizationExample;
+
+
 /*
+ * Authenticaton and authorization. Implement your own authentication/authorization logic here!
+ *
  * WARNING!
  * In this example we are store passwords as plain text only for educational purposes.
  * It's strongly not recommended way to store passwords in production environment.
  * Passwords should be hashed.
  */
 
-CONNECT TO 'jdbc:sqlite:sample' EXPOSE IF EXISTS (
-    SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
-        SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role
-    )
-) AS MySQLite;
-
-/*
- * Authenticaton and authorization. Implement your own authentication/authorization logic here!
- */
-
-DROP TABLE IF EXISTS USER_ROLES;
+/* Users */
 DROP TABLE IF EXISTS USERS;
-
-CREATE TABLE IF NOT EXISTS USERS (
+CREATE TABLE USERS (
     USERNAME VARCHAR(15) NOT NULL PRIMARY KEY,
     PASSWORD VARCHAR(15) NOT NULL
 );
-
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('john',  'secret'   );
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('tim',   'secret123');
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
 
-CREATE TABLE IF NOT EXISTS USER_ROLES (
+/* Roles */
+DROP TABLE IF EXISTS USER_ROLES;
+CREATE TABLE USER_ROLES (
     USERNAME VARCHAR(15) NOT NULL,
     ROLE     VARCHAR(15) NOT NULL,
-    PRIMARY KEY (USERNAME, ROLE)
+    PRIMARY KEY (USERNAME, ROLE),
+    FOREIGN KEY (USERNAME) REFERENCES USERS(USERNAME)
 );
-
 INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('john',  'manager'      );
 INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('tim',   'programmer'   );
 INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
@@ -311,23 +302,24 @@ INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
-            /* connection name: 'MySQLite', user: 'john', password: 'secret', role: 'manager' */
-            const conn = new Connection('MySQLite', 'john', 'secret', 'manager');
-            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
-            ps.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
+            const conn = new Connection("RoleBasedAuthorizationExample", "john", "secret", "manager");
+            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS greeting");
+            ps.executeQuery()
+            .then(resultSet => alert(resultSet[0].greeting));
         </script>
     </body>
 </html>
 ```
 <hr>
-<a id="secure_our_backend_with_expose_statement"></a>
+<a id="secure_our_backend_with_declare_statement"></a>
 <h2>Expose our database to frontend</h2>
 <p><i>
-In this chapter we will learn how to secure our backend with EXPOSE statement statement.
+In this chapter we will learn how to secure our backend with DECLARE STATEMENT statement
+and reference statements by name.
 </i></p>
 
 <strong>Backend:</strong><br>
@@ -336,23 +328,25 @@ In this chapter we will learn how to secure our backend with EXPOSE statement st
 /*
  * init.sql
  *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under ".../fbsql/config/init" directory.
  */
 
-CONNECT TO 'jdbc:sqlite:sample';
+CONNECT TO 'jdbc:sqlite:declare_statement_example_db'
+           ALLOW INCOMING CONNECTIONS
+           AS MySQLiteDeclareStatementExample;
 
-ADD WHITELIST 'my-whitelist.sql';
+DECLARE STATEMENT (SELECT 'Hello, World!' AS greeting);
 
-```
-
-```sql
-/*
- * my-whitelist.sql
- */
-
-SELECT 'Hello, World!' AS HELLO;
+DECLARE STATEMENT (SELECT :msg AS greeting)
+                  COMPRESSION BEST COMPRESSION
+                  AS myHelloStatement;
 
 ```
 
@@ -362,78 +356,40 @@ SELECT 'Hello, World!' AS HELLO;
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql/fbsql-debug.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection('my-sqlite'); 
+            const conn = new Connection("MySQLiteDeclareStatementExample");
 
-            const ps1 = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
-            ps1.executeQuery().then(resultSet => alert(resultSet[0].HELLO));
+            /* Ok */
+            const ps1 = conn.prepareStatement("SELECT 'Hello, World!' AS greeting");
+            logExecuteQuery(ps1)
+            .then(resultSet => console.log(resultSet[0].greeting))
+            .catch((error)=> {
+                console.log(error.message);
+            })
 
-            /* Error! Not in whitelist! */
-            const ps2 = conn.prepareStatement("SELECT 'Bye, World!' AS BYE");
-            ps2.executeQuery().then(resultSet => alert(resultSet[0].BYE));
+            /* Ok */
+            const ps2 = conn.prepareStatement("#myHelloStatement");
+            logExecuteQuery(ps2, {msg: "Hello, John Doe!"})
+            .then(resultSet => console.log(resultSet[0].greeting))
+            .catch((error)=> {
+                console.log(error.message);
+            })
+
+            /* Rejected! Undeclared statement. */
+            const ps3 = conn.prepareStatement("SELECT 'Hello, FBSQL!' AS greeting");
+            logExecuteQuery(ps3)
+            .then(resultSet => console.log(resultSet[0].greeting))
+            .catch((error)=> {
+                console.log(error.message);
+            })
         </script>
     </body>
 </html>
-```
-<hr>
-<a id="reference_statements_by_custom_names"></a>
-<h2>Reference statements by name</h2>
-<p><i>
-In this chapter we will learn how to use custom names as statements references.
-</i></p>
 
-
-<strong>Backend:</strong><br>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
- */
-
-CONNECT TO 'jdbc:sqlite:sample';
-
-ADD WHITELIST 'my-whitelist.sql';
-
-```
-
-```sql
-/*
- * my-whitelist.sql
- */
-
--- #myHello
-SELECT 'Hello, World!' AS HELLO;
-
-```
-
-<strong>Frontend:</strong><br>
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection('my-sqlite'); 
-
-            const ps1 = conn.prepareStatement("SELECT 'Hello, World!' AS HELLO");
-            ps1.executeQuery().then(resultSet => alert("First: " + resultSet[0].HELLO));
-
-            /* reference SQL statement form whitelist by name */
-            const ps2 = conn.prepareStatement("#myHello");
-            ps2.executeQuery().then(resultSet => alert("Second: " + resultSet[0].HELLO));
-        </script>
-    </body>
-</html>
 ```
 
 <hr>
@@ -449,17 +405,25 @@ In this chapter we will learn how to execute SQL statements from frontend JavaSc
 /*
  * init.sql
  *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under ".../fbsql/config/init" directory.
  */
 
-CONNECT TO 'jdbc:sqlite:sample';
+CONNECT TO 'jdbc:sqlite:execute_query_and_execute_update_example_db'
+           EXPOSE UNDECLARED STATEMENTS
+           ALLOW INCOMING CONNECTIONS
+           AS ExecuteQueryAndExecuteUpdateExample;
 
 DROP TABLE IF EXISTS COUNTRIES;
-CREATE TABLE IF NOT EXISTS COUNTRIES (
+CREATE TABLE COUNTRIES (
     COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
-    COUNTRY_NAME VARCHAR(40) NOT NULL
+    COUNTRY_NAME VARCHAR(50) NOT NULL
 );
 
 INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('AU', 'Australia');
@@ -473,11 +437,11 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection('my-sqlite');
+            const conn = new Connection('ExecuteQueryAndExecuteUpdateExample');
 
             /* Select all records */
             const ps1 = conn.prepareStatement("SELECT * FROM COUNTRIES");
@@ -549,119 +513,9 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
         </script>
     </body>
 </html>
-```
-
-
-
-<hr>
-<a id="parametrized_statements"></a>
-<h2>Parametrized statements</h2>
-<p><i>
-In this chapter we will learn how to use parametrized statements.
-</i></p>
-
-
-<strong>Backend:</strong><br>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
- */
-
-CONNECT TO 'jdbc:sqlite:sample';
-
-DROP TABLE IF EXISTS COUNTRIES;
-CREATE TABLE IF NOT EXISTS COUNTRIES (
-    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
-    COUNTRY_NAME VARCHAR(40) NOT NULL
-);
-
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('AU', 'Australia');
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 
 ```
-<strong>Frontend:</strong><br>
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection('my-sqlite');
-            
-            /* add new record */
-            const ps   = conn.prepareStatement("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES(:countryId, :countryName)");
-            ps.executeUpdate({countryId: 'IT', countryName: 'Italy'})
-            .then(result => alert(`${result.rowCount} records added`));
-        </script>
-    </body>
-</html>
-```
-<hr>
-<a id="batch_execution"></a>
-<h2>Batch execution</h2>
-<p><i>
-In this chapter we will learn how to use batch execution.
-</i></p>
-
-<strong>Backend:</strong><br>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
- */
-
-CONNECT TO 'jdbc:sqlite:sample';
-
-DROP TABLE IF EXISTS COUNTRIES;
-CREATE TABLE IF NOT EXISTS COUNTRIES (
-    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
-    COUNTRY_NAME VARCHAR(40) NOT NULL
-);
-
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('AU', 'Australia');
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
-
-```
-<strong>Frontend:</strong><br>
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection('my-sqlite');
-            
-            /* add new records */
-            const ps   = conn.prepareStatement("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES(:countryId, :countryName)");
-            ps.executeUpdate(
-            	[
-            		{countryId: 'IT', countryName: 'Italy'},
-            		{countryId: 'ES', countryName: 'Spain'}
-            	]
-            )
-            .then(result => alert(`${result.rowCount} records added`));
-        </script>
-    </body>
-</html>
-```
-<hr>
 <a id="reseult_set_format"></a>
 <h2>Reseult set formats</h2>
 <p><i>
@@ -683,17 +537,25 @@ You can control the result set format by choosing one from the available formats
 /*
  * init.sql
  *
- * Initialization script executes on FBSQL start up,
- * connects to database instance and optionally performs
- * any operations that you want to be executed at start up time
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under ".../fbsql/config/init" directory.
  */
 
-CONNECT TO 'jdbc:sqlite:sample';
+CONNECT TO 'jdbc:sqlite:result_set_format_example_db'
+           EXPOSE UNDECLARED STATEMENTS
+           ALLOW INCOMING CONNECTIONS
+           AS ResultSetFormatExample;
 
 DROP TABLE IF EXISTS COUNTRIES;
-CREATE TABLE IF NOT EXISTS COUNTRIES (
+CREATE TABLE COUNTRIES (
     COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
-    COUNTRY_NAME VARCHAR(40) NOT NULL
+    COUNTRY_NAME VARCHAR(50) NOT NULL
 );
 
 INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('AU', 'Australia');
@@ -707,15 +569,15 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection('my-sqlite');
+            const conn = new Connection('ResultSetFormatExample');
 
-            const ps1   = conn.prepareStatement("SELECT * FROM COUNTRIES");
-            ps1.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_OBJECTS);
-            ps1.executeQuery()
+            const ps   = conn.prepareStatement("SELECT * FROM COUNTRIES");
+            ps.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_OBJECTS);
+            ps.executeQuery()
             .then(resultSet => {
                 console.log(resultSet);
                 /*
@@ -736,8 +598,8 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
                  *       }
                  *   ]
                  */
-                ps1.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_ARRAYS);
-                return ps1.executeQuery();
+                ps.setResultSetFormat(PreparedStatement.FORMAT_ARRAY_OF_ARRAYS);
+                return ps.executeQuery();
             })
             .then(resultSet => {
                 console.log(resultSet);
@@ -759,8 +621,8 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
                  *       ]
                  *   ]
                  */
-                ps1.setResultSetFormat(PreparedStatement.FORMAT_OBJECT_OF_ARRAYS);
-                return ps1.executeQuery();
+                ps.setResultSetFormat(PreparedStatement.FORMAT_OBJECT_OF_ARRAYS);
+                return ps.executeQuery();
             })
             .then(resultSet => {
                 console.log(resultSet);
@@ -784,9 +646,9 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
         </script>
     </body>
 </html>
+
 ```
 
-<hr>
 <a id="database_agnostic_stored_procedures"></a>
 <h2>Database agnostic stored procedures</h2>
 <p><i>
@@ -1328,28 +1190,28 @@ https://github.com/GuntherRademacher/rr
 
 ```EBNF
 connect_to_stmt
-::= CONNECT TO jdbc_url
+ : CONNECT TO jdbc_url
    (
-    (USER user) |
-    (PASSWORD password) |
-    (PROPERTIES jdbc_connection_properties) |
-    (DRIVER jdbc_driver_class_name) |
-    (LIB jar_file ( ',' jar_file )* ) |
-    (CONNECTION POOL
-     (
-      (MIN connection_pool_size_min) |
-      (MAX connection_pool_size_max)
-     )+
-    )
+    ( USER user ) |
+    ( PASSWORD password ) |
+    ( PROPERTIES jdbc_connection_properties ) |
+    ( DRIVER jdbc_driver_class_name ) |
+    ( LIB jar_file ( ',' jar_file )* ) |
+    (
+     CONNECTION POOL ( ( MIN connection_pool_size_min ) | ( MAX connection_pool_size_max ) )+ 
+    ) |
+    (
+     UNDECLARED STATEMENTS ( ALLOW | REJECT )+ 
+    ) |
+    (
+     INCOMING CONNECTIONS ( ALLOW | REJECT )+ ( IF EXISTS '(' native_sql ')' )?
+    ) |
+   ( AS? connection_alias )
    )*
-   (
-   EXPOSE
-   (IF EXISTS '(' native_sql ')')?
-   AS? connection_alias
-   )?
+ ;
 
 ```
-<img src="connect_to_stmt.png"><br><br>
+<img src="images/connect_to_stmt.png"><br><br>
 <i>Examples</i><br>
 
 ```sql
@@ -1361,28 +1223,34 @@ CONNECT TO 'jdbc:sqlite:sample';
 ```sql
 
 /* Connection is exposed to frontend */
-CONNECT TO 'jdbc:sqlite:sample' EXPOSE AS MySQLite;
+          CONNECT TO 'jdbc:sqlite:sample'
+INCOMING CONNECTIONS ALLOW
+                  AS MySQLite;
 ```
 
 ```sql
-CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
-      USER 'SA'
-  PASSWORD ''
- EXPOSE AS MyH2;
+           CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
+                 USER 'SA'
+             PASSWORD ''
+ INCOMING CONNECTIONS ALLOW
+UNDECLARED STATEMENTS ALLOW
+                   AS MyH2;
 
 ```
 
 ```sql
-      CONNECT TO 'jdbc:as400://mysystem.example.com/mylibrary;naming=system;errors=full'
-            USER 'QSECOFR'
-        PASSWORD 'MYSECRET'
-          DRIVER 'com.ibm.as400.access.AS400JDBCDriver'
-             LIB '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
- CONNECTION POOL MIN 50 MAX 1000
-EXPOSE IF EXISTS ( SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
-        	        SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role)
-                 )
-              AS MyAS400;
+          CONNECT TO 'jdbc:as400://mysystem.example.com/mylibrary;naming=system;errors=full'
+                USER 'QSECOFR'
+            PASSWORD 'MYSECRET'
+              DRIVER 'com.ibm.as400.access.AS400JDBCDriver'
+                 LIB '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
+ CONNECTION POOL MIN 50
+ CONNECTION POOL MAX 1000
+INCOMING CONNECTIONS ALLOW IF EXISTS (SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
+        	                                  SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role
+        	                              )
+                                     )
+                  AS MyAS400;
 
 
 ```
@@ -1397,7 +1265,7 @@ switch_to_stmt
  ;
 
 ```
-<img src="switch_to_stmt.png"><br><br>
+<img src="images/switch_to_stmt.png"><br><br>
 <i>Examples</i><br>
 
 ```sql
@@ -1415,31 +1283,45 @@ declare_statement_stmt
    '(' native_sql ')'
    (
     STATIC |
-    ( COMPRESSION compression_level) |
+    ( COMPRESSION compression_level ) |
     ( ROLES '(' role_name ( ',' role_name )* ')' ) |
     ( TRIGGER BEFORE trigger_before_procedure_name ) |
-    ( TRIGGER AFTER trigger_after_procedure_name )
+    ( TRIGGER AFTER trigger_after_procedure_name ) |
+    ( AS? statement_alias )
    )*
-   (AS? statement_alias)?
  ;
 
 ```
 
-<img src="declare_statement_stmt.png"><br><br>
+<img src="images/declare_statement_stmt.png"><br><br>
 <i>Examples</i><br>
 
 ```sql
-EXPOSE (SELECT * FROM COUNRIES) PREFETCH ON AS COUNTRIES_LIST
+DECLARE STATEMENT (SELECT * FROM COUNRIES)
+           STATIC
+      COMPRESSION BEST COMPRESSION
+            ROLES ('cto', 'admin', 'manager')
+               AS COUNTRIES_LIST
 
 ```
 <h3>DECLARE PROCEDURE</h3>
 
 ```EBNF
 declare_procedure_stmt
- : DECLARE PROCEDURE procedure_name FOR java_method_name
+ : DECLARE PROCEDURE procedure_name TYPE
+   (
+   	JVM  |
+   	JS   |
+   	EXEC |
+   	URL
+   )*
+   (
+    OPTIONS json |
+    OPTIONS FILE json_file
+   )+
  ;
 ```
-<img src="declare_procedure_stmt.png">
+<img src="images/declare_procedure_stmt.png">
 <br><br>
 
 
@@ -1451,7 +1333,7 @@ include_script_file_stmt
  : INCLUDE sql_script_file ( ',' sql_script_file )*
  ;
 ```
-<img src="include_script_file_stmt.png">
+<img src="images/include_script_file_stmt.png">
 
 
 <h3>SCHEDULE</h3>
@@ -1463,10 +1345,10 @@ schedule_stmt
 
 
 ```
-<img src="schedule_stmt.png">
+<img src="images/schedule_stmt.png">
 
 <h3>Contacts and support:</h3>
 <ul>
 	<li>Home: <a href="https://fbsql.github.io" target="_blank">https://fbsql.github.io</a></li>
-	<li>E-Mail: <a href="mailto:fbsql.team.team@gmail.com" target="_blank">fbsql.team.team@gmail.com</a></li>
+	<li>E-Mail: <a href="mailto:fbsql.team@gmail.com" target="_blank">fbsql.team@gmail.com</a></li>
 </ul>

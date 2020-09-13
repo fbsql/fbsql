@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.servlet;
@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,12 +54,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -77,6 +80,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.fbsql.antlr4.parser.ParseNativeStmt;
+import org.fbsql.antlr4.parser.ParseNativeStmt.Procedure;
 import org.fbsql.antlr4.parser.ParseStmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtDeclareStatement.StmtDeclareStatement;
@@ -163,7 +168,8 @@ public class DbServlet extends HttpServlet {
 
 	public static final String CORS_ALLOW_ORIGIN = "CORS_ALLOW_ORIGIN";
 
-	private static final String USER_HOME_DIR = System.getProperty("user.home");
+	public static final String FBSQL_HOME_DIR_ENV_NAME = "FBSQL_HOME_DIR";
+	private String             fbsql_home_dir;
 
 	private Map<String /* instance name */, StmtConnectTo>                                                             connectionInfoMap;
 	private Map<String /* instance name */, ConnectionPoolManager>                                                     connectionPoolManagerMap;
@@ -171,9 +177,11 @@ public class DbServlet extends HttpServlet {
 	private Map<String /* instance name */, Map<StaticStatement, ReadyResult>>                                         staticJsonsMap;
 	private Map<String /* instance name */, Queue<AsyncContext>>                                                       ongoingRequestsMap;
 	private Map<String /* instance name */, Connection>                                                                connectionMap;
-	private Map<String /* instance name */, Map<String /* stored procedure name */, String /* java method */>>         instancesProceduresMap;
+	private Map<String /* instance name */, Map<String /* stored procedure name */, NonNativeProcedure>>               instancesProceduresMap;
 	private Map<String /* instance name */, Map<String /* js file name */, Scriptable>>                                instancesScopesMap;
 	private Map<String /* instance name */, Map<String /* js file name */, Map<String /* function name */, Function>>> instancesFunctionsMap;
+	private Map<String /* instance name */, ParseNativeStmt>                                                           instancesParseNativeStmtMap;
+	private Map<String /* connection name */, String /* parent directory */>                                           instancesDirectoryMap;
 
 	private Collection<String> instances;
 
@@ -219,7 +227,13 @@ public class DbServlet extends HttpServlet {
 	@Override
 	public void init(ServletConfig servletConfig) throws ServletException {
 		this.servletConfig = servletConfig;
-		loadedDrivers      = ServiceLoader.load(Driver.class);
+
+		fbsql_home_dir = System.getenv(FBSQL_HOME_DIR_ENV_NAME);
+		if (fbsql_home_dir == null)
+			fbsql_home_dir = System.getProperty("user.home");
+		new File(fbsql_home_dir).mkdirs();
+
+		loadedDrivers = ServiceLoader.load(Driver.class);
 
 		try {
 			for (Driver driver : loadedDrivers) {
@@ -227,7 +241,7 @@ public class DbServlet extends HttpServlet {
 				Logger.out(Severity.INFO, MessageFormat.format("JDBC driver registered: \"{0}\"", driver.getClass().getName()));
 			}
 
-			String dbConnectorsDir     = USER_HOME_DIR + "/fbsql/config/db";
+			String dbConnectorsDir     = fbsql_home_dir + "/fbsql/config/init";
 			Path   dbConnectorsDirPath = Paths.get(dbConnectorsDir);
 			Files.createDirectories(dbConnectorsDirPath);
 			Logger.out(Severity.INFO, MessageFormat.format("Database connectors directory is: \"{0}\"", dbConnectorsDir));
@@ -239,13 +253,9 @@ public class DbServlet extends HttpServlet {
 			sharedCoder.encoder = Base64.getEncoder().withoutPadding();
 			sharedCoder.decoder = Base64.getDecoder();
 
-			File initSqlFile = new File(dbConnectorsDir, "init.sql");
-
-			if (!initSqlFile.exists() || !initSqlFile.isFile())
-				Logger.out(Severity.WARN, "File not found: 'init.sql'");
-
 			Map<String /* connection name */, List<String /* SQL statements */>> initSqlMap = new HashMap<>();
-			SqlParseUtils.processInitSqlFiles(new File(dbConnectorsDir), initSqlMap);
+			instancesDirectoryMap = new HashMap<>();
+			SqlParseUtils.processInitSqlFiles(new File(dbConnectorsDir), initSqlMap, instancesDirectoryMap);
 			int instancesCount = initSqlMap.size();
 
 			if (instancesCount == 0)
@@ -262,6 +272,7 @@ public class DbServlet extends HttpServlet {
 			instancesProceduresMap         = new HashMap<>(instancesCount);
 			instancesScopesMap             = new HashMap<>(instancesCount);
 			instancesFunctionsMap          = new HashMap<>(instancesCount);
+			instancesParseNativeStmtMap    = new HashMap<>(instancesCount);
 
 			instances = new ArrayList<>(instancesCount);
 
@@ -291,6 +302,7 @@ public class DbServlet extends HttpServlet {
 	private void openInstance(String instanceName, List<String /* SQL statements */> initList) throws Exception {
 		if (initList.isEmpty())
 			return;
+		String instanceDirectory = instancesDirectoryMap.get(instanceName);
 
 		Logger.out(Severity.INFO, MessageFormat.format("Instance found: ''{0}''", instanceName));
 		StmtConnectTo info = null;
@@ -349,7 +361,7 @@ public class DbServlet extends HttpServlet {
 
 		Map<String /* js file name */, Scriptable>                                mapScopes                     = new HashMap<>();
 		Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions                  = new HashMap<>();
-		Map<String /* stored procedure name */, String /* java method */>         proceduresMap                 = new HashMap<>();
+		Map<String /* stored procedure name */, NonNativeProcedure>               proceduresMap                 = new HashMap<>();
 		Map<String /* Cron expression */, List<String /* SQL statement name */>>  schedulersMap                 = new HashMap<>();
 		Map<String /* SQL statement name */, StmtDeclareStatement>                declareStatementStatementsMap = new HashMap<>();
 
@@ -357,7 +369,7 @@ public class DbServlet extends HttpServlet {
 		try (Statement st = connection.createStatement()) {
 			//
 			// Execute all statements from 'init.sql' script
-			// "CONNECT TO" and "SET ALLOW LOGIN IF EXISTS" statements are ignored
+			// "CONNECT TO" statement is ignored
 			//
 
 			instancesProceduresMap.put(instanceName, proceduresMap);
@@ -365,45 +377,74 @@ public class DbServlet extends HttpServlet {
 			instancesFunctionsMap.put(instanceName, mapFunctions);
 
 			for (String statement : initList) {
+				String text = SqlParseUtils.canonizeSql(statement);
+				if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_DECLARE_PROCEDURE)) // Process DECLARE PROCEDURE statement
+					SqlParseUtils.parseDeclareProcedureStatement(servletConfig, statement, proceduresMap);
+			}
+
+			ParseNativeStmt parseNativeStmt = new ParseNativeStmt(proceduresMap.keySet());
+			instancesParseNativeStmtMap.put(instanceName, parseNativeStmt);
+
+			for (String statement : initList) {
 				if (DEBUG)
 					System.out.println("init.sql: -->" + statement + "<--");
-				String           text             = SqlParseUtils.canonizeSql(statement);
-				String           javaMethod       = CallUtils.getCallStatementMethod(statement, proceduresMap);
-				MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
-				if (methodOrFunction != null) { // Java or JavaScript
-					List<Object> parameterValues = new ArrayList<>();
-					parameterValues.add(connection);
-					parameterValues.add(instanceName);
-					CallUtils.parseSqlParameters(statement, parameterValues);
-					Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+				String             text               = SqlParseUtils.canonizeSql(statement);
+				NonNativeProcedure nonNativeProcedure = CallUtils.getCallStatementNonNativeProcedure(statement, proceduresMap);
+				if (nonNativeProcedure != null) { // Java or JavaScript
+					if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+						List<Object> parameterValues = new ArrayList<>();
+						parameterValues.add(connection);
+						parameterValues.add(instanceName);
 
-					if (methodOrFunction.method != null) // Java
-						methodOrFunction.method.invoke(null, parametersArray);
-					else { // JavaScript
+						CallUtils.parseSqlParameters(parseNativeStmt, statement, parameterValues);
+						Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+						if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+							Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
+							method.invoke(null, parametersArray);
+						} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript
 							//
 							// initize Rhino
 							// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
 							//
-						Context ctx = Context.enter();
-						try {
-							ctx.setLanguageVersion(Context.VERSION_1_7);
-							ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-							methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
-						} catch (Exception e) {
-							e.printStackTrace();
-						} finally {
-							ctx.exit();
+							Context ctx = Context.enter();
+							try {
+								ctx.setLanguageVersion(Context.VERSION_1_7);
+								ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+								JsFunction jsFunction = CallUtils.getFunction(instanceDirectory, nonNativeProcedure.optionsJson, mapScopes, mapFunctions);
+								jsFunction.function.call(ctx, jsFunction.scope, null, parametersArray);
+							} catch (Exception e) {
+								e.printStackTrace();
+							} finally {
+								ctx.exit();
+							}
 						}
+					} else if (nonNativeProcedure.procedureType == ProcedureType.EXEC) { // OS
+						List<Object> parameterValues = new ArrayList<>();
+						parameterValues.add(instanceName);
+						CallUtils.parseSqlParameters(parseNativeStmt, statement, parameterValues);
+						String[] parametersArray = parameterValues.toArray(new String[parameterValues.size()]);
+						CallUtils.executeOsProgramm(instanceDirectory, nonNativeProcedure.optionsJson, parametersArray);
+					} else if (nonNativeProcedure.procedureType == ProcedureType.URL) { // URL
+						List<Object> parameterValues = new ArrayList<>();
+						parameterValues.add(instanceName);
+						CallUtils.parseSqlParameters(parseNativeStmt, statement, parameterValues);
+						String[] parametersArray = parameterValues.toArray(new String[parameterValues.size()]);
+
+						Map<String, Object> parametersMap = new LinkedHashMap<>();
+						parametersMap.put("parameters", Arrays.toString(parametersArray));
+
+						CallUtils.executeUrl(instanceDirectory, nonNativeProcedure.optionsJson, parametersMap);
 					}
 				} //
-				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_DECLARE_PROCEDURE)) // Process DECLARE PROCEDURE statement
-					SqlParseUtils.parseDeclareProcedureStatement(servletConfig, statement, proceduresMap);
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_SCHEDULE))
 					SqlParseUtils.parseScheduleStatement(servletConfig, statement, schedulersMap);
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_DECLARE_STATEMENT)) {
 					StmtDeclareStatement stmtDeclareStatement = parseExposeStatement(servletConfig, statement);
 					declareStatementStatementsMap.put(stmtDeclareStatement.alias, stmtDeclareStatement);
 				} //
+				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_DECLARE_PROCEDURE))
+					; // ignore
 				else if (text.startsWith(SqlParseUtils.SPECIAL_STATEMENT_CONNECT_TO))
 					; // ignore
 				else // Not a special statements => native SQL
@@ -463,43 +504,59 @@ public class DbServlet extends HttpServlet {
 							try {
 								dbConnection0 = connectionPoolManager.getConnection();
 
-								String outEvent   = null;
-								String javaMethod = proceduresMap.get(storedProcedureName);
+								String outEvent = null;
 
-								MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
-								if (methodOrFunction != null) { // Java or JavaScript
-									List<Object> parameterValues = new ArrayList<>();
-									parameterValues.add(dbConnection0.getConnection());
-									parameterValues.add(instanceName);
-									parameterValues.add(cronExpression);
-									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+								NonNativeProcedure nonNativeProcedure = proceduresMap.get(storedProcedureName);
+								if (nonNativeProcedure != null) {
+									if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+										List<Object> parameterValues = new ArrayList<>();
+										parameterValues.add(dbConnection0.getConnection());
+										parameterValues.add(instanceName);
+										parameterValues.add(cronExpression);
+										Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
-									Object obj = null;
-									if (methodOrFunction.method != null) // Java
-										obj = methodOrFunction.method.invoke(null, parametersArray);
-									else { // JavaScript
+										Object obj = null;
+										if (nonNativeProcedure.procedureType == ProcedureType.JVM) {// Java
+											Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
+											obj = method.invoke(null, parametersArray);
+										} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript
 											//
 											// initize Rhino
 											// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
 											//
-										Context ctx = Context.enter();
-										try {
-											ctx.setLanguageVersion(Context.VERSION_1_7);
-											ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-											obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
-										} catch (Exception e) {
-											e.printStackTrace();
-										} finally {
-											ctx.exit();
+											Context ctx = Context.enter();
+											try {
+												ctx.setLanguageVersion(Context.VERSION_1_7);
+												ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+												JsFunction jsFunction = CallUtils.getFunction(instanceDirectory, nonNativeProcedure.optionsJson, mapScopes, mapFunctions);
+												obj = jsFunction.function.call(ctx, jsFunction.scope, null, parametersArray);
+											} catch (Exception e) {
+												e.printStackTrace();
+											} finally {
+												ctx.exit();
+											}
 										}
+										if (obj instanceof String)
+											outEvent = (String) obj;
+										else if (obj instanceof ResultSet)
+											try (ResultSet rs = (ResultSet) obj) {
+												if (rs.next())
+													outEvent = rs.getString(1);
+											}
+									} else if (nonNativeProcedure.procedureType == ProcedureType.EXEC) { // OS
+										List<Object> parameterValues = new ArrayList<>();
+										parameterValues.add(instanceName);
+										parameterValues.add(cronExpression);
+										Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+										outEvent = CallUtils.executeOsProgramm(instanceDirectory, nonNativeProcedure.optionsJson, parametersArray);
+									} else if (nonNativeProcedure.procedureType == ProcedureType.URL) { // URL
+										Map<String, Object> parametersMap = new LinkedHashMap<>();
+										parametersMap.put("instanceName", instanceName);
+										parametersMap.put("cronExpression", cronExpression);
+
+										outEvent = CallUtils.executeUrl(instanceDirectory, nonNativeProcedure.optionsJson, parametersMap);
 									}
-									if (obj instanceof String)
-										outEvent = (String) obj;
-									else if (obj instanceof ResultSet)
-										try (ResultSet rs = (ResultSet) obj) {
-											if (rs.next())
-												outEvent = rs.getString(1);
-										}
 								} else { // Native
 									CallableStatement cs = dbConnection0.getCallableStatement("{call " + storedProcedureName + "(?,?)}");
 									cs.setString(1, instanceName);
@@ -664,6 +721,8 @@ public class DbServlet extends HttpServlet {
 			return;
 		}
 		if (stmtConnectTo.authenticationQuery != null) {
+			String instanceDirectory = instancesDirectoryMap.get(instanceName);
+
 			String authorization = request.getHeader(HTTP_HEADER_AUTHORIZATION);
 			if (authorization != null && authorization.toLowerCase(Locale.ENGLISH).startsWith("basic")) {
 				String base64Credentials = authorization.substring("Basic".length()).trim();
@@ -676,51 +735,144 @@ public class DbServlet extends HttpServlet {
 				String password = userAndPassword[1];
 				String role     = request.getHeader(CUSTOM_HTTP_HEADER_ROLE);
 
-				//
-				// parameters of custom "SET AUTHORIZE USERS IF EXISTS" SQL statement
-				//
-				Map<String, Object> paramsMap = new HashMap<>();
-				paramsMap.put("user", user); // :user parameter
-				paramsMap.put("password", password); // :password parameter
-				paramsMap.put("role", role); // :role parameter
+				Connection connection = connectionMap.get(instanceName);
 
+				Map<String /* stored procedure name */, NonNativeProcedure> proceduresMap      = instancesProceduresMap.get(instanceName);
+				NonNativeProcedure                                          nonNativeProcedure = CallUtils.getCallStatementNonNativeProcedure(stmtConnectTo.authenticationQuery, proceduresMap);
 				try {
-					Connection    connection          = connectionMap.get(instanceName);
-					StringBuilder preparedStatementSb = new StringBuilder();
-
-					Map<String /* name */, List<Integer /* index */>> paramsIndexes = parseNamedPreparedStatement(stmtConnectTo.authenticationQuery, preparedStatementSb);
-					PreparedStatement                                 ps            = connection.prepareStatement(preparedStatementSb.toString());
-					ParameterMetaData                                 pmd           = ps.getParameterMetaData();
-
-					for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
-						String                    name    = entry.getKey();
-						Object                    value   = entry.getValue();
-						List<Integer /* index */> indexes = paramsIndexes.get(name);
-						if (indexes != null)
-							for (int n : indexes) {
-								int parameterType = pmd.getParameterType(n);
-								if (value == null)
-									ps.setNull(n, parameterType);
-								else
-									ps.setString(n, value.toString());
-							}
-					}
 					boolean authorized = false;
-					try (ResultSet rs = ps.executeQuery()) {
-						authorized = rs.next();
-					} finally {
-						if (!authorized) {
-							authorizationError(response, "Bad combination of user, password, role. Authorization Failed.");
-							return;
+					if (nonNativeProcedure != null) {
+						ParseNativeStmt parseNativeStmt = instancesParseNativeStmtMap.get(instanceName);
+						Procedure       procedure       = parseNativeStmt.parse(stmtConnectTo.authenticationQuery);
+
+						Map<String /* js file name */, Scriptable>                                mapScopes    = instancesScopesMap.get(instanceName);
+						Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions = instancesFunctionsMap.get(instanceName);
+
+						if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+
+							List<Object> parameterValues = new ArrayList<>();
+							parameterValues.add(request);
+							parameterValues.add(response);
+							parameterValues.add(connection);
+							parameterValues.add(instanceName);
+
+							for (Object param : procedure.parameters) {
+								if (param.equals(":user"))
+									parameterValues.add(user);
+								else if (param.equals(":password"))
+									parameterValues.add(password);
+								else if (param.equals(":role"))
+									parameterValues.add(role);
+							}
+
+							Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+							Object obj = null;
+							if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+								Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
+								obj = method.invoke(null, parametersArray);
+								try (ResultSet rs = (ResultSet) obj;) {
+									authorized = rs.next();
+								}
+							} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript
+								//
+								// initize Rhino
+								// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
+								//
+								Context ctx = Context.enter();
+								try {
+									ctx.setLanguageVersion(Context.VERSION_1_7);
+									ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+									JsFunction jsFunction = CallUtils.getFunction(instanceDirectory, nonNativeProcedure.optionsJson, mapScopes, mapFunctions);
+									obj = jsFunction.function.call(ctx, jsFunction.scope, null, parametersArray);
+								} catch (Exception e) {
+									e.printStackTrace();
+								} finally {
+									ctx.exit();
+								}
+								try (ResultSet rs = (ResultSet) obj;) {
+									authorized = rs.next();
+								}
+
+							}
+						} else if (nonNativeProcedure.procedureType == ProcedureType.EXEC) { // OS
+							List<Object> parameterValues = new ArrayList<>();
+							parameterValues.add(instanceName);
+
+							for (Object param : procedure.parameters) {
+								if (param.equals(":user"))
+									parameterValues.add(user);
+								else if (param.equals(":password"))
+									parameterValues.add(password);
+								else if (param.equals(":role"))
+									parameterValues.add(role);
+							}
+
+							Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+							String   jsonArray       = CallUtils.executeOsProgramm(instanceDirectory, nonNativeProcedure.optionsJson, parametersArray);
+							jsonArray  = jsonArray.trim().replace(" ", "").replace("\n", "").replace("\t", "");
+							authorized = jsonArray.equals("[]");
+						} else if (nonNativeProcedure.procedureType == ProcedureType.URL) { // URL
+							Map<String, Object> parametersMap = new LinkedHashMap<>();
+							parametersMap.put("instanceName", instanceName);
+
+							for (Object param : procedure.parameters) {
+								if (param.equals(":user"))
+									parametersMap.put("user", user);
+								else if (param.equals(":password"))
+									parametersMap.put("password", password);
+								else if (param.equals(":role"))
+									parametersMap.put("role", role);
+							}
+
+							String jsonArray = CallUtils.executeUrl(instanceDirectory, nonNativeProcedure.optionsJson, parametersMap);
+							jsonArray  = jsonArray.trim().replace(" ", "").replace("\n", "").replace("\t", "");
+							authorized = jsonArray.equals("[]");
+						}
+
+						if (!stmtConnectTo.allowConnections)
+							authorized = !authorized;
+					} else { // Native SQL statemment
+						StringBuilder preparedStatementSb = new StringBuilder();
+
+						Map<String /* name */, List<Integer /* index */>> paramsIndexes = parseNamedPreparedStatement(stmtConnectTo.authenticationQuery, preparedStatementSb);
+						PreparedStatement                                 ps            = connection.prepareStatement(preparedStatementSb.toString());
+						ParameterMetaData                                 pmd           = ps.getParameterMetaData();
+
+						//
+						// parameters of custom authentication SQL statement
+						//
+						Map<String, Object> paramsMap = new HashMap<>();
+						paramsMap.put("user", user); // :user parameter
+						paramsMap.put("password", password); // :password parameter
+						paramsMap.put("role", role); // :role parameter
+
+						for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
+							String                    name    = entry.getKey();
+							Object                    value   = entry.getValue();
+							List<Integer /* index */> indexes = paramsIndexes.get(name);
+							if (indexes != null)
+								for (int n : indexes) {
+									int parameterType = pmd.getParameterType(n);
+									if (value == null)
+										ps.setNull(n, parameterType);
+									else
+										ps.setString(n, value.toString());
+								}
+						}
+						try (ResultSet rs = ps.executeQuery();) {
+							authorized = rs.next();
 						}
 					}
-				} catch (SQLException e) {
+					if (!authorized) {
+						authorizationError(response, "Bad combination of user, password, role. Authorization Failed.");
+						return;
+					}
+					request.setAttribute(REQUEST_ATTRIBUTE_USER, user);
+				} catch (Exception e) {
 					e.printStackTrace();
 					authorizationError(response, "Authorization query error. Authorization Failed.");
-					return;
 				}
-
-				request.setAttribute(REQUEST_ATTRIBUTE_USER, user);
 			} else {
 				if (!request.getMethod().trim().toUpperCase(Locale.ENGLISH).equals("OPTIONS")) {
 					authorizationError(response, "Authorization Required");
@@ -822,9 +974,11 @@ public class DbServlet extends HttpServlet {
 		StmtConnectTo                                                             stmtConnectTo         = connectionInfoMap.get(instanceName);
 		ConnectionPoolManager                                                     connectionPoolManager = connectionPoolManagerMap.get(instanceName);
 		Map<String /* SQL statement name */, StmtDeclareStatement>                declaredStatementsMap = instancesDeclaredStatementsMap.get(instanceName);
-		Map<String /* stored procedure name */, String /* java method */>         proceduresMap         = instancesProceduresMap.get(instanceName);
+		Map<String /* stored procedure name */, NonNativeProcedure>               proceduresMap         = instancesProceduresMap.get(instanceName);
 		Map<String /* js file name */, Scriptable>                                mapScopes             = instancesScopesMap.get(instanceName);
 		Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions          = instancesFunctionsMap.get(instanceName);
+		ParseNativeStmt                                                           parseNativeStmt       = instancesParseNativeStmtMap.get(instanceName);
+		String                                                                    instanceDirectory     = instancesDirectoryMap.get(instanceName);
 
 		Queue<AsyncContext> ongoingRequests = ongoingRequestsMap.get(instanceName);
 
@@ -869,6 +1023,7 @@ public class DbServlet extends HttpServlet {
 		}, request, response);
 		new DbRequestProcessor( //
 				instanceName, //
+				instanceDirectory, //
 				stmtConnectTo, //
 				asyncCtx, //
 				DEBUG, //
@@ -879,6 +1034,7 @@ public class DbServlet extends HttpServlet {
 				mapFunctions, //
 				mapJson, //
 				ongoingRequests, //
+				parseNativeStmt, //
 				sharedCoder //
 		).run();
 
@@ -915,7 +1071,7 @@ public class DbServlet extends HttpServlet {
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.parser;
@@ -48,6 +48,7 @@ import org.fbsql.antlr4.generated.FbsqlParser.Statement_aliasContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Trigger_after_procedure_nameContext;
 import org.fbsql.antlr4.generated.FbsqlParser.Trigger_before_procedure_nameContext;
 import org.fbsql.servlet.CompressionLevel;
+import org.fbsql.servlet.DbServlet;
 
 public class ParseStmtDeclareStatement {
 	/**
@@ -148,22 +149,16 @@ public class ParseStmtDeclareStatement {
 
 		if (st.alias == null)
 			st.alias = ParseStmtConnectTo.NONEXPOSABLE_NAME_PREFIX + UUID.randomUUID().toString();
-		return st;
-	}
 
-	public static void main(String[] args) {
-		String                                         sql = "DECLARE STATEMENT ( SELECT log AS x FROM t1 \n" +                                //
-				"GROUP BY x /* aaaa */ \n" +                                                                                                   //
-				"HAVING count(*) >= 4 \n" +                                                                                                    //
-				"ORDER BY max(n) + 0 )  static COMPRESSION BEST SPEED TRIGGER BEFORE MYVALIDATOR ROLES(aaa, bbb) TRIGGER AFTER MYNOTIFIER zz"; //
-		ParseStmtDeclareStatement                      p   = new ParseStmtDeclareStatement();
-		ParseStmtDeclareStatement.StmtDeclareStatement se  = p.parse(sql);
-		System.out.println(se);
+		if (DbServlet.DEBUG)
+			System.out.println(st);
+
+		return st;
 	}
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 -->
 
 <!--
@@ -55,7 +55,7 @@ E.g.:
 		<property name="port" value="8080" />
 
 		<echo message="http://localhost:${port}/${webapp}" />
-		<java classname="org.test.reg.tomcat.Embedded" fork="yes" classpath=".:/home/qsecofr/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib/*:${bundles-dir}/drivers/*">
+		<java classname="org.test.reg.tomcat.Embedded" fork="yes" classpath=".:${user.home}/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib/*:${bundles-dir}/drivers/*">
 			<jvmarg value="-Xdebug" />
 			<jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5432" />
 			<arg value="--catalinaHome" />

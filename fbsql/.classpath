@@ -25,5 +25,6 @@
 	<classpathentry kind="lib" path="WEB-INF/lib/spring-dao-2.0.8.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/spring-core-5.2.7.RELEASE.jar"/>
 	<classpathentry kind="lib" path="WEB-INF/lib/antlr-4.8-complete.jar"/>
+	<classpathentry kind="lib" path="WEB-INF/lib/h2-1.4.200.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.servlet;
@@ -77,7 +77,9 @@ public class SqlParseUtils {
 	public static final String SPECIAL_STATEMENT_SCHEDULE          = canonizeSql("SCHEDULE");          // Add scheduled stored procedure (can be used only in «init.sql» script)
 	public static final String SPECIAL_STATEMENT_DECLARE_STATEMENT = canonizeSql("DECLARE STATEMENT"); // Expose corresponding native SQL statement to frontend
 	public static final String SPECIAL_STATEMENT_INCLUDE           = canonizeSql("INCLUDE");           // Include script file(s) (can be used only in «init.sql» script)
+	public static final String SPECIAL_STATEMENT_CALL              = canonizeSql("CALL");              // CALL statement
 
+	private static final String INIT_SQL_FILE_EXT        = "init.sql";
 	/**
 	 * SQL statement separator: «;»
 	 */
@@ -209,7 +211,7 @@ public class SqlParseUtils {
 	 * @param sql           - DECLARE PROCEDURE statement
 	 * @param proceduresMap - procedures Map for specific stored procedure name
 	 */
-	public static void parseDeclareProcedureStatement(ServletConfig servletConfig, String sql, Map<String /* stored procedure name */, String /* java method */> proceduresMap) {
+	public static void parseDeclareProcedureStatement(ServletConfig servletConfig, String sql, Map<String /* stored procedure name */, NonNativeProcedure> proceduresMap) {
 		sql = stripComments(sql).trim();
 		sql = sql.replace('\n', ' ');
 		sql = sql.replace('\r', ' ');
@@ -218,10 +220,10 @@ public class SqlParseUtils {
 		StmtDeclareProcedure stmtDeclareProcedure = new ParseStmtDeclareProcedure().parse(sql);
 		stmtDeclareProcedure.procedure = stmtDeclareProcedure.procedure.toUpperCase(Locale.ENGLISH);
 
-		String storedProcedureName = stmtDeclareProcedure.procedure.toUpperCase(Locale.ENGLISH);
-		String javaMethod          = stmtDeclareProcedure.javaMethod;                           // <class name> + <::> + <method name>
+		String             storedProcedureName = stmtDeclareProcedure.procedure.toUpperCase(Locale.ENGLISH);
+		NonNativeProcedure nonNativeProcedure  = stmtDeclareProcedure.nonNativeProcedure;                   // <class name> + <::> + <method name>
 
-		proceduresMap.put(storedProcedureName, javaMethod);
+		proceduresMap.put(storedProcedureName, nonNativeProcedure);
 	}
 
 	/**
@@ -598,7 +600,7 @@ public class SqlParseUtils {
 	 * @param map
 	 * @throws IOException
 	 */
-	private static void separateSqlFile(List<String /* SQL statements */> list, Map<String /* connection name */, List<String /* SQL statements */>> map) throws IOException {
+	private static void separateSqlFile(Path path, List<String /* SQL statements */> list, Map<String /* connection name */, List<String /* SQL statements */>> map, Map<String /* connection name */, String /* parent directory */> parentDirectoryMap) throws IOException {
 		String       instanceName = null;
 		List<String> listBuffer   = null;
 		for (String statement : list) {
@@ -609,6 +611,7 @@ public class SqlParseUtils {
 				listBuffer   = new ArrayList<>();
 				listBuffer.add(statement);
 				map.put(instanceName, listBuffer);
+				parentDirectoryMap.put(instanceName, path.getParent().toString());
 			} else if (canonizedStatement.startsWith(SPECIAL_STATEMENT_SWITCH_TO)) {
 				StmtSwitchTo stmtSwitchTo = new ParseStmtSwitchTo().parse(null, statement);
 				instanceName = stmtSwitchTo.instanceName;
@@ -627,39 +630,33 @@ public class SqlParseUtils {
 	 * Iterate directory recursive, find 'init.sql' files, and process them.
 	 *
 	 * @param path
-	 * @param map
+	 * @param sqlStatementsMap
 	 * @throws IOException
 	 */
-	public static void processInitSqlFiles(File file, Map<String /* connection name */, List<String /* SQL statements */>> map) throws IOException {
+	public static void processInitSqlFiles(File file, Map<String /* connection name */, List<String /* SQL statements */>> sqlStatementsMap, Map<String /* connection name */, String /* parent directory */> parentDirectoryMap) throws IOException {
 		if (file.isDirectory()) {
 			File[] files = file.listFiles();
-			if (files != null) {
+			if (files != null)
 				for (File f : files)
-					processInitSqlFiles(f, map);
-			}
-		} else if (file.getName().equals("init.sql"))
-			processInitSqlFile(file.toPath(), map);
+					processInitSqlFiles(f, sqlStatementsMap, parentDirectoryMap);
+		} else {
+			String fileName = file.getName();
+			if (fileName.equals(INIT_SQL_FILE_EXT) || fileName.endsWith('.' + INIT_SQL_FILE_EXT))
+				processInitSqlFile(file.toPath(), sqlStatementsMap, parentDirectoryMap);
+		}
 	}
 
 	/**
 	 * Read 'init.sql' file, process 'includes', iterate record by record and divide it by instance name to map
 	 *
 	 * @param path
-	 * @param map
+	 * @param sqlStatementsMap
 	 * @throws IOException
 	 */
-	private static void processInitSqlFile(Path path, Map<String /* connection name */, List<String /* SQL statements */>> map) throws IOException {
+	private static void processInitSqlFile(Path path, Map<String /* connection name */, List<String /* SQL statements */>> sqlStatementsMap, Map<String /* connection name */, String /* parent directory */> parentDirectoryMap) throws IOException {
 		List<String /* SQL statements */> list = new ArrayList<>();
 		processIncludes(path, list);
-		separateSqlFile(list, map);
-	}
-
-	public static void main(String[] args) throws IOException {
-		Map<String /* connection name */, List<String /* SQL statements */>> map = new LinkedHashMap<>();
-		//processInitSqlFile(Paths.get("/home/qsecofr/fbsql/config/db/my-sqlite/init.sql"), map);
-		processInitSqlFiles(Paths.get("/home/qsecofr/fbsql/config/db").toFile(), map);
-		//processInitSqlFile(Paths.get("/home/qsecofr/fbsql/config/db"), map);
-		System.out.println(map);
+		separateSqlFile(path, list, sqlStatementsMap, parentDirectoryMap);
 	}
 
 	/**
@@ -679,8 +676,9 @@ public class SqlParseUtils {
 		return sql;
 	}
 }
+
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

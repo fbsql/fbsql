@@ -22,16 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.servlet;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.Scanner;
 
 public class StringUtils {
 
@@ -142,10 +144,15 @@ public class StringUtils {
 		return s;
 	}
 
+	public static String inputSreamToString(InputStream is) {
+		Scanner s = new Scanner(is, StandardCharsets.UTF_8.name()).useDelimiter("\\A");
+		return s.hasNext() ? s.next().trim() : "";
+	}
+
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

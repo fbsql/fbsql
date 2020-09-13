@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.parser;
@@ -38,6 +38,7 @@ import org.fbsql.antlr4.generated.FbsqlBaseListener;
 import org.fbsql.antlr4.generated.FbsqlLexer;
 import org.fbsql.antlr4.generated.FbsqlParser;
 import org.fbsql.antlr4.generated.FbsqlParser.Connection_aliasContext;
+import org.fbsql.servlet.DbServlet;
 import org.fbsql.servlet.SqlParseUtils;
 import org.fbsql.servlet.StringUtils;
 
@@ -93,7 +94,6 @@ public class ParseStmtSwitchTo {
 
 		ParseTreeWalker.DEFAULT.walk(new FbsqlBaseListener() {
 
-
 			@Override
 			public void enterConnection_alias(Connection_aliasContext ctx) {
 				st.instanceName = StringUtils.unquote(ctx.getText());
@@ -101,19 +101,15 @@ public class ParseStmtSwitchTo {
 
 		}, tree);
 
-		return st;
-	}
+		if (DbServlet.DEBUG)
+			System.out.println(st);
 
-	public static void main(String[] args) {
-		String            sql = "Switch TO \"ali\"";
-		ParseStmtSwitchTo p   = new ParseStmtSwitchTo();
-		StmtSwitchTo      se  = p.parse(null, sql);
-		System.out.println(se);
+		return st;
 	}
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

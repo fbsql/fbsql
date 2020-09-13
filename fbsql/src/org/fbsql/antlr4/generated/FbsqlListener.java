@@ -1,5 +1,3 @@
-// Generated from /home/qsecofr/git/fbsql/fbsql/Fbsql.g4 by ANTLR 4.8
-
 /*
 MIT License
 
@@ -24,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.generated;
@@ -46,6 +44,26 @@ public interface FbsqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNative_sql(FbsqlParser.Native_sqlContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link FbsqlParser#parameter}.
+	 * @param ctx the parse tree
+	 */
+	void enterParameter(FbsqlParser.ParameterContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FbsqlParser#parameter}.
+	 * @param ctx the parse tree
+	 */
+	void exitParameter(FbsqlParser.ParameterContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link FbsqlParser#procedure}.
+	 * @param ctx the parse tree
+	 */
+	void enterProcedure(FbsqlParser.ProcedureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FbsqlParser#procedure}.
+	 * @param ctx the parse tree
+	 */
+	void exitProcedure(FbsqlParser.ProcedureContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#role_name}.
 	 * @param ctx the parse tree
@@ -117,15 +135,15 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitProcedure_name(FbsqlParser.Procedure_nameContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FbsqlParser#java_method_name}.
+	 * Enter a parse tree produced by {@link FbsqlParser#json}.
 	 * @param ctx the parse tree
 	 */
-	void enterJava_method_name(FbsqlParser.Java_method_nameContext ctx);
+	void enterJson(FbsqlParser.JsonContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FbsqlParser#java_method_name}.
+	 * Exit a parse tree produced by {@link FbsqlParser#json}.
 	 * @param ctx the parse tree
 	 */
-	void exitJava_method_name(FbsqlParser.Java_method_nameContext ctx);
+	void exitJson(FbsqlParser.JsonContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#jdbc_url}.
 	 * @param ctx the parse tree
@@ -217,6 +235,16 @@ public interface FbsqlListener extends ParseTreeListener {
 	 */
 	void exitSql_script_file(FbsqlParser.Sql_script_fileContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link FbsqlParser#json_file}.
+	 * @param ctx the parse tree
+	 */
+	void enterJson_file(FbsqlParser.Json_fileContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FbsqlParser#json_file}.
+	 * @param ctx the parse tree
+	 */
+	void exitJson_file(FbsqlParser.Json_fileContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link FbsqlParser#cron_expression}.
 	 * @param ctx the parse tree
 	 */
@@ -286,4 +314,14 @@ public interface FbsqlListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSchedule_stmt(FbsqlParser.Schedule_stmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link FbsqlParser#native_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterNative_stmt(FbsqlParser.Native_stmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FbsqlParser#native_stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitNative_stmt(FbsqlParser.Native_stmtContext ctx);
 }

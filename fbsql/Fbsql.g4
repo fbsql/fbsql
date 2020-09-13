@@ -31,7 +31,7 @@ Mail    : bart@big-o.nl <Bart Kiers>
 
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 @header
@@ -60,7 +60,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.generated;
@@ -68,7 +68,6 @@ package org.fbsql.antlr4.generated;
 
 /* keywords */
 
-EXPOSE      : E X P O S E;
 STATIC      : S T A T I C;
 ROLES       : R O L E S;
 TRIGGER     : T R I G G E R;
@@ -82,7 +81,16 @@ SPEED       : S P E E D;
 
 DECLARE     : D E C L A R E;
 PROCEDURE   : P R O C E D U R E;
-FOR         : F O R;
+
+TYPE        : T Y P E;
+
+JVM         : J V M;
+JS          : J S;
+EXEC        : E X E C;
+URL         : U R L;
+
+OPTIONS     : O P T I O N S;
+FILE        : F I L E;
 STATEMENT   : S T A T E M E N T;
 
 CONNECT     : C O N N E C T;
@@ -112,10 +120,23 @@ SCHEDULE    : S C H E D U L E;
 AT          : A T;
 
 INCLUDE     : I N C L U D E;
-FILE        : F I L E;
+
+NULL        : N U L L;
 
 native_sql
  : .*?
+ ;
+
+parameter
+ : ':' IDENTIFIER
+ | NUMERIC_LITERAL
+ | STRING_LITERAL
+ | NULL
+ | procedure
+ ;
+
+procedure
+ : procedure_name '(' parameter? ( ',' parameter )* ')'
  ;
 
 role_name
@@ -152,7 +173,7 @@ procedure_name
  | STRING_LITERAL
  ;
 
-java_method_name
+json
  : STRING_LITERAL
  ;
 
@@ -193,6 +214,10 @@ sql_script_file // file name
  : STRING_LITERAL
  ;
 
+json_file
+ : STRING_LITERAL
+ ;
+
 cron_expression
  : STRING_LITERAL
  ;
@@ -205,15 +230,14 @@ connect_to_stmt
     ( PROPERTIES jdbc_connection_properties ) |
     ( DRIVER jdbc_driver_class_name ) |
     ( LIB jar_file ( ',' jar_file )* ) |
-    ( CONNECTION POOL
-     (
-      ( MIN connection_pool_size_min ) |
-      ( MAX connection_pool_size_max )
-     )+
-    ) |
-    ( EXPOSE UNDECLARED STATEMENTS ) |
     (
-     ALLOW INCOMING CONNECTIONS ( IF EXISTS '(' native_sql ')' )?
+     CONNECTION POOL ( ( MIN connection_pool_size_min ) | ( MAX connection_pool_size_max ) )+ 
+    ) |
+    (
+     UNDECLARED STATEMENTS ( ALLOW | REJECT )+ 
+    ) |
+    (
+     INCOMING CONNECTIONS ( ALLOW | REJECT )+ ( IF EXISTS '(' native_sql ')' )?
     ) |
    ( AS? connection_alias )
    )*
@@ -237,7 +261,17 @@ declare_statement_stmt
  ;
 
 declare_procedure_stmt
- : DECLARE PROCEDURE procedure_name FOR java_method_name
+ : DECLARE PROCEDURE procedure_name TYPE
+   (
+   	JVM  |
+   	JS   |
+   	EXEC |
+   	URL
+   )*
+   (
+    OPTIONS json |
+    OPTIONS FILE json_file
+   )+
  ;
 
 include_script_file_stmt
@@ -247,6 +281,25 @@ include_script_file_stmt
 schedule_stmt
  : SCHEDULE procedure_name AT cron_expression
  ;
+
+native_stmt
+ : ( .*? procedure .*? )*
+ ;
+
+/*
+constant
+ : 
+   (
+ 	REMOTEUSER |
+ 	REMOTEROLE
+   )
+ ;
+statement
+ : .*?
+   constant .*? ( constant )
+   .*?
+ ;
+*/
 
 /* Developed by : Bart Kiers, bart@big-o.nl */
 IDENTIFIER
@@ -319,7 +372,7 @@ fragment Y : [yY];
 fragment Z : [zZ];
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

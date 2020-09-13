@@ -22,13 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.servlet;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Callable;
@@ -45,7 +46,7 @@ public class RhinoUtils {
 	 * @param json
 	 * @return
 	 */
-	public static Object toObject(String json) {
+	private static Object asObject(String json) {
 		Context context = Context.enter();
 		context.setLanguageVersion(Context.VERSION_ES6);
 		context.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
@@ -68,10 +69,29 @@ public class RhinoUtils {
 		return object;
 	}
 
+	/**
+	 * Convert JSON string to List
+	 *
+	 * @param json
+	 * @return
+	 */
+	public static List asList(String json) {
+		return (List) asObject(json);
+	}
+
+	/**
+	 * Convert JSON string to Map<String, Object>
+	 *
+	 * @param json
+	 * @return
+	 */
+	public static Map<String, Object> asMap(String json) {
+		return (Map<String, Object>) asObject(json);
+	}
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

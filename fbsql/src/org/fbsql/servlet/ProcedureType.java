@@ -27,29 +27,11 @@ E-Mail: fbsql.team@gmail.com
 
 package org.fbsql.servlet;
 
-import java.util.Objects;
-
-public class CommonUtils {
-
-	public static int indexOf(Object[] array, Object[] subArray) {
-		boolean found = false;
-		for (int i = 0; i <= array.length - subArray.length; i++) {
-			if (Objects.equals(array[i], subArray[0])) {
-				for (int j = 1; j < subArray.length; j++) {
-					if (Objects.equals(array[i + j], subArray[j]))
-						found = true;
-					else {
-						found = false;
-						break;
-					}
-				}
-			}
-			if (found)
-				return i;
-		}
-		return -1;
-	}
-
+public enum ProcedureType {
+	JVM, // Java
+	JS, // JavaScript
+	EXEC, // OS executable
+	URL // URL ("http://", "https://", "file://" are supported) or local file (absolute and relative path supported) 
 }
 
 /*

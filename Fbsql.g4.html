@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Fbsql.g4</title>
+<style type="text/css">
+body { 
+  color: #000;
+  font-family: sans-serif;
+  font-size: 12px;
+  margin: 20px 5px 10px 20px;
+}
+/* resets */
+ul {
+  list-style: none;
+  padding: 0;
+}
+a {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+img {
+  border: 0;
+}
+.clear {
+  clear: both;
+}
+.container {
+  position: relative;
+}
+/* Grammar name */
+h1 {
+  font-size: 20px;
+}
+/*Grammar documentation*/
+.gdoc {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+#index {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px;
+  overflow: auto;
+}
+#index h2 {
+  margin: 0;
+}
+#index ol {
+  padding-left: 30px;
+  list-style-type: square;
+  color: #364559;
+}
+#index ol li {
+  margin: 2px 0;
+}
+#index ol li a {
+  color: #366199;
+  font-family: monospace;
+}
+#rules {
+  margin-left: 210px;
+  padding-left: 20px;
+  border-left: 1px solid #AAA;
+}
+.rule {
+  margin-bottom: 30px;
+}
+/* Rule name*/
+.rule h3 {
+  color: #364559;
+  background-color: #DADFE6;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 4px 5px;
+  border-bottom: 1px solid #828B99;
+}
+.rule h3 a.topLink {
+  font-family: sans-serif;
+  font-size: 10px;
+  color: #000;
+  margin-left: 20px;
+}
+.rule h3, .rule .ebnf div {
+  font-family: monospace;
+}
+/* Sections: ebnf, railroad*/
+.doc, .ebnf, .railroad {
+  padding-left: 20px;
+}
+.doc h4, .ebnf h4, .railroad h4 {
+  font-size: 12px;
+  margin: 15px 0 10px -20px;
+}
+.ebnf div {
+  background-color: #F7F7F7;
+  border-top: 1px solid #E8E8E8;
+  border-bottom: 1px solid #E8E8E8;
+  padding: 10px 5px;
+}
+.ebnf div .literal {
+  color: #0000FF;
+}
+.ebnf div .keyword {
+  color: #7F0055;
+  font-weight: bold;
+}
+.ebnf div .rule {
+  color: #004084;
+  font-weight: bold;
+}
+.ebnf div .token {
+  font-style:italic;
+}
+.railroad img {
+  display: block;
+}
+footer {
+  float: right;
+}
+</style>
+</head>
+<body>
+<h1><a href="Fbsql.g4.html" name="top">Fbsql</a></h1>
+<p class="gdoc"></p>
+<div class="container">
+<div id="index">
+<h2>Rules</h2>
+<ol>
+  <li><a href="#EXPOSE">EXPOSE</a></li>
+  <li><a href="#STATIC">STATIC</a></li>
+  <li><a href="#ROLES">ROLES</a></li>
+  <li><a href="#TRIGGER">TRIGGER</a></li>
+  <li><a href="#BEFORE">BEFORE</a></li>
+  <li><a href="#AFTER">AFTER</a></li>
+  <li><a href="#AS">AS</a></li>
+  <li><a href="#NO">NO</a></li>
+  <li><a href="#COMPRESSION">COMPRESSION</a></li>
+  <li><a href="#BEST">BEST</a></li>
+  <li><a href="#SPEED">SPEED</a></li>
+  <li><a href="#DECLARE">DECLARE</a></li>
+  <li><a href="#PROCEDURE">PROCEDURE</a></li>
+  <li><a href="#TYPE">TYPE</a></li>
+  <li><a href="#JVM">JVM</a></li>
+  <li><a href="#JS">JS</a></li>
+  <li><a href="#EXEC">EXEC</a></li>
+  <li><a href="#URL">URL</a></li>
+  <li><a href="#OPTIONS">OPTIONS</a></li>
+  <li><a href="#FILE">FILE</a></li>
+  <li><a href="#STATEMENT">STATEMENT</a></li>
+  <li><a href="#CONNECT">CONNECT</a></li>
+  <li><a href="#TO">TO</a></li>
+  <li><a href="#USER">USER</a></li>
+  <li><a href="#PASSWORD">PASSWORD</a></li>
+  <li><a href="#PROPERTIES">PROPERTIES</a></li>
+  <li><a href="#DRIVER">DRIVER</a></li>
+  <li><a href="#LIB">LIB</a></li>
+  <li><a href="#CONNECTION">CONNECTION</a></li>
+  <li><a href="#POOL">POOL</a></li>
+  <li><a href="#SIZE">SIZE</a></li>
+  <li><a href="#MIN">MIN</a></li>
+  <li><a href="#MAX">MAX</a></li>
+  <li><a href="#UNDECLARED">UNDECLARED</a></li>
+  <li><a href="#STATEMENTS">STATEMENTS</a></li>
+  <li><a href="#INCOMING">INCOMING</a></li>
+  <li><a href="#CONNECTIONS">CONNECTIONS</a></li>
+  <li><a href="#ALLOW">ALLOW</a></li>
+  <li><a href="#REJECT">REJECT</a></li>
+  <li><a href="#IF">IF</a></li>
+  <li><a href="#EXISTS">EXISTS</a></li>
+  <li><a href="#SWITCH">SWITCH</a></li>
+  <li><a href="#SCHEDULE">SCHEDULE</a></li>
+  <li><a href="#AT">AT</a></li>
+  <li><a href="#INCLUDE">INCLUDE</a></li>
+  <li><a href="#NULL">NULL</a></li>
+  <li><a href="#native_sql">native_sql</a></li>
+  <li><a href="#parameter">parameter</a></li>
+  <li><a href="#procedure">procedure</a></li>
+  <li><a href="#role_name">role_name</a></li>
+  <li><a href="#trigger_before_procedure_name">trigger_before_procedure_name</a></li>
+  <li><a href="#trigger_after_procedure_name">trigger_after_procedure_name</a></li>
+  <li><a href="#compression_level">compression_level</a></li>
+  <li><a href="#connection_alias">connection_alias</a></li>
+  <li><a href="#statement_alias">statement_alias</a></li>
+  <li><a href="#procedure_name">procedure_name</a></li>
+  <li><a href="#json">json</a></li>
+  <li><a href="#jdbc_url">jdbc_url</a></li>
+  <li><a href="#user">user</a></li>
+  <li><a href="#password">password</a></li>
+  <li><a href="#jdbc_connection_properties">jdbc_connection_properties</a></li>
+  <li><a href="#jdbc_driver_class_name">jdbc_driver_class_name</a></li>
+  <li><a href="#jar_file">jar_file</a></li>
+  <li><a href="#connection_pool_size_min">connection_pool_size_min</a></li>
+  <li><a href="#connection_pool_size_max">connection_pool_size_max</a></li>
+  <li><a href="#sql_script_file">sql_script_file</a></li>
+  <li><a href="#json_file">json_file</a></li>
+  <li><a href="#cron_expression">cron_expression</a></li>
+  <li><a href="#connect_to_stmt">connect_to_stmt</a></li>
+  <li><a href="#switch_to_stmt">switch_to_stmt</a></li>
+  <li><a href="#declare_statement_stmt">declare_statement_stmt</a></li>
+  <li><a href="#declare_procedure_stmt">declare_procedure_stmt</a></li>
+  <li><a href="#include_script_file_stmt">include_script_file_stmt</a></li>
+  <li><a href="#schedule_stmt">schedule_stmt</a></li>
+  <li><a href="#native_stmt">native_stmt</a></li>
+  <li><a href="#IDENTIFIER">IDENTIFIER</a></li>
+  <li><a href="#NUMERIC_LITERAL">NUMERIC_LITERAL</a></li>
+  <li><a href="#STRING_LITERAL">STRING_LITERAL</a></li>
+  <li><a href="#SINGLE_LINE_COMMENT">SINGLE_LINE_COMMENT</a></li>
+  <li><a href="#MULTILINE_COMMENT">MULTILINE_COMMENT</a></li>
+  <li><a href="#SPACES">SPACES</a></li>
+  <li><a href="#UNEXPECTED_CHAR">UNEXPECTED_CHAR</a></li>
+  <li><a href="#DIGIT">DIGIT</a></li>
+  <li><a href="#A">A</a></li>
+  <li><a href="#B">B</a></li>
+  <li><a href="#C">C</a></li>
+  <li><a href="#D">D</a></li>
+  <li><a href="#E">E</a></li>
+  <li><a href="#F">F</a></li>
+  <li><a href="#G">G</a></li>
+  <li><a href="#H">H</a></li>
+  <li><a href="#I">I</a></li>
+  <li><a href="#J">J</a></li>
+  <li><a href="#K">K</a></li>
+  <li><a href="#L">L</a></li>
+  <li><a href="#M">M</a></li>
+  <li><a href="#N">N</a></li>
+  <li><a href="#O">O</a></li>
+  <li><a href="#P">P</a></li>
+  <li><a href="#Q">Q</a></li>
+  <li><a href="#R">R</a></li>
+  <li><a href="#S">S</a></li>
+  <li><a href="#T">T</a></li>
+  <li><a href="#U">U</a></li>
+  <li><a href="#V">V</a></li>
+  <li><a href="#W">W</a></li>
+  <li><a href="#X">X</a></li>
+  <li><a href="#Y">Y</a></li>
+  <li><a href="#Z">Z</a></li>
+</ol>
+</div>
+
+<div id="rules">
+<ul>
+  <li class="rule" id="EXPOSE">
+  <h3>EXPOSE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">EXPOSE</span> :  <a href="#E" class="token">E</a> <a href="#X" class="token">X</a> <a href="#P" class="token">P</a> <a href="#O" class="token">O</a> <a href="#S" class="token">S</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/EXPOSE.png" />
+  </div>
+  </li>
+  <li class="rule" id="STATIC">
+  <h3>STATIC <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">STATIC</span> :  <a href="#S" class="token">S</a> <a href="#T" class="token">T</a> <a href="#A" class="token">A</a> <a href="#T" class="token">T</a> <a href="#I" class="token">I</a> <a href="#C" class="token">C</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/STATIC.png" />
+  </div>
+  </li>
+  <li class="rule" id="ROLES">
+  <h3>ROLES <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">ROLES</span> :  <a href="#R" class="token">R</a> <a href="#O" class="token">O</a> <a href="#L" class="token">L</a> <a href="#E" class="token">E</a> <a href="#S" class="token">S</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/ROLES.png" />
+  </div>
+  </li>
+  <li class="rule" id="TRIGGER">
+  <h3>TRIGGER <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">TRIGGER</span> :  <a href="#T" class="token">T</a> <a href="#R" class="token">R</a> <a href="#I" class="token">I</a> <a href="#G" class="token">G</a> <a href="#G" class="token">G</a> <a href="#E" class="token">E</a> <a href="#R" class="token">R</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/TRIGGER.png" />
+  </div>
+  </li>
+  <li class="rule" id="BEFORE">
+  <h3>BEFORE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">BEFORE</span> :  <a href="#B" class="token">B</a> <a href="#E" class="token">E</a> <a href="#F" class="token">F</a> <a href="#O" class="token">O</a> <a href="#R" class="token">R</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/BEFORE.png" />
+  </div>
+  </li>
+  <li class="rule" id="AFTER">
+  <h3>AFTER <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">AFTER</span> :  <a href="#A" class="token">A</a> <a href="#F" class="token">F</a> <a href="#T" class="token">T</a> <a href="#E" class="token">E</a> <a href="#R" class="token">R</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/AFTER.png" />
+  </div>
+  </li>
+  <li class="rule" id="AS">
+  <h3>AS <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">AS</span> :  <a href="#A" class="token">A</a> <a href="#S" class="token">S</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/AS.png" />
+  </div>
+  </li>
+  <li class="rule" id="NO">
+  <h3>NO <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">NO</span> :  <a href="#N" class="token">N</a> <a href="#O" class="token">O</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/NO.png" />
+  </div>
+  </li>
+  <li class="rule" id="COMPRESSION">
+  <h3>COMPRESSION <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">COMPRESSION</span> :  <a href="#C" class="token">C</a> <a href="#O" class="token">O</a> <a href="#M" class="token">M</a> <a href="#P" class="token">P</a> <a href="#R" class="token">R</a> <a href="#E" class="token">E</a> <a href="#S" class="token">S</a> <a href="#S" class="token">S</a> <a href="#I" class="token">I</a> <a href="#O" class="token">O</a> <a href="#N" class="token">N</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/COMPRESSION.png" />
+  </div>
+  </li>
+  <li class="rule" id="BEST">
+  <h3>BEST <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">BEST</span> :  <a href="#B" class="token">B</a> <a href="#E" class="token">E</a> <a href="#S" class="token">S</a> <a href="#T" class="token">T</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/BEST.png" />
+  </div>
+  </li>
+  <li class="rule" id="SPEED">
+  <h3>SPEED <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">SPEED</span> :  <a href="#S" class="token">S</a> <a href="#P" class="token">P</a> <a href="#E" class="token">E</a> <a href="#E" class="token">E</a> <a href="#D" class="token">D</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/SPEED.png" />
+  </div>
+  </li>
+  <li class="rule" id="DECLARE">
+  <h3>DECLARE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">DECLARE</span> :  <a href="#D" class="token">D</a> <a href="#E" class="token">E</a> <a href="#C" class="token">C</a> <a href="#L" class="token">L</a> <a href="#A" class="token">A</a> <a href="#R" class="token">R</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/DECLARE.png" />
+  </div>
+  </li>
+  <li class="rule" id="PROCEDURE">
+  <h3>PROCEDURE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">PROCEDURE</span> :  <a href="#P" class="token">P</a> <a href="#R" class="token">R</a> <a href="#O" class="token">O</a> <a href="#C" class="token">C</a> <a href="#E" class="token">E</a> <a href="#D" class="token">D</a> <a href="#U" class="token">U</a> <a href="#R" class="token">R</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/PROCEDURE.png" />
+  </div>
+  </li>
+  <li class="rule" id="TYPE">
+  <h3>TYPE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">TYPE</span> :  <a href="#T" class="token">T</a> <a href="#Y" class="token">Y</a> <a href="#P" class="token">P</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/TYPE.png" />
+  </div>
+  </li>
+  <li class="rule" id="JVM">
+  <h3>JVM <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">JVM</span> :  <a href="#J" class="token">J</a> <a href="#V" class="token">V</a> <a href="#M" class="token">M</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/JVM.png" />
+  </div>
+  </li>
+  <li class="rule" id="JS">
+  <h3>JS <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">JS</span> :  <a href="#J" class="token">J</a> <a href="#S" class="token">S</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/JS.png" />
+  </div>
+  </li>
+  <li class="rule" id="EXEC">
+  <h3>EXEC <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">EXEC</span> :  <a href="#E" class="token">E</a> <a href="#X" class="token">X</a> <a href="#E" class="token">E</a> <a href="#C" class="token">C</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/EXEC.png" />
+  </div>
+  </li>
+  <li class="rule" id="URL">
+  <h3>URL <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">URL</span> :  <a href="#U" class="token">U</a> <a href="#R" class="token">R</a> <a href="#L" class="token">L</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/URL.png" />
+  </div>
+  </li>
+  <li class="rule" id="OPTIONS">
+  <h3>OPTIONS <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">OPTIONS</span> :  <a href="#O" class="token">O</a> <a href="#P" class="token">P</a> <a href="#T" class="token">T</a> <a href="#I" class="token">I</a> <a href="#O" class="token">O</a> <a href="#N" class="token">N</a> <a href="#S" class="token">S</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/OPTIONS.png" />
+  </div>
+  </li>
+  <li class="rule" id="FILE">
+  <h3>FILE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">FILE</span> :  <a href="#F" class="token">F</a> <a href="#I" class="token">I</a> <a href="#L" class="token">L</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/FILE.png" />
+  </div>
+  </li>
+  <li class="rule" id="STATEMENT">
+  <h3>STATEMENT <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">STATEMENT</span> :  <a href="#S" class="token">S</a> <a href="#T" class="token">T</a> <a href="#A" class="token">A</a> <a href="#T" class="token">T</a> <a href="#E" class="token">E</a> <a href="#M" class="token">M</a> <a href="#E" class="token">E</a> <a href="#N" class="token">N</a> <a href="#T" class="token">T</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/STATEMENT.png" />
+  </div>
+  </li>
+  <li class="rule" id="CONNECT">
+  <h3>CONNECT <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">CONNECT</span> :  <a href="#C" class="token">C</a> <a href="#O" class="token">O</a> <a href="#N" class="token">N</a> <a href="#N" class="token">N</a> <a href="#E" class="token">E</a> <a href="#C" class="token">C</a> <a href="#T" class="token">T</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/CONNECT.png" />
+  </div>
+  </li>
+  <li class="rule" id="TO">
+  <h3>TO <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">TO</span> :  <a href="#T" class="token">T</a> <a href="#O" class="token">O</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/TO.png" />
+  </div>
+  </li>
+  <li class="rule" id="USER">
+  <h3>USER <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">USER</span> :  <a href="#U" class="token">U</a> <a href="#S" class="token">S</a> <a href="#E" class="token">E</a> <a href="#R" class="token">R</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/USER.png" />
+  </div>
+  </li>
+  <li class="rule" id="PASSWORD">
+  <h3>PASSWORD <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">PASSWORD</span> :  <a href="#P" class="token">P</a> <a href="#A" class="token">A</a> <a href="#S" class="token">S</a> <a href="#S" class="token">S</a> <a href="#W" class="token">W</a> <a href="#O" class="token">O</a> <a href="#R" class="token">R</a> <a href="#D" class="token">D</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/PASSWORD.png" />
+  </div>
+  </li>
+  <li class="rule" id="PROPERTIES">
+  <h3>PROPERTIES <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">PROPERTIES</span> :  <a href="#P" class="token">P</a> <a href="#R" class="token">R</a> <a href="#O" class="token">O</a> <a href="#P" class="token">P</a> <a href="#E" class="token">E</a> <a href="#R" class="token">R</a> <a href="#T" class="token">T</a> <a href="#I" class="token">I</a> <a href="#E" class="token">E</a> <a href="#S" class="token">S</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/PROPERTIES.png" />
+  </div>
+  </li>
+  <li class="rule" id="DRIVER">
+  <h3>DRIVER <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">DRIVER</span> :  <a href="#D" class="token">D</a> <a href="#R" class="token">R</a> <a href="#I" class="token">I</a> <a href="#V" class="token">V</a> <a href="#E" class="token">E</a> <a href="#R" class="token">R</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/DRIVER.png" />
+  </div>
+  </li>
+  <li class="rule" id="LIB">
+  <h3>LIB <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">LIB</span> :  <a href="#L" class="token">L</a> <a href="#I" class="token">I</a> <a href="#B" class="token">B</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/LIB.png" />
+  </div>
+  </li>
+  <li class="rule" id="CONNECTION">
+  <h3>CONNECTION <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">CONNECTION</span> :  <a href="#C" class="token">C</a> <a href="#O" class="token">O</a> <a href="#N" class="token">N</a> <a href="#N" class="token">N</a> <a href="#E" class="token">E</a> <a href="#C" class="token">C</a> <a href="#T" class="token">T</a> <a href="#I" class="token">I</a> <a href="#O" class="token">O</a> <a href="#N" class="token">N</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/CONNECTION.png" />
+  </div>
+  </li>
+  <li class="rule" id="POOL">
+  <h3>POOL <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">POOL</span> :  <a href="#P" class="token">P</a> <a href="#O" class="token">O</a> <a href="#O" class="token">O</a> <a href="#L" class="token">L</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/POOL.png" />
+  </div>
+  </li>
+  <li class="rule" id="SIZE">
+  <h3>SIZE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">SIZE</span> :  <a href="#S" class="token">S</a> <a href="#I" class="token">I</a> <a href="#Z" class="token">Z</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/SIZE.png" />
+  </div>
+  </li>
+  <li class="rule" id="MIN">
+  <h3>MIN <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">MIN</span> :  <a href="#M" class="token">M</a> <a href="#I" class="token">I</a> <a href="#N" class="token">N</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/MIN.png" />
+  </div>
+  </li>
+  <li class="rule" id="MAX">
+  <h3>MAX <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">MAX</span> :  <a href="#M" class="token">M</a> <a href="#A" class="token">A</a> <a href="#X" class="token">X</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/MAX.png" />
+  </div>
+  </li>
+  <li class="rule" id="UNDECLARED">
+  <h3>UNDECLARED <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">UNDECLARED</span> :  <a href="#U" class="token">U</a> <a href="#N" class="token">N</a> <a href="#D" class="token">D</a> <a href="#E" class="token">E</a> <a href="#C" class="token">C</a> <a href="#L" class="token">L</a> <a href="#A" class="token">A</a> <a href="#R" class="token">R</a> <a href="#E" class="token">E</a> <a href="#D" class="token">D</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/UNDECLARED.png" />
+  </div>
+  </li>
+  <li class="rule" id="STATEMENTS">
+  <h3>STATEMENTS <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">STATEMENTS</span> :  <a href="#S" class="token">S</a> <a href="#T" class="token">T</a> <a href="#A" class="token">A</a> <a href="#T" class="token">T</a> <a href="#E" class="token">E</a> <a href="#M" class="token">M</a> <a href="#E" class="token">E</a> <a href="#N" class="token">N</a> <a href="#T" class="token">T</a> <a href="#S" class="token">S</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/STATEMENTS.png" />
+  </div>
+  </li>
+  <li class="rule" id="INCOMING">
+  <h3>INCOMING <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">INCOMING</span> :  <a href="#I" class="token">I</a> <a href="#N" class="token">N</a> <a href="#C" class="token">C</a> <a href="#O" class="token">O</a> <a href="#M" class="token">M</a> <a href="#I" class="token">I</a> <a href="#N" class="token">N</a> <a href="#G" class="token">G</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/INCOMING.png" />
+  </div>
+  </li>
+  <li class="rule" id="CONNECTIONS">
+  <h3>CONNECTIONS <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">CONNECTIONS</span> :  <a href="#C" class="token">C</a> <a href="#O" class="token">O</a> <a href="#N" class="token">N</a> <a href="#N" class="token">N</a> <a href="#E" class="token">E</a> <a href="#C" class="token">C</a> <a href="#T" class="token">T</a> <a href="#I" class="token">I</a> <a href="#O" class="token">O</a> <a href="#N" class="token">N</a> <a href="#S" class="token">S</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/CONNECTIONS.png" />
+  </div>
+  </li>
+  <li class="rule" id="ALLOW">
+  <h3>ALLOW <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">ALLOW</span> :  <a href="#A" class="token">A</a> <a href="#L" class="token">L</a> <a href="#L" class="token">L</a> <a href="#O" class="token">O</a> <a href="#W" class="token">W</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/ALLOW.png" />
+  </div>
+  </li>
+  <li class="rule" id="REJECT">
+  <h3>REJECT <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">REJECT</span> :  <a href="#R" class="token">R</a> <a href="#E" class="token">E</a> <a href="#J" class="token">J</a> <a href="#E" class="token">E</a> <a href="#C" class="token">C</a> <a href="#T" class="token">T</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/REJECT.png" />
+  </div>
+  </li>
+  <li class="rule" id="IF">
+  <h3>IF <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">IF</span> :  <a href="#I" class="token">I</a> <a href="#F" class="token">F</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/IF.png" />
+  </div>
+  </li>
+  <li class="rule" id="EXISTS">
+  <h3>EXISTS <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">EXISTS</span> :  <a href="#E" class="token">E</a> <a href="#X" class="token">X</a> <a href="#I" class="token">I</a> <a href="#S" class="token">S</a> <a href="#T" class="token">T</a> <a href="#S" class="token">S</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/EXISTS.png" />
+  </div>
+  </li>
+  <li class="rule" id="SWITCH">
+  <h3>SWITCH <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">SWITCH</span> :  <a href="#S" class="token">S</a> <a href="#W" class="token">W</a> <a href="#I" class="token">I</a> <a href="#T" class="token">T</a> <a href="#C" class="token">C</a> <a href="#H" class="token">H</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/SWITCH.png" />
+  </div>
+  </li>
+  <li class="rule" id="SCHEDULE">
+  <h3>SCHEDULE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">SCHEDULE</span> :  <a href="#S" class="token">S</a> <a href="#C" class="token">C</a> <a href="#H" class="token">H</a> <a href="#E" class="token">E</a> <a href="#D" class="token">D</a> <a href="#U" class="token">U</a> <a href="#L" class="token">L</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/SCHEDULE.png" />
+  </div>
+  </li>
+  <li class="rule" id="AT">
+  <h3>AT <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">AT</span> :  <a href="#A" class="token">A</a> <a href="#T" class="token">T</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/AT.png" />
+  </div>
+  </li>
+  <li class="rule" id="INCLUDE">
+  <h3>INCLUDE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">INCLUDE</span> :  <a href="#I" class="token">I</a> <a href="#N" class="token">N</a> <a href="#C" class="token">C</a> <a href="#L" class="token">L</a> <a href="#U" class="token">U</a> <a href="#D" class="token">D</a> <a href="#E" class="token">E</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/INCLUDE.png" />
+  </div>
+  </li>
+  <li class="rule" id="NULL">
+  <h3>NULL <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">NULL</span> :  <a href="#N" class="token">N</a> <a href="#U" class="token">U</a> <a href="#L" class="token">L</a> <a href="#L" class="token">L</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/NULL.png" />
+  </div>
+  </li>
+  <li class="rule" id="native_sql">
+  <h3>native_sql <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">native_sql</span> :  <span class="operator">.</span><span class="operator">*</span><span class="operator">?</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/native_sql.png" />
+  </div>
+  </li>
+  <li class="rule" id="parameter">
+  <h3>parameter <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">parameter</span> :  <span class="literal">':'</span> <a href="#IDENTIFIER" class="token">IDENTIFIER</a> <span class="operator">|</span> <a href="#NUMERIC_LITERAL" class="token">NUMERIC_LITERAL</a> <span class="operator">|</span> <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> <span class="operator">|</span> <a href="#NULL" class="token">NULL</a> <span class="operator">|</span> <a href="#procedure" class="rule">procedure</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/parameter.png" />
+  </div>
+  </li>
+  <li class="rule" id="procedure">
+  <h3>procedure <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">procedure</span> :  <a href="#procedure_name" class="rule">procedure_name</a> <span class="literal">'('</span> <a href="#parameter" class="rule">parameter</a><span class="operator">?</span> <span class="operator">(</span> <span class="literal">','</span> <a href="#parameter" class="rule">parameter</a> <span class="operator">)</span><span class="operator">*</span> <span class="literal">')'</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/procedure.png" />
+  </div>
+  </li>
+  <li class="rule" id="role_name">
+  <h3>role_name <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">role_name</span> :  <a href="#IDENTIFIER" class="token">IDENTIFIER</a> <span class="operator">|</span> <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/role_name.png" />
+  </div>
+  </li>
+  <li class="rule" id="trigger_before_procedure_name">
+  <h3>trigger_before_procedure_name <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">trigger_before_procedure_name</span> :  <a href="#IDENTIFIER" class="token">IDENTIFIER</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/trigger_before_procedure_name.png" />
+  </div>
+  </li>
+  <li class="rule" id="trigger_after_procedure_name">
+  <h3>trigger_after_procedure_name <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">trigger_after_procedure_name</span> :  <a href="#IDENTIFIER" class="token">IDENTIFIER</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/trigger_after_procedure_name.png" />
+  </div>
+  </li>
+  <li class="rule" id="compression_level">
+  <h3>compression_level <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">compression_level</span> :  <a href="#NO" class="token">NO</a> <a href="#COMPRESSION" class="token">COMPRESSION</a> <span class="operator">|</span> <a href="#BEST" class="token">BEST</a> <a href="#COMPRESSION" class="token">COMPRESSION</a> <span class="operator">|</span> <a href="#BEST" class="token">BEST</a> <a href="#SPEED" class="token">SPEED</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/compression_level.png" />
+  </div>
+  </li>
+  <li class="rule" id="connection_alias">
+  <h3>connection_alias <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">connection_alias</span> :  <a href="#IDENTIFIER" class="token">IDENTIFIER</a> <span class="operator">|</span> <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/connection_alias.png" />
+  </div>
+  </li>
+  <li class="rule" id="statement_alias">
+  <h3>statement_alias <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">statement_alias</span> :  <a href="#IDENTIFIER" class="token">IDENTIFIER</a> <span class="operator">|</span> <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/statement_alias.png" />
+  </div>
+  </li>
+  <li class="rule" id="procedure_name">
+  <h3>procedure_name <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">procedure_name</span> :  <a href="#IDENTIFIER" class="token">IDENTIFIER</a> <span class="operator">|</span> <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/procedure_name.png" />
+  </div>
+  </li>
+  <li class="rule" id="json">
+  <h3>json <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">json</span> :  <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/json.png" />
+  </div>
+  </li>
+  <li class="rule" id="jdbc_url">
+  <h3>jdbc_url <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">jdbc_url</span> :  <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/jdbc_url.png" />
+  </div>
+  </li>
+  <li class="rule" id="user">
+  <h3>user <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">user</span> :  <a href="#IDENTIFIER" class="token">IDENTIFIER</a> <span class="operator">|</span> <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/user.png" />
+  </div>
+  </li>
+  <li class="rule" id="password">
+  <h3>password <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">password</span> : <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/password.png" />
+  </div>
+  </li>
+  <li class="rule" id="jdbc_connection_properties">
+  <h3>jdbc_connection_properties <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">jdbc_connection_properties</span> :  <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/jdbc_connection_properties.png" />
+  </div>
+  </li>
+  <li class="rule" id="jdbc_driver_class_name">
+  <h3>jdbc_driver_class_name <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">jdbc_driver_class_name</span> :  <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/jdbc_driver_class_name.png" />
+  </div>
+  </li>
+  <li class="rule" id="jar_file">
+  <h3>jar_file <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">jar_file</span> :  <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/jar_file.png" />
+  </div>
+  </li>
+  <li class="rule" id="connection_pool_size_min">
+  <h3>connection_pool_size_min <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">connection_pool_size_min</span> :  <a href="#NUMERIC_LITERAL" class="token">NUMERIC_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/connection_pool_size_min.png" />
+  </div>
+  </li>
+  <li class="rule" id="connection_pool_size_max">
+  <h3>connection_pool_size_max <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">connection_pool_size_max</span> :  <a href="#NUMERIC_LITERAL" class="token">NUMERIC_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/connection_pool_size_max.png" />
+  </div>
+  </li>
+  <li class="rule" id="sql_script_file">
+  <h3>sql_script_file <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">sql_script_file</span> :  <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/sql_script_file.png" />
+  </div>
+  </li>
+  <li class="rule" id="json_file">
+  <h3>json_file <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">json_file</span> :  <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/json_file.png" />
+  </div>
+  </li>
+  <li class="rule" id="cron_expression">
+  <h3>cron_expression <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">cron_expression</span> :  <a href="#STRING_LITERAL" class="token">STRING_LITERAL</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/cron_expression.png" />
+  </div>
+  </li>
+  <li class="rule" id="connect_to_stmt">
+  <h3>connect_to_stmt <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">connect_to_stmt</span> :  <a href="#CONNECT" class="token">CONNECT</a> <a href="#TO" class="token">TO</a> <a href="#jdbc_url" class="rule">jdbc_url</a> <span class="operator">(</span> <span class="operator">(</span> <a href="#USER" class="token">USER</a> <a href="#user" class="rule">user</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#PASSWORD" class="token">PASSWORD</a> <a href="#password" class="rule">password</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#PROPERTIES" class="token">PROPERTIES</a> <a href="#jdbc_connection_properties" class="rule">jdbc_connection_properties</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#DRIVER" class="token">DRIVER</a> <a href="#jdbc_driver_class_name" class="rule">jdbc_driver_class_name</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#LIB" class="token">LIB</a> <a href="#jar_file" class="rule">jar_file</a> <span class="operator">(</span> <span class="literal">','</span> <a href="#jar_file" class="rule">jar_file</a> <span class="operator">)</span><span class="operator">*</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#CONNECTION" class="token">CONNECTION</a> <a href="#POOL" class="token">POOL</a> <span class="operator">(</span> <span class="operator">(</span> <a href="#MIN" class="token">MIN</a> <a href="#connection_pool_size_min" class="rule">connection_pool_size_min</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#MAX" class="token">MAX</a> <a href="#connection_pool_size_max" class="rule">connection_pool_size_max</a> <span class="operator">)</span> <span class="operator">)</span><span class="operator">+</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#EXPOSE" class="token">EXPOSE</a> <a href="#UNDECLARED" class="token">UNDECLARED</a> <a href="#STATEMENTS" class="token">STATEMENTS</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#ALLOW" class="token">ALLOW</a> <a href="#INCOMING" class="token">INCOMING</a> <a href="#CONNECTIONS" class="token">CONNECTIONS</a> <span class="operator">(</span> <a href="#IF" class="token">IF</a> <a href="#EXISTS" class="token">EXISTS</a> <span class="literal">'('</span> <a href="#native_sql" class="rule">native_sql</a> <span class="literal">')'</span> <span class="operator">)</span><span class="operator">?</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#AS" class="token">AS</a><span class="operator">?</span> <a href="#connection_alias" class="rule">connection_alias</a> <span class="operator">)</span> <span class="operator">)</span><span class="operator">*</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/connect_to_stmt.png" />
+  </div>
+  </li>
+  <li class="rule" id="switch_to_stmt">
+  <h3>switch_to_stmt <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">switch_to_stmt</span> :  <a href="#SWITCH" class="token">SWITCH</a> <a href="#TO" class="token">TO</a> <a href="#connection_alias" class="rule">connection_alias</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/switch_to_stmt.png" />
+  </div>
+  </li>
+  <li class="rule" id="declare_statement_stmt">
+  <h3>declare_statement_stmt <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">declare_statement_stmt</span> :  <a href="#DECLARE" class="token">DECLARE</a> <a href="#STATEMENT" class="token">STATEMENT</a> <span class="literal">'('</span> <a href="#native_sql" class="rule">native_sql</a> <span class="literal">')'</span> <span class="operator">(</span> <a href="#STATIC" class="token">STATIC</a> <span class="operator">|</span> <span class="operator">(</span> <a href="#COMPRESSION" class="token">COMPRESSION</a> <a href="#compression_level" class="rule">compression_level</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#ROLES" class="token">ROLES</a> <span class="literal">'('</span> <a href="#role_name" class="rule">role_name</a> <span class="operator">(</span> <span class="literal">','</span> <a href="#role_name" class="rule">role_name</a> <span class="operator">)</span><span class="operator">*</span> <span class="literal">')'</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#TRIGGER" class="token">TRIGGER</a> <a href="#BEFORE" class="token">BEFORE</a> <a href="#trigger_before_procedure_name" class="rule">trigger_before_procedure_name</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#TRIGGER" class="token">TRIGGER</a> <a href="#AFTER" class="token">AFTER</a> <a href="#trigger_after_procedure_name" class="rule">trigger_after_procedure_name</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#AS" class="token">AS</a><span class="operator">?</span> <a href="#statement_alias" class="rule">statement_alias</a> <span class="operator">)</span> <span class="operator">)</span><span class="operator">*</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/declare_statement_stmt.png" />
+  </div>
+  </li>
+  <li class="rule" id="declare_procedure_stmt">
+  <h3>declare_procedure_stmt <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">declare_procedure_stmt</span> :  <a href="#DECLARE" class="token">DECLARE</a> <a href="#PROCEDURE" class="token">PROCEDURE</a> <a href="#procedure_name" class="rule">procedure_name</a> <a href="#TYPE" class="token">TYPE</a> <span class="operator">(</span> <a href="#JVM" class="token">JVM</a> <span class="operator">|</span> <a href="#JS" class="token">JS</a> <span class="operator">|</span> <a href="#EXEC" class="token">EXEC</a> <span class="operator">|</span> <a href="#URL" class="token">URL</a> <span class="operator">)</span><span class="operator">*</span> <span class="operator">(</span> <a href="#OPTIONS" class="token">OPTIONS</a> <a href="#json" class="rule">json</a> <span class="operator">|</span> <a href="#OPTIONS" class="token">OPTIONS</a> <a href="#FILE" class="token">FILE</a> <a href="#json_file" class="rule">json_file</a> <span class="operator">)</span><span class="operator">+</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/declare_procedure_stmt.png" />
+  </div>
+  </li>
+  <li class="rule" id="include_script_file_stmt">
+  <h3>include_script_file_stmt <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">include_script_file_stmt</span> :  <a href="#INCLUDE" class="token">INCLUDE</a> <a href="#sql_script_file" class="rule">sql_script_file</a> <span class="operator">(</span> <span class="literal">','</span> <a href="#sql_script_file" class="rule">sql_script_file</a> <span class="operator">)</span><span class="operator">*</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/include_script_file_stmt.png" />
+  </div>
+  </li>
+  <li class="rule" id="schedule_stmt">
+  <h3>schedule_stmt <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">schedule_stmt</span> :  <a href="#SCHEDULE" class="token">SCHEDULE</a> <a href="#procedure_name" class="rule">procedure_name</a> <a href="#AT" class="token">AT</a> <a href="#cron_expression" class="rule">cron_expression</a> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/schedule_stmt.png" />
+  </div>
+  </li>
+  <li class="rule" id="native_stmt">
+  <h3>native_stmt <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">native_stmt</span> :  <span class="operator">(</span> <span class="operator">.</span><span class="operator">*</span><span class="operator">?</span> <a href="#procedure" class="rule">procedure</a> <span class="operator">.</span><span class="operator">*</span><span class="operator">?</span> <span class="operator">)</span><span class="operator">*</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/native_stmt.png" />
+  </div>
+  </li>
+  <li class="rule" id="IDENTIFIER">
+  <h3>IDENTIFIER <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">IDENTIFIER</span> :  <span class="literal">'"'</span> <span class="operator">(</span><span class="operator">~</span><span class="literal">'"'</span> <span class="operator">|</span> <span class="literal">'""'</span><span class="operator">)</span><span class="operator">*</span> <span class="literal">'"'</span> <span class="operator">|</span> <span class="literal">'`'</span> <span class="operator">(</span><span class="operator">~</span><span class="literal">'`'</span> <span class="operator">|</span> <span class="literal">'``'</span><span class="operator">)</span><span class="operator">*</span> <span class="literal">'`'</span> <span class="operator">|</span> <span class="literal">'['</span> <span class="operator">~</span><span class="literal">']'</span><span class="operator">*</span> <span class="literal">']'</span> <span class="operator">|</span> [<span class="literal">a-zA-Z_</span>] [<span class="literal">a-zA-Z_0-9</span>]<span class="operator">*</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/IDENTIFIER.png" />
+  </div>
+  </li>
+  <li class="rule" id="NUMERIC_LITERAL">
+  <h3>NUMERIC_LITERAL <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">NUMERIC_LITERAL</span> :  <a href="#DIGIT" class="token">DIGIT</a><span class="operator">+</span> <span class="operator">(</span> <span class="literal">'.'</span> <a href="#DIGIT" class="token">DIGIT</a><span class="operator">*</span> <span class="operator">)</span><span class="operator">?</span> <span class="operator">(</span> <a href="#E" class="token">E</a> [<span class="literal">-+</span>]<span class="operator">?</span> <a href="#DIGIT" class="token">DIGIT</a><span class="operator">+</span> <span class="operator">)</span><span class="operator">?</span> <span class="operator">|</span> <span class="literal">'.'</span> <a href="#DIGIT" class="token">DIGIT</a><span class="operator">+</span> <span class="operator">(</span> <a href="#E" class="token">E</a> [<span class="literal">-+</span>]<span class="operator">?</span> <a href="#DIGIT" class="token">DIGIT</a><span class="operator">+</span> <span class="operator">)</span><span class="operator">?</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/NUMERIC_LITERAL.png" />
+  </div>
+  </li>
+  <li class="rule" id="STRING_LITERAL">
+  <h3>STRING_LITERAL <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">STRING_LITERAL</span> :  <span class="literal">'\''</span> <span class="operator">(</span> <span class="operator">~</span><span class="literal">'\''</span> <span class="operator">|</span> <span class="literal">'\'\''</span> <span class="operator">)</span><span class="operator">*</span> <span class="literal">'\''</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/STRING_LITERAL.png" />
+  </div>
+  </li>
+  <li class="rule" id="SINGLE_LINE_COMMENT">
+  <h3>SINGLE_LINE_COMMENT <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">SINGLE_LINE_COMMENT</span> :  <span class="literal">'--'</span> <span class="operator">~</span>[<span class="literal">\r\n</span>]<span class="operator">*</span> <span class="operator">-></span> <a href="#channel" class="rule">channel</a><span class="operator">(</span><a href="#HIDDEN" class="token">HIDDEN</a><span class="operator">)</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/SINGLE_LINE_COMMENT.png" />
+  </div>
+  </li>
+  <li class="rule" id="MULTILINE_COMMENT">
+  <h3>MULTILINE_COMMENT <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">MULTILINE_COMMENT</span> :  <span class="literal">'/*'</span> <span class="operator">.</span><span class="operator">*</span><span class="operator">?</span> <span class="operator">(</span> <span class="literal">'*/'</span> <span class="operator">|</span> <span class="keyword">EOF</span> <span class="operator">)</span> <span class="operator">-></span> <a href="#channel" class="rule">channel</a><span class="operator">(</span><a href="#HIDDEN" class="token">HIDDEN</a><span class="operator">)</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/MULTILINE_COMMENT.png" />
+  </div>
+  </li>
+  <li class="rule" id="SPACES">
+  <h3>SPACES <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">SPACES</span> :  [<span class="literal"> \u000B\t\r\n</span>] <span class="operator">-></span> <a href="#channel" class="rule">channel</a><span class="operator">(</span><a href="#HIDDEN" class="token">HIDDEN</a><span class="operator">)</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/SPACES.png" />
+  </div>
+  </li>
+  <li class="rule" id="UNEXPECTED_CHAR">
+  <h3>UNEXPECTED_CHAR <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">UNEXPECTED_CHAR</span> :  <span class="operator">.</span> ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/UNEXPECTED_CHAR.png" />
+  </div>
+  </li>
+  <li class="rule" id="DIGIT">
+  <h3>DIGIT <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">DIGIT</span> :  [<span class="literal">0-9</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/DIGIT.png" />
+  </div>
+  </li>
+  <li class="rule" id="A">
+  <h3>A <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">A</span> :  [<span class="literal">aA</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/A.png" />
+  </div>
+  </li>
+  <li class="rule" id="B">
+  <h3>B <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">B</span> :  [<span class="literal">bB</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/B.png" />
+  </div>
+  </li>
+  <li class="rule" id="C">
+  <h3>C <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">C</span> :  [<span class="literal">cC</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/C.png" />
+  </div>
+  </li>
+  <li class="rule" id="D">
+  <h3>D <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">D</span> :  [<span class="literal">dD</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/D.png" />
+  </div>
+  </li>
+  <li class="rule" id="E">
+  <h3>E <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">E</span> :  [<span class="literal">eE</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/E.png" />
+  </div>
+  </li>
+  <li class="rule" id="F">
+  <h3>F <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">F</span> :  [<span class="literal">fF</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/F.png" />
+  </div>
+  </li>
+  <li class="rule" id="G">
+  <h3>G <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">G</span> :  [<span class="literal">gG</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/G.png" />
+  </div>
+  </li>
+  <li class="rule" id="H">
+  <h3>H <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">H</span> :  [<span class="literal">hH</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/H.png" />
+  </div>
+  </li>
+  <li class="rule" id="I">
+  <h3>I <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">I</span> :  [<span class="literal">iI</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/I.png" />
+  </div>
+  </li>
+  <li class="rule" id="J">
+  <h3>J <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">J</span> :  [<span class="literal">jJ</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/J.png" />
+  </div>
+  </li>
+  <li class="rule" id="K">
+  <h3>K <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">K</span> :  [<span class="literal">kK</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/K.png" />
+  </div>
+  </li>
+  <li class="rule" id="L">
+  <h3>L <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">L</span> :  [<span class="literal">lL</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/L.png" />
+  </div>
+  </li>
+  <li class="rule" id="M">
+  <h3>M <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">M</span> :  [<span class="literal">mM</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/M.png" />
+  </div>
+  </li>
+  <li class="rule" id="N">
+  <h3>N <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">N</span> :  [<span class="literal">nN</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/N.png" />
+  </div>
+  </li>
+  <li class="rule" id="O">
+  <h3>O <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">O</span> :  [<span class="literal">oO</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/O.png" />
+  </div>
+  </li>
+  <li class="rule" id="P">
+  <h3>P <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">P</span> :  [<span class="literal">pP</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/P.png" />
+  </div>
+  </li>
+  <li class="rule" id="Q">
+  <h3>Q <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">Q</span> :  [<span class="literal">qQ</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/Q.png" />
+  </div>
+  </li>
+  <li class="rule" id="R">
+  <h3>R <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">R</span> :  [<span class="literal">rR</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/R.png" />
+  </div>
+  </li>
+  <li class="rule" id="S">
+  <h3>S <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">S</span> :  [<span class="literal">sS</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/S.png" />
+  </div>
+  </li>
+  <li class="rule" id="T">
+  <h3>T <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">T</span> :  [<span class="literal">tT</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/T.png" />
+  </div>
+  </li>
+  <li class="rule" id="U">
+  <h3>U <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">U</span> :  [<span class="literal">uU</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/U.png" />
+  </div>
+  </li>
+  <li class="rule" id="V">
+  <h3>V <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">V</span> :  [<span class="literal">vV</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/V.png" />
+  </div>
+  </li>
+  <li class="rule" id="W">
+  <h3>W <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">W</span> :  [<span class="literal">wW</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/W.png" />
+  </div>
+  </li>
+  <li class="rule" id="X">
+  <h3>X <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">X</span> :  [<span class="literal">xX</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/X.png" />
+  </div>
+  </li>
+  <li class="rule" id="Y">
+  <h3>Y <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">Y</span> :  [<span class="literal">yY</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/Y.png" />
+  </div>
+  </li>
+  <li class="rule" id="Z">
+  <h3>Z <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <div class="doc">
+    <p>
+    </p>
+  </div>
+  <div class="ebnf">
+  <h4>Text notation:</h4>
+  <div>
+    <span class="rule">Z</span> :  [<span class="literal">zZ</span>] ;
+  </div>
+  </div>
+  <div class="railroad">
+  <h4>Visual notation:</h4>
+  <img border="0" src="images/Z.png" />
+  </div>
+  </li>
+</ul>
+</div>
+</div>
+<footer>Generated by: <a href="https://github.com/jknack/antlr4ide">ANTLR 4 IDE</a>. Copyright (c) 2013 <a href="https://twitter.com/edgarespina">Edgar Espina</a></footer>
+</body>
+</html>

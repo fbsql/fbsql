@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 -->
 
 <!--
@@ -176,13 +176,8 @@ Important properties:
 		<echo file="${start-script}" append="true"><![CDATA[cp -npr "$parentdir"/fbsql-server/webapps/ROOT/WEB-INF/web.xml $HOME/fbsql/config/tomcat/webapps/ROOT/WEB-INF${line.separator}]]></echo>
 
 
-		<echo file="${start-script}" append="true"><![CDATA[if [ ! -d "$HOME"/fbsql/config/db ]; then${line.separator}]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/db${line.separator}]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/db/fbsql_default_db${line.separator}]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "   CONNECT TO 'jdbc:sqlite:memory:myDb';${line.separator}"             > $HOME/fbsql/config/db/fbsql_default_db/init.sql${line.separator}]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "-- CONNECT TO 'jdbc:h2:mem:myDb';${line.separator}"                   >> $HOME/fbsql/config/db/fbsql_default_db/init.sql${line.separator}]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "-- CONNECT TO 'jdbc:hsqldb:mem:myDb';${line.separator}"               >> $HOME/fbsql/config/db/fbsql_default_db/init.sql${line.separator}]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "-- CONNECT TO 'jdbc:derby:memory:myDb;create=true';${line.separator}" >> $HOME/fbsql/config/db/fbsql_default_db/init.sql${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[if [ ! -d "$HOME"/fbsql/config/init ]; then${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[mkdir -p $HOME/fbsql/config/init${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[fi${line.separator}]]></echo>
 
 
@@ -283,7 +278,7 @@ Important properties:
 </project>
 
 <!--
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 -->

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql_server;
@@ -45,10 +45,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import org.fbsql.servlet.DbServlet;
 import org.fbsql.servlet.SqlParseUtils;
 
 public class Main {
-	private static final String USER_HOME_DIR = System.getProperty("user.home");
 
 	/**
 	 * Called from start.sh script
@@ -58,11 +58,16 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
 
+		String fbsql_home_dir = System.getenv(DbServlet.FBSQL_HOME_DIR_ENV_NAME);
+		if (fbsql_home_dir == null)
+			fbsql_home_dir = System.getProperty("user.home");
+		new File(fbsql_home_dir).mkdirs();
+
 		/* Process application settings directory (child of user home directory) */
-		String appDir        = USER_HOME_DIR + "/fbsql";   // *** BRANDING ARTIFACT *** //
+		String appDir        = fbsql_home_dir + "/fbsql";  // *** BRANDING ARTIFACT *** //
 		String logsDir       = appDir + "/logs";
 		String configDir     = appDir + "/config";
-		String fbsqlConfDir  = configDir + "/db";
+		String fbsqlConfDir  = configDir + "/init";
 		String tomcatDir     = configDir + "/tomcat";
 		String tomcatConfDir = tomcatDir + "/conf";
 		String tomcatBinDir  = tomcatDir + "/bin";
@@ -131,9 +136,9 @@ public class Main {
 		System.out.println("    • Connectors:");
 		Path fbsqlConfDirPath = Paths.get(fbsqlConfDir);
 
-		Map<String /* connection name */, List<String /* SQL statements */>> initSqlMap = new HashMap<>();
-		//Path                                                                 initSqlPath = initSqlFile.toPath();
-		SqlParseUtils.processInitSqlFiles(new File(fbsqlConfDirPath.toString()), initSqlMap);
+		Map<String /* connection name */, List<String /* SQL statements */>> initSqlMap         = new HashMap<>();
+		Map<String /* connection name */, String /* parent directory */>     parentDirectoryMap = new HashMap<>();
+		SqlParseUtils.processInitSqlFiles(new File(fbsqlConfDirPath.toString()), initSqlMap, parentDirectoryMap);
 		for (String /* connection name */ instanceName : initSqlMap.keySet())
 			System.out.println("      • " + instanceName);
 
@@ -167,7 +172,7 @@ public class Main {
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

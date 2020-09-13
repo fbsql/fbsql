@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.servlet;
@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -68,6 +70,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.fbsql.antlr4.parser.ParseNativeStmt;
 import org.fbsql.antlr4.parser.ParseStmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtConnectTo.StmtConnectTo;
 import org.fbsql.antlr4.parser.ParseStmtDeclareStatement.StmtDeclareStatement;
@@ -142,7 +145,16 @@ public class DbRequestProcessor implements Runnable {
 	private static final String FUN_REMOTE_SESSION_LAST_ACCESSED_TIME = "REMOTE_SESSION_LAST_ACCESSED_TIME()";
 	private static final String FUN_USER_INFO                         = "USER_INFO()";
 
+	/* system constants (See JavaSctript class Constants in fbsql.js */
+	private static final String FBSQL_REMOTE_USER                       = "FBSQL_REMOTE_USER";
+	private static final String FBSQL_REMOTE_ROLE                       = "FBSQL_REMOTE_ROLE";
+	private static final String FBSQL_REMOTE_SESSION_ID                 = "FBSQL_REMOTE_SESSION_ID";
+	private static final String FBSQL_REMOTE_SESSION_CREATION_TIME      = "FBSQL_REMOTE_SESSION_CREATION_TIME";
+	private static final String FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME = "FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME";
+	private static final String FBSQL_USER_INFO                         = "FBSQL_USER_INFO";
+
 	private String        instanceName;
+	private String        instanceDirectory;
 	private StmtConnectTo stmtConnectTo;
 	private AsyncContext  asyncContext;
 
@@ -150,13 +162,14 @@ public class DbRequestProcessor implements Runnable {
 	private ConnectionPoolManager connectionPoolManager;
 
 	private Map<String /* SQL statement name */, StmtDeclareStatement>                declaredStatementsMap; // list of SQL statements
-	private Map<String /* stored procedure name */, String /* java method */>         proceduresMap;
+	private Map<String /* stored procedure name */, NonNativeProcedure>               proceduresMap;
 	private Map<String /* js file name */, Scriptable>                                mapScopes;
 	private Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions;
 
 	private Map<StaticStatement, ReadyResult> mapJson;
 	private Queue<AsyncContext>               ongoingRequests;
 	private DbServlet.SharedCoder             sharedCoder;
+	private ParseNativeStmt                   parseNativeStmt;
 
 	/**
 	 * Constructs DbRequestProcessor object
@@ -176,19 +189,22 @@ public class DbRequestProcessor implements Runnable {
 	 */
 	public DbRequestProcessor( //
 			String instanceName, //
+			String instanceDirectory, //
 			StmtConnectTo stmtConnectTo, //
 			AsyncContext asyncCtx, //
 			boolean debug, //
 			ConnectionPoolManager connectionPoolManager, //
 			Map<String /* SQL statement name */, StmtDeclareStatement> declaredStatementsMap, // list of SQL statements
-			Map<String /* stored procedure name */, String /* java method */> proceduresMap, //
+			Map<String /* stored procedure name */, NonNativeProcedure> proceduresMap, //
 			Map<String /* js file name */, Scriptable> mapScopes, //
 			Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions, //
 			Map<StaticStatement, ReadyResult> mapJson, //
 			Queue<AsyncContext> ongoingRequests, //
+			ParseNativeStmt parseNativeStmt, //
 			DbServlet.SharedCoder sharedCoder //
 	) {
 		this.instanceName          = instanceName;
+		this.instanceDirectory     = instanceDirectory;
 		this.stmtConnectTo         = stmtConnectTo;
 		this.asyncContext          = asyncCtx;
 		this.debug                 = debug;
@@ -199,6 +215,7 @@ public class DbRequestProcessor implements Runnable {
 		this.mapFunctions          = mapFunctions;
 		this.mapJson               = mapJson;
 		this.ongoingRequests       = ongoingRequests;
+		this.parseNativeStmt       = parseNativeStmt;
 		this.sharedCoder           = sharedCoder;
 	}
 
@@ -208,7 +225,7 @@ public class DbRequestProcessor implements Runnable {
 	 * Overview of request processor logic
 	 * - Parse request body
 	 * - Check SQL statement against white list (list of allowed SQL statements)
-	 * - Execut SQL statement if allowed
+	 * - Execute SQL statement if allowed
 	 */
 	@Override
 	public void run() {
@@ -224,8 +241,9 @@ public class DbRequestProcessor implements Runnable {
 			//
 			HttpSession session = request.getSession();
 
-			boolean reject        = false;
-			String  rejectMessage = null;
+			boolean   reject        = false;
+			String    rejectMessage = null;
+			Throwable exception     = null;
 			//
 			String              clientInfoJson  = getClientInfo(request, sharedCoder.decoder);
 			BufferedReader      br              = getCustomDataReader(request, sharedCoder.decoder);
@@ -287,7 +305,7 @@ public class DbRequestProcessor implements Runnable {
 					rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\" not exposed to frontend", namedPreparedStatement));
 			} else { // SQL statement name provided
 				reject = statementId.startsWith(ParseStmtConnectTo.NONEXPOSABLE_NAME_PREFIX);
-				final String NAME_NOT_FOUND_MSG = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement name: \"{0}\" not found", statementId));
+				final String NAME_NOT_FOUND_MSG = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement name: ''{0}'' not found", statementId));
 				if (reject) // wrong name format
 					rejectMessage = NAME_NOT_FOUND_MSG;
 				else {
@@ -331,46 +349,74 @@ public class DbRequestProcessor implements Runnable {
 						try {
 							dbConnection0 = connectionPoolManager.getConnection();
 
-							String           javaMethod       = proceduresMap.get(validatorStoredProcedureName);
-							MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
-							if (methodOrFunction != null) { // Java or JavaScript
-								List<Object> parameterValues = new ArrayList<>();
-								parameterValues.add(request);
-								parameterValues.add(response);
-								parameterValues.add(dbConnection0.getConnection());
-								parameterValues.add(instanceName);
-								parameterValues.add(userInfoJson);
-								parameterValues.add(statementInfoJson);
-								Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+							NonNativeProcedure nonNativeProcedure = proceduresMap.get(validatorStoredProcedureName);
+							if (nonNativeProcedure != null) { // Java or JavaScript
+								if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
 
-								Object obj = null;
-								if (methodOrFunction.method != null) // java
-									obj = (String) methodOrFunction.method.invoke(null, parametersArray);
-								else { // JavaScript
+									List<Object> parameterValues = new ArrayList<>();
+									parameterValues.add(request);
+									parameterValues.add(response);
+									parameterValues.add(dbConnection0.getConnection());
+									parameterValues.add(instanceName);
+									parameterValues.add(userInfoJson);
+									parameterValues.add(statementInfoJson);
+									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+									Object obj = null;
+									if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+										Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
+										try {
+											obj = (String) method.invoke(null, parametersArray);
+										} catch (InvocationTargetException e) {
+											exception = e.getTargetException();
+										}
+									} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript
 										//
 										// initize Rhino
 										// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
 										//
-									Context ctx = Context.enter();
-									try {
-										ctx.setLanguageVersion(Context.VERSION_1_7);
-										ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-										obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
-										if (obj instanceof NativeObject)
-											obj = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null); // to string
-									} catch (Exception e) {
-										e.printStackTrace();
-									} finally {
-										ctx.exit();
+										Context ctx = Context.enter();
+										try {
+											ctx.setLanguageVersion(Context.VERSION_1_7);
+											ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+											JsFunction jsFunction = CallUtils.getFunction(instanceDirectory, nonNativeProcedure.optionsJson, mapScopes, mapFunctions);
+											try {
+												obj = jsFunction.function.call(ctx, jsFunction.scope, null, parametersArray);
+											} catch (Exception e) {
+												exception = e.getCause();
+											}
+											if (obj instanceof NativeObject)
+												obj = (String) NativeJSON.stringify(ctx, jsFunction.scope, obj, null, null); // to string
+										} finally {
+											ctx.exit();
+										}
 									}
+									if (obj instanceof ResultSet)
+										try (ResultSet rs = (ResultSet) obj) {
+											if (rs.next())
+												modifiedParamsJson = rs.getString(1);
+										} catch (SQLException e) {
+											exception = e.getCause();
+										}
+									else if (obj instanceof CharSequence)
+										modifiedParamsJson = obj.toString();
+								} else if (nonNativeProcedure.procedureType == ProcedureType.EXEC) { // OS
+									List<Object> parameterValues = new ArrayList<>();
+									parameterValues.add(instanceName);
+									parameterValues.add(userInfoJson);
+									parameterValues.add(statementInfoJson);
+									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+									modifiedParamsJson = CallUtils.executeOsProgramm(instanceDirectory, nonNativeProcedure.optionsJson, parametersArray);
+
+								} else if (nonNativeProcedure.procedureType == ProcedureType.URL) { // URL
+									Map<String, Object> parametersMap = new LinkedHashMap<>();
+									parametersMap.put("instanceName", instanceName);
+									parametersMap.put("userInfoJson", userInfoJson);
+									parametersMap.put("statementInfoJson", statementInfoJson);
+
+									modifiedParamsJson = CallUtils.executeUrl(instanceDirectory, nonNativeProcedure.optionsJson, parametersMap);
 								}
-								if (obj instanceof ResultSet)
-									try (ResultSet rs = (ResultSet) obj) {
-										if (rs.next())
-											modifiedParamsJson = rs.getString(1);
-									}
-								else if (obj instanceof CharSequence)
-									modifiedParamsJson = obj.toString();
 							} else { // Native
 								CallableStatement cs = dbConnection0.getCallableStatement("{call " + validatorStoredProcedureName + "(?,?)}");
 								cs.setString(1, instanceName);
@@ -386,8 +432,11 @@ public class DbRequestProcessor implements Runnable {
 							if (dbConnection0 != null)
 								connectionPoolManager.releaseConnection(dbConnection0);
 							if (modifiedParamsJson == null) { // reject if stored procedure return null
-								reject        = true;
-								rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. SQL statement \"{0}\". Bad parameters: \"{1}\"", namedPreparedStatement, paramJson));
+								reject = true;
+								if (exception == null || exception.getMessage() == null)
+									rejectMessage = StringUtils.escapeJson(MessageFormat.format("Rejected. Message: \"Rejected by trigger\". Procedure: {0}. SQL statement: \"{1}\". Parameters: {2}.", validatorStoredProcedureName, namedPreparedStatement, paramJson));
+								else
+									rejectMessage = exception.getMessage();
 							} else
 								paramJson = modifiedParamsJson.trim();
 						}
@@ -560,11 +609,11 @@ public class DbRequestProcessor implements Runnable {
 				}
 				DbConnection dbConnection = connectionPoolManager.getConnection();
 				try {
-					String           javaMethod       = CallUtils.getCallStatementMethod(unprocessedNamedPreparedStatement, proceduresMap);
-					MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
+					NonNativeProcedure nonNativeProcedure = CallUtils.getCallStatementNonNativeProcedure(unprocessedNamedPreparedStatement, proceduresMap);
 
-					if (methodOrFunction != null) { // Java or JavaScript
-						if (methodOrFunction.method != null) { // Java
+					if (nonNativeProcedure != null) {
+						if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+							Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
 							if (executeTypeUpdate) {
 								int rowCount = 0;
 								for (Map<String, Object> parametersMap : parametersListOfMaps) {
@@ -573,10 +622,10 @@ public class DbRequestProcessor implements Runnable {
 									parameterValues.add(response);
 									parameterValues.add(dbConnection.getConnection());
 									parameterValues.add(instanceName);
-									CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+									CallUtils.getCallStatementParameterValues(parseNativeStmt, unprocessedNamedPreparedStatement, parametersMap, parameterValues);
 									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
-									methodOrFunction.method.invoke(null, parametersArray);
+									method.invoke(null, parametersArray);
 									rowCount++;
 								}
 								bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
@@ -587,10 +636,10 @@ public class DbRequestProcessor implements Runnable {
 								parameterValues.add(response);
 								parameterValues.add(dbConnection.getConnection());
 								parameterValues.add(instanceName);
-								CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+								CallUtils.getCallStatementParameterValues(parseNativeStmt, unprocessedNamedPreparedStatement, parametersMap, parameterValues);
 								Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
-								Object                                                       obj         = methodOrFunction.method.invoke(null, parametersArray);
+								Object                                                       obj         = method.invoke(null, parametersArray);
 								Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
 								List<Map<String /* column name */, String /* JSON value */>> list        = null;
 								if (obj instanceof ResultSet)
@@ -602,7 +651,7 @@ public class DbRequestProcessor implements Runnable {
 								etag       = rr.etag;
 								compressed = rr.compressed;
 							}
-						} else { // JavaScript
+						} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript
 							//
 							// initize Rhino
 							// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
@@ -612,6 +661,7 @@ public class DbRequestProcessor implements Runnable {
 							try {
 								ctx.setLanguageVersion(Context.VERSION_1_7);
 								ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+								JsFunction jsFunction = CallUtils.getFunction(instanceDirectory, nonNativeProcedure.optionsJson, mapScopes, mapFunctions);
 
 								if (executeTypeUpdate) {
 									int rowCount = 0;
@@ -621,10 +671,10 @@ public class DbRequestProcessor implements Runnable {
 										parameterValues.add(response);
 										parameterValues.add(dbConnection.getConnection());
 										parameterValues.add(instanceName);
-										CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+										CallUtils.getCallStatementParameterValues(parseNativeStmt, unprocessedNamedPreparedStatement, parametersMap, parameterValues);
 										Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
-										methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+										jsFunction.function.call(ctx, jsFunction.scope, null, parametersArray);
 										rowCount++;
 									}
 									bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
@@ -635,14 +685,14 @@ public class DbRequestProcessor implements Runnable {
 									parameterValues.add(response);
 									parameterValues.add(dbConnection.getConnection());
 									parameterValues.add(instanceName);
-									CallUtils.getCallStatementParameterValues(unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+									CallUtils.getCallStatementParameterValues(parseNativeStmt, unprocessedNamedPreparedStatement, parametersMap, parameterValues);
 									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
-									Object                                                       obj         = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
+									Object                                                       obj         = jsFunction.function.call(ctx, jsFunction.scope, null, parametersArray);
 									Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
 									List<Map<String /* column name */, String /* JSON value */>> list        = null;
 									if (obj instanceof NativeObject || obj instanceof NativeArray) { // return JSON object that will sent to client
-										String json = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null);
+										String json = (String) NativeJSON.stringify(ctx, jsFunction.scope, obj, null, null);
 										if (json.startsWith("{") && json.endsWith("}"))
 											json = '[' + json + ']';
 										list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(json);
@@ -659,6 +709,63 @@ public class DbRequestProcessor implements Runnable {
 								e.printStackTrace();
 							} finally {
 								ctx.exit();
+							}
+						} else if (nonNativeProcedure.procedureType == ProcedureType.EXEC) { // OS
+							if (executeTypeUpdate) {
+								int rowCount = 0;
+								for (Map<String, Object> parametersMap : parametersListOfMaps) {
+									List<Object> parameterValues = new ArrayList<>();
+									parameterValues.add(instanceName);
+									CallUtils.getCallStatementParameterValues(parseNativeStmt, unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+									CallUtils.executeOsProgramm(instanceDirectory, nonNativeProcedure.optionsJson, parametersArray);
+									rowCount++;
+								}
+								bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
+							} else if (executeTypeQuery) {
+								Map<String, Object> parametersMap   = parametersListOfMaps.get(0);
+								List<Object>        parameterValues = new ArrayList<>();
+								parameterValues.add(instanceName);
+								CallUtils.getCallStatementParameterValues(parseNativeStmt, unprocessedNamedPreparedStatement, parametersMap, parameterValues);
+								Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+								String jsonArray = CallUtils.executeOsProgramm(instanceDirectory, nonNativeProcedure.optionsJson, parametersArray);
+
+								Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
+								List<Map<String /* column name */, String /* JSON value */>> list        = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArray);
+								ReadyResult                                                  rr          = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+								bs         = rr.bs;
+								etag       = rr.etag;
+								compressed = rr.compressed;
+							}
+						} else if (nonNativeProcedure.procedureType == ProcedureType.URL) { // URL
+							if (executeTypeUpdate) {
+								int rowCount = 0;
+								for (Map<String, Object> parametersMap : parametersListOfMaps) {
+									Map<String, Object> parametersMap0 = new LinkedHashMap<>();
+									parametersMap0.put("instanceName", instanceName);
+									parametersMap0.putAll(parametersMap);
+
+									CallUtils.executeUrl(instanceDirectory, nonNativeProcedure.optionsJson, parametersMap0);
+									rowCount++;
+								}
+								bs = simpleExecuteUpdateResultJson(rowCount).getBytes(StandardCharsets.UTF_8);
+							} else if (executeTypeQuery) {
+								Map<String, Object> parametersMap = parametersListOfMaps.get(0);
+
+								Map<String, Object> parametersMap0 = new LinkedHashMap<>();
+								parametersMap0.put("instanceName", instanceName);
+								parametersMap0.putAll(parametersMap);
+
+								String jsonArray = CallUtils.executeUrl(instanceDirectory, nonNativeProcedure.optionsJson, parametersMap0);
+
+								Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
+								List<Map<String /* column name */, String /* JSON value */>> list        = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArray);
+								ReadyResult                                                  rr          = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+								bs         = rr.bs;
+								etag       = rr.etag;
+								compressed = rr.compressed;
 							}
 						}
 					} else { // Native
@@ -731,8 +838,22 @@ public class DbRequestProcessor implements Runnable {
 												Clob clob = ps.getConnection().createClob();
 												clob.setString(1L, pvalue);
 												ps.setClob(n, clob);
-											} else // unknown
-												ps.setString(n, pvalue);
+											} else { // unknown
+												if (FBSQL_REMOTE_USER.equals(pvalue))
+													ps.setString(n, remoteUser);
+												else if (FBSQL_REMOTE_ROLE.equals(pvalue))
+													ps.setString(n, remoteRole);
+												else if (FBSQL_REMOTE_SESSION_ID.equals(pvalue))
+													ps.setString(n, session.getId());
+												else if (FBSQL_REMOTE_SESSION_CREATION_TIME.equals(pvalue))
+													ps.setLong(n, session.getCreationTime());
+												else if (FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME.equals(pvalue))
+													ps.setLong(n, session.getLastAccessedTime());
+												else if (FBSQL_USER_INFO.equals(pvalue))
+													ps.setString(n, userInfoJson);
+												else
+													ps.setString(n, pvalue);
+											}
 										}
 									}
 							}
@@ -847,48 +968,72 @@ public class DbRequestProcessor implements Runnable {
 									DbConnection dbConnection0 = null;
 									try {
 										dbConnection0 = connectionPoolManager.getConnection();
-										String           javaMethod       = proceduresMap.get(notifierStoredProcedureName);
-										MethodOrFunction methodOrFunction = CallUtils.getMethodOrFunction(javaMethod, proceduresMap, mapScopes, mapFunctions);
-										Object           obj;
-										if (methodOrFunction != null) { // Java or JavaScript
-											List<Object> parameterValues = new ArrayList<>();
-											parameterValues.add(selfRequest);
-											parameterValues.add(selfResponce);
-											parameterValues.add(dbConnection0.getConnection());
-											parameterValues.add(userInfoJson);
-											parameterValues.add(selfUserInfoJson);
-											parameterValues.add(statementInfoJson);
-											parameterValues.add(executionResultJson);
-											Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+										NonNativeProcedure nonNativeProcedure = proceduresMap.get(notifierStoredProcedureName);
+										if (nonNativeProcedure != null) {
+											if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+												Object obj = null;
 
-											if (methodOrFunction.method != null) // Java
-												obj = methodOrFunction.method.invoke(null, parametersArray);
-											else { // JavaScript
+												List<Object> parameterValues = new ArrayList<>();
+												parameterValues.add(selfRequest);
+												parameterValues.add(selfResponce);
+												parameterValues.add(dbConnection0.getConnection());
+												parameterValues.add(instanceName);
+												parameterValues.add(userInfoJson);
+												parameterValues.add(selfUserInfoJson);
+												parameterValues.add(statementInfoJson);
+												parameterValues.add(executionResultJson);
+												Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+
+												if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+													Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
+													obj = method.invoke(null, parametersArray);
+												} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript
 													//
 													// initize Rhino
 													// https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino
 													//
-												Context ctx = Context.enter();
-												try {
-													ctx.setLanguageVersion(Context.VERSION_1_7);
-													ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
-													obj = methodOrFunction.function.call(ctx, methodOrFunction.scope, null, parametersArray);
-													if (obj instanceof NativeObject)
-														obj = (String) NativeJSON.stringify(ctx, methodOrFunction.scope, obj, null, null);
-												} catch (Exception e) {
-													obj = null;
-													e.printStackTrace();
-												} finally {
-													ctx.exit();
+													Context ctx = Context.enter();
+													try {
+														ctx.setLanguageVersion(Context.VERSION_1_7);
+														ctx.setOptimizationLevel(9); // Rhino optimization: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/Rhino/Optimization
+														JsFunction jsFunction = CallUtils.getFunction(instanceDirectory, nonNativeProcedure.optionsJson, mapScopes, mapFunctions);
+														obj = jsFunction.function.call(ctx, jsFunction.scope, null, parametersArray);
+														if (obj instanceof NativeObject)
+															obj = (String) NativeJSON.stringify(ctx, jsFunction.scope, obj, null, null);
+													} catch (Exception e) {
+														obj = null;
+														e.printStackTrace();
+													} finally {
+														ctx.exit();
+													}
 												}
+												if (obj instanceof ResultSet)
+													try (ResultSet rs = (ResultSet) obj) {
+														if (rs.next())
+															outEvent = rs.getString(1);
+													}
+												else if (obj instanceof CharSequence)
+													outEvent = obj.toString();
+											} else if (nonNativeProcedure.procedureType == ProcedureType.EXEC) { // OS
+												List<Object> parameterValues = new ArrayList<>();
+												parameterValues.add(instanceName);
+												parameterValues.add(userInfoJson);
+												parameterValues.add(selfUserInfoJson);
+												parameterValues.add(statementInfoJson);
+												parameterValues.add(executionResultJson);
+												Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
+												outEvent = CallUtils.executeOsProgramm(instanceDirectory, nonNativeProcedure.optionsJson, parametersArray);
+
+											} else if (nonNativeProcedure.procedureType == ProcedureType.URL) { // URL
+												Map<String, Object> parametersMap = new LinkedHashMap<>();
+												parametersMap.put("instanceName", instanceName);
+												parametersMap.put("userInfoJson", userInfoJson);
+												parametersMap.put("selfUserInfoJson", selfUserInfoJson);
+												parametersMap.put("statementInfoJson", statementInfoJson);
+												parametersMap.put("executionResultJson", executionResultJson);
+
+												outEvent = CallUtils.executeUrl(instanceDirectory, nonNativeProcedure.optionsJson, parametersMap);
 											}
-											if (obj instanceof ResultSet)
-												try (ResultSet rs = (ResultSet) obj) {
-													if (rs.next())
-														outEvent = rs.getString(1);
-												}
-											else if (obj instanceof CharSequence)
-												outEvent = obj.toString();
 										} else { // Native
 											CallableStatement cs = dbConnection0.getCallableStatement("{call " + notifierStoredProcedureName + "(?,?,?,?)}");
 											cs.setString(1, userInfoJson);
@@ -950,9 +1095,7 @@ public class DbRequestProcessor implements Runnable {
 				os.write(bs);
 				os.flush();
 			}
-		} catch (
-
-		Throwable e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			try (OutputStream os = response.getOutputStream()) {
 				os.write(("{" + q("message") + ":" + q(e.getMessage()) + "}").getBytes(StandardCharsets.UTF_8));
@@ -1098,8 +1241,9 @@ public class DbRequestProcessor implements Runnable {
 		return sb.toString();
 	}
 }
+
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */

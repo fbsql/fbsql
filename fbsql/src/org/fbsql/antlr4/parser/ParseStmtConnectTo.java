@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Home:   https://fbsql.github.io
-E-Mail: fbsql.team.team@gmail.com
+E-Mail: fbsql.team@gmail.com
 */
 
 package org.fbsql.antlr4.parser;
@@ -56,6 +56,7 @@ import org.fbsql.antlr4.generated.FbsqlParser.Native_sqlContext;
 import org.fbsql.antlr4.generated.FbsqlParser.PasswordContext;
 import org.fbsql.antlr4.generated.FbsqlParser.UserContext;
 import org.fbsql.servlet.CommonUtils;
+import org.fbsql.servlet.DbServlet;
 import org.fbsql.servlet.SqlParseUtils;
 import org.fbsql.servlet.StringUtils;
 
@@ -63,27 +64,24 @@ import org.fbsql.servlet.StringUtils;
  * ANTLR4 grammar:
  *
  * connect_to_stmt
- * : CONNECT TO jdbc_url
- * (
- *  (USER user) |
- *  (PASSWORD password) |
- *  (PROPERTIES jdbc_connection_properties) |
- *  (DRIVER jdbc_driver_class_name) |
- *  (LIB jar_file ( ',' jar_file )* ) |
- *  (CONNECTION POOL
- *   (
- *    (MIN connection_pool_size_min) |
- *    (MAX connection_pool_size_max)
- *   )+
- *  )
- * )*
- * (
- * EXPOSE
- * (IF EXISTS '(' native_sql ')')?
- * AS? connection_alias
- * )?
- * ;
- */
+ *  : CONNECT TO jdbc_url
+ *    (
+ *     ( USER user ) |
+ *     ( PASSWORD password ) |
+ *     ( PROPERTIES jdbc_connection_properties ) |
+ *     ( DRIVER jdbc_driver_class_name ) |
+ *     ( LIB jar_file ( ',' jar_file )* ) |
+ *     ( CONNECTION POOL MIN connection_pool_size_min ) |
+ *     ( CONNECTION POOL MAX connection_pool_size_max ) |
+ *     ( UNDECLARED STATEMENTS ALLOW ) |
+ *     ( UNDECLARED STATEMENTS REJECT ) |
+ *     (
+ *      INCOMING CONNECTIONS ( ALLOW | REJECT )+ ( IF EXISTS '(' native_sql ')' )?
+ *     ) |
+ *    ( AS? connection_alias )
+ *    )*
+ */ ;
+
 public class ParseStmtConnectTo {
 	public static final String  NONEXPOSABLE_NAME_PREFIX = "NONEXPOSABLE_NAME:";
 	private static final String ENCODED_PASSWORD_PREFIX  = "base64:";
@@ -161,8 +159,11 @@ public class ParseStmtConnectTo {
 
 	}
 
-	private static final String[] ALOW_INCOMING_CONNECTIONS    = new String[] { "ALLOW", "INCOMING", "CONNECTIONS" };
-	private static final String[] EXPOSE_UNDECLARED_STATEMENTS = new String[] { "EXPOSE", "UNDECLARED", "STATEMENTS" };
+	private static final String[] INCOMING_CONNECTIONS_ALLOW  = new String[] { "INCOMING", "CONNECTIONS", "ALLOW" };
+	private static final String[] INCOMING_CONNECTIONS_REJECT = new String[] { "INCOMING", "CONNECTIONS", "REJECT" };
+
+	private static final String[] UNDECLARED_STATEMENTS_ALLOW  = new String[] { "UNDECLARED", "STATEMENTS", "ALLOW" };
+	private static final String[] UNDECLARED_STATEMENTS_REJECT = new String[] { "UNDECLARED", "STATEMENTS", "REJECT" };
 
 	/**
 	 * StmtConnectTo transfer object
@@ -196,11 +197,15 @@ public class ParseStmtConnectTo {
 				for (ParseTree parseTree : ctx.children)
 					array[n++] = parseTree.getText().toUpperCase(Locale.ENGLISH);
 
-				if (CommonUtils.indexOf(array, EXPOSE_UNDECLARED_STATEMENTS) != -1)
+				if (CommonUtils.indexOf(array, UNDECLARED_STATEMENTS_ALLOW) != -1)
 					st.exposeUndeclaredStatements = true;
+				else if (CommonUtils.indexOf(array, UNDECLARED_STATEMENTS_REJECT) != -1)
+					st.exposeUndeclaredStatements = false;
 
-				if (CommonUtils.indexOf(array, ALOW_INCOMING_CONNECTIONS) != -1)
+				if (CommonUtils.indexOf(array, INCOMING_CONNECTIONS_ALLOW) != -1)
 					st.allowConnections = true;
+				else if (CommonUtils.indexOf(array, INCOMING_CONNECTIONS_REJECT) != -1)
+					st.allowConnections = false;
 			}
 
 			@Override
@@ -285,20 +290,16 @@ public class ParseStmtConnectTo {
 				st.password = st.password.substring(ENCODED_PASSWORD_PREFIX.length());
 				st.password = new String(Base64.getDecoder().decode(st.password), StandardCharsets.UTF_8);
 			}
-		return st;
-	}
 
-	public static void main(String[] args) {
-		String sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' ALLOW STATEMENTS exposed USER uuu INCOMING CONNECTIONS ALLOW IF EXISTS (SELECT * from USERS where USER=:user) AS ali";
-		//		String             sql = "CONNECT TO 'jdbc://h2.prefetch' \n DRIVER 'org.h2.Driver' CONNECTION POOL MIN 21 MAX 62 PASSWORD 'base64:cHJpVmV0' ALLOW STATEMENTS EXPOSED USER uuu ALLOW CONNECTIONS NONE AS ali";
-		ParseStmtConnectTo p  = new ParseStmtConnectTo();
-		StmtConnectTo      se = p.parse(null, sql);
-		System.out.println(se);
+		if (DbServlet.DEBUG)
+			System.out.println(st);
+
+		return st;
 	}
 }
 
 /*
-Please contact FBSQL Team by E-Mail fbsql.team.team@gmail.com
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
 or visit https://fbsql.github.io if you need additional
 information or have any questions.
 */
