@@ -27,10 +27,10 @@ E-Mail: fbsql.team@gmail.com
 -->
 
 <!--
-WARNING! To run this script you need define "war-file" system property
+WARNING! To run this script you need define "out-dir" system property
 
 E.g.:
--Dwar-file=/home/johndoe/apache-tomcat-9.0.30/fbsql.war
+-Dout-dir=/home/johndoe/apache-tomcat-9.0.30
 -->
 
 <project default="main">
@@ -39,7 +39,7 @@ E.g.:
 	</echo>
 
 	<echo>External parameters:</echo>
-	<echo>-Dwar-file=${war-file}</echo>
+	<echo>-Dout-dir=${out-dir}</echo>
 	<echo>
 	</echo>
 
@@ -48,14 +48,12 @@ E.g.:
 
 	<property name="bundle-closure-compiler" value="${bundles-dir}/closure-compiler-v20200224.jar" />
 
-	<property name="tmpdir-war" value="${java.io.tmpdir}/fbsql-war-tmp" />
-
 	<target name="main">
 		<property name="bin" value="${basedir}/bin" />
-		<property name="result-fbsql-js" value="${tmpdir-war}/fbsql.min.js" />
-		<property name="result-fbsql-debug-js" value="${tmpdir-war}/fbsql-debug.min.js" />
+		<property name="result-fbsql-js" value="${out-dir}/fbsql.min.js" />
+		<property name="result-fbsql-debug-js" value="${out-dir}/fbsql-debug.min.js" />
 
-		<mkdir dir="${tmpdir-war}" />
+		<mkdir dir="${out-dir}" />
 
 		<macrodef name="minify">
 			<attribute name="input" />
@@ -78,11 +76,10 @@ E.g.:
 		<copy file="${basedir}/js/fbsql-debug.js" tofile="${result-fbsql-debug-js}" overwrite="true" />
 		-->
 
-		<delete file="${war-file}" failonerror="false" />
-		<war destfile="${war-file}" webxml="${basedir}/WEB-INF/web.xml" manifest="${basedir}/META-INF/MANIFEST.MF">
+		<delete file="${out-dir}/fbsql.war" failonerror="false" />
+		<war destfile="${out-dir}/fbsql.war" webxml="${basedir}/WEB-INF/web.xml" manifest="${basedir}/META-INF/MANIFEST.MF">
 			<fileset dir="${basedir}" includes="META-INF/**" />
 			<fileset file="${result-fbsql-js}" />
-			<fileset file="${result-fbsql-debug-js}" />
 			<fileset file="${basedir}/js/index.html" />
 			<classes dir="${bin}" />
 			<lib dir="${basedir}/WEB-INF/lib" />

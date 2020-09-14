@@ -171,8 +171,8 @@ class Connection {
 	/**
 	 * Fires mock database event
 	 */
-	fireMockDatabaseEvent(fireEventFunc) {
-		let json = fireEventFunc();
+	fireMockDatabaseEvent(mockEventFunc) {
+		let json = mockEventFunc();
 		this.listeners.forEach(listener => listener(json));
 	}
 }
@@ -239,8 +239,8 @@ class PreparedStatement {
 	/**
 	 * Set execute mock function
 	 */
-	setExecuteMock(executeFunc) {
-		this.executeFunc  = executeFunc;
+	setMockFunction(mockFunc) {
+		this.mockFunc  = mockFunc;
 		return this;
 	}
 
@@ -263,7 +263,7 @@ class PreparedStatement {
 				else if (value instanceof Date)
 					parameters[key] = value.toISOString();
 
-			if (this.executeFunc === undefined) {
+			if (this.mockFunc === undefined) {
 				// NOTE
 				// Format PreparedStatement.FORMAT_OBJECT_OF_ARRAYS supported on client side,
 				// so we send to server PreparedStatement.FORMAT_ARRAY_OF_OBJECTS and
@@ -317,7 +317,7 @@ class PreparedStatement {
 				})
 				.catch(error => reject(error));
 			} else {
-				let data = this.executeFunc(this, parameters);
+				let data = this.mockFunc(this, parameters);
 				if (data instanceof Array) {
 					if (this.format === PreparedStatement.FORMAT_OBJECT_OF_ARRAYS)
 						data = pivot(data);
@@ -347,7 +347,7 @@ class PreparedStatement {
 				else if (value instanceof Date)
 					parameters[key] = value.toISOString();
 
-			if (this.executeFunc === undefined) {
+			if (this.mockFunc === undefined) {
 				// NOTE
 				// To support JDBC PreparedStatement.RETURN_GENERATED_KEYS feature we need format for ResultSet returned by Statement.getGeneratedKeys()
 				//
@@ -400,7 +400,7 @@ class PreparedStatement {
 				})
 				.catch(error => reject(error));
 			} else {
-				let data = this.executeFunc(this, parameters);
+				let data = this.mockFunc(this, parameters);
 				if (data['message'] !== undefined)
 					reject(data);
 				else {

@@ -29,57 +29,18 @@ Work (secure) with your backend database within HTML<br>
 
 <h3>FBSQL distributions</h3>
 <table>
-<tr>
-<th></th><th>FBSQL Servlet</th><th>FBSQL Server</th><th>FBSQL Server Db</th>
-</tr>
-<tr>
-<td>FBSQL engine (servlet)         </td><td>&check;</td><td>&check;</td><td>&check;</td>
-</tr>
-<tr>
-<td>JavaScript client     </td><td>&check;</td><td>&check;</td><td>&check;</td>
-</tr>
-<tr>
-<td>Java Runtime Environment (JRE)</td><td></td><td>&check;</td><td>&check;</td>
-</tr>
-<tr>
-<td>Servlet container     </td><td></td><td>&check;</td><td>&check;</td>
-</tr>
-<tr>
-<td>Command line interface</td><td></td><td>&check;</td><td>&check;</td>
-</tr>
-<tr>
-<td>Embedded database</td><td></td><td></td><td>&check;</td>
-</tr>
+
+<tr><th>                              </th><th>FBSQL Server</th><th>FBSQL Server Min</th><th>FBSQL Servlet</th></tr>
+<tr><td>FBSQL engine (servlet)        </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
+<tr><td>JavaScript client             </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
+<tr><td>JavaScript debug tool         </td><td>&check;     </td><td>                </td><td>             </td></tr>
+<tr><td>Java Runtime Environment (JRE)</td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
+<tr><td>Servlet container             </td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
+<tr><td>Command line interface        </td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
+<tr><td>Embedded database             </td><td>&check;     </td><td>                </td><td>             </td></tr>
 </table>
 
-<h1>FBSQL tutorial</h1>
-
-<h2>Table of Contents</h2>
-<ul>
-<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Basic example</a></li>
-<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
-<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
-<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
-<li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
-<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
-<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
-<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
-<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
-<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
-<li><a href="#debug_utility" title="Debug utility fbsql-debug.min.js.">Debug utility</a></li>
-
-</ul>
-
-
-
-
-
-
-
-
-<a id="installation_and_basic_example"></a>
-<h2>Basic example</h2>
-
+<h2>«Hello world!» example</h2>
 <strong>Backend:</strong><br>
 
 <br>
@@ -87,16 +48,18 @@ Work (secure) with your backend database within HTML<br>
 <li>
 Install FBSQL:<br><br>
 <ul>
-<li>Download the latest <i>«FBSQL Server Plus»</i> release: <a href="fbsql-1.2-linux-x86-64.zip" title="The latest «FBSQL Server Plus» release">fbsql-1.2-linux-x86-64.zip</a></li>
+<li>Download the latest <i>«FBSQL Server»</i> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
 ```text
 
-fbsql-server-plus-2.3.4-linux-x86-64 ─┐
-                                      ├─ fbsql    - FBSQL Server Plus executable
-                                      ├─ README   - Release information 
-                                      └─ LICENSES - Third party licenses
+fbsql-server-2.3.4-linux-x86-64 ─┐
+                                 ├─ fbsql              - Server executable
+                                 ├─ fbsql-min.js       - Client
+                                 ├─ fbsql-debug-min.js - Frontend debug tool
+                                 ├─ README             - Release information 
+                                 └─ LICENSES           - Third party licenses
 ```
 <br>
 </li>
@@ -118,10 +81,22 @@ Put the initialization script <code>init.sql</code> into the <code>~/fbsql/confi
  * Put your init scripts somewhere under ".../fbsql/config/init" directory.
  */
 
-CONNECT TO 'jdbc:sqlite:hello_world_db'
-           EXPOSE UNDECLARED STATEMENTS
-           ALLOW INCOMING CONNECTIONS
-           AS HelloWorldExample;
+           CONNECT TO 'jdbc:sqlite:hello_world_db'
+UNDECLARED STATEMENTS ALLOW
+ INCOMING CONNECTIONS ALLOW
+                   AS HelloWorldExample;
+
+DROP TABLE IF EXISTS EMPLOYEES;
+
+CREATE TABLE EMPLOYEES (
+    EMPLOYEE_ID   CHAR(4)     PRIMARY KEY,
+    EMPLOYEE_NAME VARCHAR(50) NOT NULL
+);
+
+INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('B342', 'Bill ');
+INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('D455', 'Dan  ');
+INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('J231', 'John ');
+INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
 
 ```
 <li>
@@ -145,23 +120,106 @@ Start FBSQL server:<br><br>
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
+        <script src="fbsql.js"></script>
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection("HelloWorldExample");
-            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS greeting");
-            ps.executeQuery()
-            .then(resultSet => alert(resultSet[0].greeting));
+            const conn = new Connection("http://localhost:8080/db/HelloWorldExample");
+            const ps   = conn.prepareStatement("SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id");
+            ps.executeQuery({id: "W123"})
+            .then(resultSet => alert("Hello, " + resultSet[0].EMPLOYEE_NAME + "!")); // Hello, World!
         </script>
     </body>
 </html>
+
 ```
 </ol>
 <strong>Result:</strong><br><br>
 <ol>
 <img src="images/hello-world-alert.png">
 </ol>
+
+<h2>Commands</h2>
+<ul>
+<li><a href="#connect_to"        title="CONNECT TO statement"       >CONNECT TO</a></li>
+<li><a href="#switch_to"         title="SWITCH TO statement"        >SWITCH TO</a></li>
+<li><a href="#declare_statement" title="DECLARE STATEMENT statement">DECLARE STATEMENT</a></li>
+<li><a href="#declare_procedure" title="DECLARE PROCEDURE statement">DECLARE PROCEDURE</a></li>
+<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
+<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
+</ul>
+
+<h2>FBSQL JavaScript Client (fbsql.js)</h2>
+<ul>
+	<li><a href="#connection_object" title="Connection object">Connection</a>
+		<ul>
+			<li><a href="#connection_object_constructor" title="Connection object constructor">Constructor</a></li>
+			<li>Methods
+				<ul>
+					<li><a href="#prepare_statement_method"           title="prepareStatement method">prepareStatement</a></li>
+					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">addDatabaseEventListener</a></li>
+					<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">fireMockDatabaseEvent</a></li>
+				</ul>
+			</li>
+		</ul>
+	</li>
+	<li><a href="#prepared_statement_object" title="PreparedStatement object">PreparedStatement</a>
+		<ul>
+			<li>Methods
+				<ul>
+					<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
+					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>
+					<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">setMockFunction</a></li>
+				</ul>
+			</li>
+		</ul>
+	</li>
+</ul>
+
+
+<h2>Frontend debug tool (fbsql-debug.js)</h2>
+<ul>
+	<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
+	<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
+	<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
+</ul>
+
+<h2>FBSQL Overview</h2>
+<ul>
+</ul>
+
+<h1>FBSQL tutorial</h1>
+
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Basic example</a></li>
+<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
+<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
+<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
+<li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
+<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
+<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
+<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
+<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
+<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
+<li><a href="#debug_utility" title="FBSQL server.">Server</a></li>
+<li><a href="#debug_utility" title="FBSQL client (fbsql.js).">Client</a></li>
+<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
+<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
+<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
+<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Database event notification</a></li>
+</ul>
+
+
+
+
+
+
+
+
+<a id="installation_and_basic_example"></a>
+<h2>Basic example</h2>
+
 <hr>
 <a id="add_simple_authentication"></a>
 <h2>Authentication</h2>
@@ -1275,7 +1333,7 @@ SWITCH TO MySQLite;
 ```
 <br><br>
 
-<h3>EXPOSE</h3>
+<h3>DECLARE STATEMENT</h3>
 
 ```EBNF
 declare_statement_stmt
