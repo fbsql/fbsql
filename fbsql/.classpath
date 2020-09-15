@@ -14,17 +14,17 @@
 	<classpathentry kind="lib" path="/TomcatEmbedded/tomcat_embedded_lib/tomcat-embed-jasper.jar"/>
 	<classpathentry kind="lib" path="/TomcatEmbedded/tomcat_embedded_lib/tomcat-embed-websocket.jar"/>
 	<classpathentry kind="lib" path="/TomcatEmbedded/bin"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/c3p0-0.9.5.2.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/quartz-2.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/quartz-jobs-2.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/slf4j-api-1.7.7.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/slf4j-log4j12-1.7.7.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/rhino-runtime-1.7.12.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/spring-jdbc-5.2.7.RELEASE.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/spring-dao-2.0.8.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/spring-core-5.2.7.RELEASE.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/antlr-4.8-complete.jar"/>
-	<classpathentry kind="lib" path="WEB-INF/lib/h2-1.4.200.jar"/>
+	<classpathentry kind="lib" path="lib/quartz-2.3.0/c3p0-0.9.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/quartz-2.3.0/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="lib/quartz-2.3.0/quartz-2.3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/quartz-2.3.0/quartz-jobs-2.3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/quartz-2.3.0/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="lib/quartz-2.3.0/slf4j-log4j12-1.7.7.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-core-5.2.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-dao-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-jdbc-5.2.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/antlr-4.8-complete.jar"/>
+	<classpathentry kind="lib" path="lib/h2-1.4.200.jar"/>
+	<classpathentry kind="lib" path="lib/rhino-runtime-1.7.12.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

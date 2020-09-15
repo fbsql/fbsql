@@ -32,8 +32,8 @@ Work (secure) with your backend database within HTML<br>
 
 <tr><th>                              </th><th>FBSQL Server</th><th>FBSQL Server Min</th><th>FBSQL Servlet</th></tr>
 <tr><td>FBSQL engine (servlet)        </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
-<tr><td>JavaScript client             </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
-<tr><td>JavaScript debug tool         </td><td>&check;     </td><td>                </td><td>             </td></tr>
+<tr><td>JavaScript client API         </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
+<tr><td>Frontend debug tool           </td><td>&check;     </td><td>                </td><td>             </td></tr>
 <tr><td>Java Runtime Environment (JRE)</td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
 <tr><td>Servlet container             </td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
 <tr><td>Command line interface        </td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
@@ -149,12 +149,12 @@ Start FBSQL server:<br><br>
 <li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
 </ul>
 
-<h2>FBSQL JavaScript Client (fbsql.js)</h2>
+<h2>FBSQL JavaScript client API for browser (fbsql.js)</h2>
 <ul>
 	<li><a href="#connection_object" title="Connection object">Connection</a>
 		<ul>
 			<li><a href="#connection_object_constructor" title="Connection object constructor">Constructor</a></li>
-			<li>Methods
+			<li>Methods:
 				<ul>
 					<li><a href="#prepare_statement_method"           title="prepareStatement method">prepareStatement</a></li>
 					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">addDatabaseEventListener</a></li>
@@ -165,7 +165,7 @@ Start FBSQL server:<br><br>
 	</li>
 	<li><a href="#prepared_statement_object" title="PreparedStatement object">PreparedStatement</a>
 		<ul>
-			<li>Methods
+			<li>Methods:
 				<ul>
 					<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
 					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>

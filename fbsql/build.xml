@@ -53,6 +53,10 @@ E.g.:
 		<property name="result-fbsql-js" value="${out-dir}/fbsql.min.js" />
 		<property name="result-fbsql-debug-js" value="${out-dir}/fbsql-debug.min.js" />
 
+		<property name="tmpdir" value="${java.io.tmpdir}/fbsql-tmp" />
+		<mkdir dir="${tmpdir}" />
+		<delete includeemptydirs="true" dir="${tmpdir}" />
+
 		<mkdir dir="${out-dir}" />
 
 		<macrodef name="minify">
@@ -76,14 +80,22 @@ E.g.:
 		<copy file="${basedir}/js/fbsql-debug.js" tofile="${result-fbsql-debug-js}" overwrite="true" />
 		-->
 
+		<copy todir="${tmpdir}" flatten="true">
+			<fileset dir="${basedir}/lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+
 		<delete file="${out-dir}/fbsql.war" failonerror="false" />
 		<war destfile="${out-dir}/fbsql.war" webxml="${basedir}/WEB-INF/web.xml" manifest="${basedir}/META-INF/MANIFEST.MF">
 			<fileset dir="${basedir}" includes="META-INF/**" />
 			<fileset file="${result-fbsql-js}" />
 			<fileset file="${basedir}/js/index.html" />
 			<classes dir="${bin}" />
-			<lib dir="${basedir}/WEB-INF/lib" />
+			<lib dir="${tmpdir}" />
 		</war>
+
+		<delete includeemptydirs="true" dir="${tmpdir}" />
 	</target>
 </project>
 
