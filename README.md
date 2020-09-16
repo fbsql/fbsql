@@ -55,8 +55,8 @@ Install FBSQL:<br><br>
 ```text
 
 fbsql-server-2.3.4-linux-x86-64 ─┐
-                                 ├─ fbsql              - Server executable
-                                 ├─ fbsql-min.js       - Client
+                                 ├─ fbsql              - Server executable (Linux-x86-64)
+                                 ├─ fbsql-min.js       - Client for browser
                                  ├─ fbsql-debug-min.js - Frontend debug tool
                                  ├─ README             - Release information 
                                  └─ LICENSES           - Third party licenses
@@ -1269,6 +1269,22 @@ connect_to_stmt
  ;
 
 ```
+Connects FBSQL to database. through JDBC URL <code>(jdbc_url)</code>.
+<br><br>
+<pre>
+<code>jdbc_url              (REQUIRED)</code> - JDBC URL. Please refer to your JDBC driver vendor documentation for more information.<br>
+<code>USER                  (OPTIONAL)</code> - Database user name.<br>
+<code>PASSWORD              (OPTIONAL)</code> - Database user password.<br>
+<code>PROPERTIES            (OPTIONAL)</code> - File that contains JDBC connection properties. File must to be in <a href="https://en.wikipedia.org/wiki/.properties">Java properties format</a>. Please refer to your JDBC driver vendor documentation for more information.<br>
+<code>DRIVER                (OPTIONAL)</code> - JDBC driver class name.<br>
+<code>LIB                   (OPTIONAL)</code> - JDBC driver libraries. By default FBSQL search for JDBC driver libraries in directory: ~/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib<br>
+<code>CONNECTION POOL MIN   (OPTIONAL)</code> - Connection pool minimum size. Default value is: 1.<br>
+<code>CONNECTION POOL MAX   (OPTIONAL)</code> - Connection pool maximum size. Default value is: 100.<br>
+<code>UNDECLARED STATEMENTS (OPTIONAL)</code> - Allow/reject undeclared statements. Default value is: REJECT.<br>
+<code>INCOMING CONNECTIONS  (OPTIONAL)</code> - Allow/reject incomming connections. Default value is: REJECT. INCOMING CONNECTIONS can be used with IF EXISTS (native_sql) clause to provide authentication/authorization mechanism. native_sql can contain :user, :password and :role parameters.<br>
+<code>AS                    (OPTIONAL)</code> - The alias name for this connection. Incoming connections can not be established without the alias name<br>
+</pre>
+
 <img src="images/connect_to_stmt.png"><br><br>
 <i>Examples</i><br>
 
@@ -1287,6 +1303,7 @@ INCOMING CONNECTIONS ALLOW
 ```
 
 ```sql
+/* All statements from frontend side are permitted */
            CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
                  USER 'SA'
              PASSWORD ''
@@ -1297,6 +1314,7 @@ UNDECLARED STATEMENTS ALLOW
 ```
 
 ```sql
+/* Connect to remote database with connection pool settings and simple role based authentication/authorization mechanism */
           CONNECT TO 'jdbc:as400://mysystem.example.com/mylibrary;naming=system;errors=full'
                 USER 'QSECOFR'
             PASSWORD 'MYSECRET'
