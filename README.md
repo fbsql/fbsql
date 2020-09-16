@@ -1271,19 +1271,19 @@ connect_to_stmt
 ```
 Connects FBSQL to database. through JDBC URL <code>(jdbc_url)</code>.
 <br><br>
-<pre>
-<code>jdbc_url              (REQUIRED)</code> - JDBC URL. Please refer to your JDBC driver vendor documentation for more information.<br>
-<code>USER                  (OPTIONAL)</code> - Database user name.<br>
-<code>PASSWORD              (OPTIONAL)</code> - Database user password.<br>
-<code>PROPERTIES            (OPTIONAL)</code> - File that contains JDBC connection properties. File must to be in <a href="https://en.wikipedia.org/wiki/.properties">Java properties format</a>. Please refer to your JDBC driver vendor documentation for more information.<br>
-<code>DRIVER                (OPTIONAL)</code> - JDBC driver class name.<br>
-<code>LIB                   (OPTIONAL)</code> - JDBC driver libraries. By default FBSQL search for JDBC driver libraries in directory: ~/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib<br>
-<code>CONNECTION POOL MIN   (OPTIONAL)</code> - Connection pool minimum size. Default value is: 1.<br>
-<code>CONNECTION POOL MAX   (OPTIONAL)</code> - Connection pool maximum size. Default value is: 100.<br>
-<code>UNDECLARED STATEMENTS (OPTIONAL)</code> - Allow/reject undeclared statements. Default value is: REJECT.<br>
-<code>INCOMING CONNECTIONS  (OPTIONAL)</code> - Allow/reject incomming connections. Default value is: REJECT. INCOMING CONNECTIONS can be used with IF EXISTS (native_sql) clause to provide authentication/authorization mechanism. native_sql can contain :user, :password and :role parameters.<br>
-<code>AS                    (OPTIONAL)</code> - The alias name for this connection. Incoming connections can not be established without the alias name<br>
-</pre>
+<table>
+<tr><td>cjdbc_url             </code></td><td>REQUIRED</td><td>JDBC URL. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
+<tr><td><code>USER                 </code></td><td>OPTIONAL</td><td>Database user name.</td></tr>
+<tr><td><code>PASSWORD             </code></td><td>OPTIONAL</td><td>Database user password.</td></tr>
+<tr><td><code>PROPERTIES           </code></td><td>OPTIONAL</td><td>File that contains JDBC connection properties. File must to be in <a href="https://en.wikipedia.org/wiki/.properties">Java properties format</a>. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
+<tr><td><code>DRIVER               </code></td><td>OPTIONAL</td><td>JDBC driver class name.</td></tr>
+<tr><td><code>LIB                  </code></td><td>OPTIONAL</td><td>JDBC driver libraries. By default FBSQL search for JDBC driver libraries in directory: <code>.../fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code></td></tr>
+<tr><td><code>CONNECTION POOL MIN  </code></td><td>OPTIONAL</td><td>Connection pool minimum size. Default value is: <code>1</code>.</td></tr>
+<tr><td><code>CONNECTION POOL MAX  </code></td><td>OPTIONAL</td><td>Connection pool maximum size. Default value is: <code>100</code>.</td></tr>
+<tr><td><code>UNDECLARED STATEMENTS</code></td><td>OPTIONAL</td><td>Allow/reject undeclared statements. Default value is: <code>REJECT</code>.</td></tr>
+<tr><td><code>INCOMING CONNECTIONS </code></td><td>OPTIONAL</td><td>Allow/reject incomming connections. Default value is: <code>REJECT</code>. <code>INCOMING CONNECTIONS</code> can be used with <code>IF EXISTS</code> (native_sql) clause to provide authentication/authorization mechanism. native_sql can contain <code>:user</code>, <code>:password</code> and <code>:role</code> parameters.</td></tr>
+<tr><td><code>AS                   </code></td><td>OPTIONAL</td><td>The alias name for this connection. Incoming connections can not be established without the alias name</td></tr>
+</table>
 
 <img src="images/connect_to_stmt.png"><br><br>
 <i>Examples</i><br>
