@@ -1272,17 +1272,17 @@ connect_to_stmt
 Connects FBSQL to database. through JDBC URL <code>(jdbc_url)</code>.
 <br><br>
 <table>
-<tr><td>cjdbc_url             </code></td><td>REQUIRED</td><td>JDBC URL. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
-<tr><td><code>USER                 </code></td><td>OPTIONAL</td><td>Database user name.</td></tr>
-<tr><td><code>PASSWORD             </code></td><td>OPTIONAL</td><td>Database user password.</td></tr>
-<tr><td><code>PROPERTIES           </code></td><td>OPTIONAL</td><td>File that contains JDBC connection properties. File must to be in <a href="https://en.wikipedia.org/wiki/.properties">Java properties format</a>. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
-<tr><td><code>DRIVER               </code></td><td>OPTIONAL</td><td>JDBC driver class name.</td></tr>
-<tr><td><code>LIB                  </code></td><td>OPTIONAL</td><td>JDBC driver libraries. By default FBSQL search for JDBC driver libraries in directory: <code>.../fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code></td></tr>
-<tr><td><code><pre>CONNECTION POOL MIN</pre></code></td><td>OPTIONAL</td><td>Connection pool minimum size. Default value is: <code>1</code>.</td></tr>
-<tr><td><code>CONNECTION POOL MAX  </code></td><td>OPTIONAL</td><td>Connection pool maximum size. Default value is: <code>100</code>.</td></tr>
-<tr><td><code>UNDECLARED STATEMENTS</code></td><td>OPTIONAL</td><td>Allow/reject undeclared statements. Default value is: <code>REJECT</code>.</td></tr>
-<tr><td><code>INCOMING CONNECTIONS </code></td><td>OPTIONAL</td><td>Allow/reject incomming connections. Default value is: <code>REJECT</code>. <code>INCOMING CONNECTIONS</code> can be used with <code>IF EXISTS</code> (native_sql) clause to provide authentication/authorization mechanism. native_sql can contain <code>:user</code>, <code>:password</code> and <code>:role</code> parameters.</td></tr>
-<tr><td><code>AS                   </code></td><td>OPTIONAL</td><td>The alias name for this connection. Incoming connections can not be established without the alias name</td></tr>
+<tr><td><code><pre>cjdbc_url            </pre></code></td><td>REQUIRED</td><td>JDBC URL. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
+<tr><td><code><pre>USER                 </pre></code></td><td>OPTIONAL</td><td>Database user name.</td></tr>
+<tr><td><code><pre>PASSWORD             </pre></code></td><td>OPTIONAL</td><td>Database user password.</td></tr>
+<tr><td><code><pre>PROPERTIES           </pre></code></td><td>OPTIONAL</td><td>File that contains JDBC connection properties. File must to be in <a href="https://en.wikipedia.org/wiki/.properties">Java properties format</a>. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
+<tr><td><code><pre>DRIVER               </pre></code></td><td>OPTIONAL</td><td>JDBC driver class name.</td></tr>
+<tr><td><code><pre>LIB                  </pre></code></td><td>OPTIONAL</td><td>JDBC driver libraries. By default FBSQL search for JDBC driver libraries in directory: <code>.../fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code></td></tr>
+<tr><td><code><pre>CONNECTION POOL MIN  </pre></code></td><td>OPTIONAL</td><td>Connection pool minimum size. Default value is: <code>1</code>.</td></tr>
+<tr><td><code><pre>CONNECTION POOL MAX  </pre></code></td><td>OPTIONAL</td><td>Connection pool maximum size. Default value is: <code>100</code>.</td></tr>
+<tr><td><code><pre>UNDECLARED STATEMENTS</pre></code></td><td>OPTIONAL</td><td>Allow/reject undeclared statements. Default value is: <code>REJECT</code>.</td></tr>
+<tr><td><code><pre>INCOMING CONNECTIONS </pre></code></td><td>OPTIONAL</td><td>Allow/reject incomming connections. Default value is: <code>REJECT</code>. <code>INCOMING CONNECTIONS</code> can be used with <code>IF EXISTS</code> (native_sql) clause to provide authentication/authorization mechanism. native_sql can contain <code>:user</code>, <code>:password</code> and <code>:role</code> parameters.</td></tr>
+<tr><td><code><pre>AS                   </pre></code></td><td>OPTIONAL</td><td>The alias name for this connection. Incoming connections can not be established without the alias name</td></tr>
 </table>
 
 <img src="images/connect_to_stmt.png"><br><br>
