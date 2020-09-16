@@ -1278,7 +1278,7 @@ Connects FBSQL to database. through JDBC URL <code>(jdbc_url)</code>.
 <tr><td><code>PROPERTIES           </code></td><td>OPTIONAL</td><td>File that contains JDBC connection properties. File must to be in <a href="https://en.wikipedia.org/wiki/.properties">Java properties format</a>. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
 <tr><td><code>DRIVER               </code></td><td>OPTIONAL</td><td>JDBC driver class name.</td></tr>
 <tr><td><code>LIB                  </code></td><td>OPTIONAL</td><td>JDBC driver libraries. By default FBSQL search for JDBC driver libraries in directory: <code>.../fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code></td></tr>
-<tr><td><code><nobr>CONNECTION POOL MIN</nobr>  </code></td><td>OPTIONAL</td><td>Connection pool minimum size. Default value is: <code>1</code>.</td></tr>
+<tr><td><pre><code>CONNECTION POOL MIN  </code></pre></td><td>OPTIONAL</td><td>Connection pool minimum size. Default value is: <code>1</code>.</td></tr>
 <tr><td><code>CONNECTION POOL MAX  </code></td><td>OPTIONAL</td><td>Connection pool maximum size. Default value is: <code>100</code>.</td></tr>
 <tr><td><code>UNDECLARED STATEMENTS</code></td><td>OPTIONAL</td><td>Allow/reject undeclared statements. Default value is: <code>REJECT</code>.</td></tr>
 <tr><td><code>INCOMING CONNECTIONS </code></td><td>OPTIONAL</td><td>Allow/reject incomming connections. Default value is: <code>REJECT</code>. <code>INCOMING CONNECTIONS</code> can be used with <code>IF EXISTS</code> (native_sql) clause to provide authentication/authorization mechanism. native_sql can contain <code>:user</code>, <code>:password</code> and <code>:role</code> parameters.</td></tr>
