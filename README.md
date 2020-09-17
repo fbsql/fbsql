@@ -8,6 +8,7 @@ Work (secure) with your backend database within HTML<br>
 		<li>Database agnostic stored procedures</li>
 		<li>Database events notification</li>
 		<li>Background jobs</li>
+		<li>No dependencies</li>
 	</ul>	
 
 <h3>F.A.Q.</h3>
@@ -27,9 +28,87 @@ Work (secure) with your backend database within HTML<br>
 	<strong>What about performance?</strong><br>
 	FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimized communication and response compression.<br>
 
+
+
+<h2>Table of Contents</h2>
+<ul>
+	<br><strong>Overview</strong>
+	<ul>
+		<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
+		<li><a href="#connect_to"        title="CONNECT TO statement"       >Installation</a></li>
+	</ul>
+	<br><strong>Server</strong>
+	<ul>
+		<li><a href="#switch_to"         title="SWITCH TO statement"        >Command line interface (CLI)</a></li>
+		<li><a href="#connect_to"        title="CONNECT TO statement"       >Init script</a></li>
+	</ul>
+	<br><strong>SQL Commands</strong>
+	<ul>
+		<li><a href="#connect_to"        title="CONNECT TO statement"       >CONNECT TO</a></li>
+		<li><a href="#switch_to"         title="SWITCH TO statement"        >SWITCH TO</a></li>
+		<li><a href="#declare_statement" title="DECLARE STATEMENT statement">DECLARE STATEMENT</a></li>
+		<li><a href="#declare_procedure" title="DECLARE PROCEDURE statement">DECLARE PROCEDURE</a></li>
+		<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
+		<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
+	</ul>
+	<br><strong>Client for browser</strong>
+	<ul>
+		<li><a href="#connection_object" title="Connection object">Introduction</a></li>
+		<li><a href="#connection_object" title="Connection object">Connection</a></li>
+		<ul>
+			<a href="#connection_object_constructor" title="Connection object constructor">Constructor</a><br>
+			Methods:
+				<ul>
+					<li><a href="#prepare_statement_method"           title="prepareStatement method">prepareStatement</a></li>
+					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">addDatabaseEventListener</a></li>
+					<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">fireMockDatabaseEvent</a></li>
+				</ul>
+		</ul>
+		<li><a href="#prepared_statement_object" title="PreparedStatement object">PreparedStatement</a></li>
+		<ul>
+			Methods:
+				<ul>
+					<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
+					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>
+					<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">setMockFunction</a></li>
+				</ul>
+		</ul>
+	</ul>
+	<br><strong>Frontend debug tool</strong>
+	<ul>
+		<a href="#connection_object" title="Connection object">Introduction</a><br>
+		Functions:
+		<ul>
+			<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
+			<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
+			<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
+		</ul>
+	</ul>
+	<br><strong>Tutorial</strong>
+	<ul>
+		<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">«Hello world!» example</a></li>
+		<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
+		<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
+		<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
+		<li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
+		<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
+		<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
+		<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
+		<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
+		<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
+		<li><a href="#debug_utility" title="FBSQL server.">Server</a></li>
+		<li><a href="#debug_utility" title="FBSQL client (fbsql.js).">Client</a></li>
+		<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
+		<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
+		<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
+		<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Database event notification</a></li>
+	</ul>
+</ul>
+
+
+<a id="fbsql_distributions"></a>
 <h3>FBSQL distributions</h3>
 <table>
-
 <tr><th>                              </th><th>FBSQL Server</th><th>FBSQL Server Min</th><th>FBSQL Servlet</th></tr>
 <tr><td>FBSQL engine (servlet)        </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
 <tr><td>JavaScript client API         </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
@@ -40,6 +119,8 @@ Work (secure) with your backend database within HTML<br>
 <tr><td>Embedded database             </td><td>&check;     </td><td>                </td><td>             </td></tr>
 </table>
 
+
+<a id="installation_and_basic_example"></a>
 <h2>«Hello world!» example</h2>
 <strong>Backend:</strong><br>
 
@@ -139,155 +220,6 @@ Start FBSQL server:<br><br>
 <img src="images/hello-world-alert.png">
 </ol>
 
-<h2>Commands</h2>
-<ul>
-<li><a href="#connect_to"        title="CONNECT TO statement"       >CONNECT TO</a></li>
-<li><a href="#switch_to"         title="SWITCH TO statement"        >SWITCH TO</a></li>
-<li><a href="#declare_statement" title="DECLARE STATEMENT statement">DECLARE STATEMENT</a></li>
-<li><a href="#declare_procedure" title="DECLARE PROCEDURE statement">DECLARE PROCEDURE</a></li>
-<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
-<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
-</ul>
-
-<h2>FBSQL JavaScript client API for browser (fbsql.js)</h2>
-<ul>
-	<li><a href="#connection_object" title="Connection object">Connection</a>
-		<ul>
-			<li><a href="#connection_object_constructor" title="Connection object constructor">Constructor</a></li>
-			<li>Methods:
-				<ul>
-					<li><a href="#prepare_statement_method"           title="prepareStatement method">prepareStatement</a></li>
-					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">addDatabaseEventListener</a></li>
-					<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">fireMockDatabaseEvent</a></li>
-				</ul>
-			</li>
-		</ul>
-	</li>
-	<li><a href="#prepared_statement_object" title="PreparedStatement object">PreparedStatement</a>
-		<ul>
-			<li>Methods:
-				<ul>
-					<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
-					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>
-					<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">setMockFunction</a></li>
-				</ul>
-			</li>
-		</ul>
-	</li>
-</ul>
-
-
-<h2>Frontend debug tool (fbsql-debug.js)</h2>
-<ul>
-	<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
-	<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
-	<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
-</ul>
-
-<h2>FBSQL Overview</h2>
-<ul>
-</ul>
-
-<h1>FBSQL tutorial</h1>
-
-<h2>Table of Contents</h2>
-<ul>
-<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Basic example</a></li>
-<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
-<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
-<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
-<li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
-<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
-<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
-<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
-<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
-<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
-<li><a href="#debug_utility" title="FBSQL server.">Server</a></li>
-<li><a href="#debug_utility" title="FBSQL client (fbsql.js).">Client</a></li>
-<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
-<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
-<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
-<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Database event notification</a></li>
-</ul>
-
-
-
-
-
-
-
-
-<a id="installation_and_basic_example"></a>
-<h2>Basic example</h2>
-
-<hr>
-<a id="add_simple_authentication"></a>
-<h2>Authentication</h2>
-<p><i>
-In this chapter we will learn how to add simple authentication to our CONNECT TO statement.<br>
-We are going to authenticate our users by username and password.
-</i></p>
-
-<strong>Backend:</strong><br>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL startup,
- * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
- *
- * To be executed at startup init scripts must have the name "init.sql"
- * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
- *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
- */
-
-CONNECT TO 'jdbc:sqlite:auth_example_db'
-           EXPOSE UNDECLARED STATEMENTS
-           ALLOW INCOMING CONNECTIONS IF EXISTS (SELECT TRUE FROM USERS WHERE USERNAME=:user AND PASSWORD=:password)
-           AS AuthenticationExample;
-
-
-/*
- * Authentication. Implement your own authentication logic here!
- *
- * WARNING!
- * In this example we are store passwords as plain text only for educational purposes.
- * It's strongly not recommended way to store passwords in production environment.
- * Passwords should be hashed.
- */
-
-/* Users */
-DROP TABLE IF EXISTS USERS;
-CREATE TABLE USERS (
-    USERNAME VARCHAR(15) NOT NULL PRIMARY KEY,
-    PASSWORD VARCHAR(15) NOT NULL
-);
-INSERT INTO USERS (USERNAME, PASSWORD) VALUES('john',  'secret'   );
-INSERT INTO USERS (USERNAME, PASSWORD) VALUES('tim',   'secret123');
-INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
-
-```
-<strong>Frontend:</strong><br>
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="http://localhost:8080/fbsql/fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection("AuthenticationExample", "john", "secret");
-            const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS greeting");
-            ps.executeQuery()
-            .then(resultSet => alert(resultSet[0].greeting));
-        </script>
-    </body>
-</html>
-```
 <hr>
 <a id="add_simple_role_based_authorization"></a>
 <h2>Authorization</h2>
@@ -826,253 +758,6 @@ public class StoredProcedures {
 
 <a id="schedule_periodic_jobs"></a>
 <h2>Schedule periodic jobs</h2>
-<p><i>
-In this chapter we will learn how to schedule periodic jobs (SCHEDULE statement).
-Most of information here was taken from <a href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html">Cron Trigger Tutorial</a>
-
-</i></p>
-
-FBSQL has own scheduler to run periodic jobs. Stored procedures can be scheduled to run according <strong>cron</strong> expression.
-
-<p><a href="https://en.wikipedia.org/wiki/Cron" title="Article from wikipedia.org">cron</a> is a UNIX tool that has been around for a long time, so its scheduling capabilities are powerful
-and proven.</p>
-<p>SCHEDULE statement uses cron expressions, which are able to create firing schedules such as: “At 8:00am every
-Monday through Friday” or “At 1:30am every last Friday of the month”.</p>
-
-<h3>Format</h3>
-
-<p>A cron expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the
-allowed values, along with various combinations of the allowed special characters for that field. The fields are as
-follows:</p>
-<table cellpadding="3" cellspacing="1">
-    <tbody>
-        <tr>
-            <th>Field Name</th>
-            <th>Mandatory</th>
-            <th>Allowed Values</th>
-            <th>Allowed Special Characters</th>
-        </tr>
-        <tr>
-            <td>Seconds</td>
-            <td>YES</td>
-            <td>0-59</td>
-            <td>, - * /</td>
-        </tr>
-        <tr>
-            <td>Minutes</td>
-            <td>YES</td>
-            <td>0-59</td>
-            <td>, - * /</td>
-        </tr>
-        <tr>
-            <td>Hours</td>
-            <td>YES</td>
-            <td>0-23</td>
-            <td>, - * /</td>
-        </tr>
-        <tr>
-            <td>Day of month</td>
-            <td>YES</td>
-            <td>1-31</td>
-            <td>, - * ? / L W<br clear="all" />
-            </td>
-        </tr>
-        <tr>
-            <td>Month</td>
-            <td>YES</td>
-            <td>1-12 or JAN-DEC</td>
-            <td>, - * /</td>
-        </tr>
-        <tr>
-            <td>Day of week</td>
-            <td>YES</td>
-            <td>1-7 or SUN-SAT</td>
-            <td>, - * ? / L #</td>
-        </tr>
-        <tr>
-            <td>Year</td>
-            <td>NO</td>
-            <td>empty, 1970-2099</td>
-            <td>, - * /</td>
-        </tr>
-    </tbody>
-</table>
-<p>So cron expressions can be as simple as this: <tt>* * * * ? *</tt></p>
-<p>or more complex, like this: <tt>0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2002-2010</tt></p>
-
-<h3>Special characters</h3>
-
-<ul>
-  <li>
-    <p><tt><strong>*</strong></tt> (<em>“all values”</em>) - used to select all values within a field. For example, “<strong>*</strong>”
-  in the minute field means <em>“every minute”</em>.</p>
-  </li>
-  <li>
-    <p><tt><strong>?</strong></tt> (<em>“no specific value”</em>) - useful when you need to specify something in one of the
-  two fields in which the character is allowed, but not the other. For example, if I want my trigger to fire on a
-  particular day of the month (say, the 10th), but don’t care what day of the week that happens to be, I would put
-  “10” in the day-of-month field, and “?” in the day-of-week field. See the examples below for clarification.</p>
-  </li>
-  <li>
-    <p><tt><strong>-</strong></tt> - used to specify ranges. For example, “10-12” in the hour field means <em>“the
-  hours 10, 11 and 12”</em>.</p>
-  </li>
-  <li>
-    <p><tt><strong>,</strong></tt> - used to specify additional values. For example, “MON,WED,FRI” in the day-of-week
-  field means <em>“the days Monday, Wednesday, and Friday”</em>.</p>
-  </li>
-  <li>
-    <p><tt><strong>/</strong></tt> - used to specify increments. For example, “0/15” in the seconds field means <em>“the
-  seconds 0, 15, 30, and 45”</em>. And “5/15” in the seconds field means <em>“the seconds 5, 20, 35, and 50”</em>. You can
-  also specify ‘/’ after the ‘<strong>’ character - in this case ‘</strong>’ is equivalent to having ‘0’ before the ‘/’. ‘1/3’
-  in the day-of-month field means <em>“fire every 3 days starting on the first day of the month”</em>.</p>
-  </li>
-  <li>
-    <p><tt><strong>L</strong></tt> (<em>“last”</em>) - has different meaning in each of the two fields in which it is
-  allowed. For example, the value “L” in the day-of-month field means <em>“the last day of the month”</em> - day
-  31 for January, day 28 for February on non-leap years. If used in the day-of-week field by itself, it simply means
-  “7” or “SAT”. But if used in the day-of-week field after another value, it means <em>“the last xxx day of the
-  month”</em> - for example “6L” means <em>“the last friday of the month”</em>. You can also specify an offset
-  from the last day of the month, such as “L-3” which would mean the third-to-last day of the calendar month.
-  <em>When using the ‘L’ option, it is important not to specify lists, or ranges of values, as you’ll get
-  confusing/unexpected results.</em></p>
-  </li>
-  <li>
-    <p><tt><strong>W</strong></tt> (<em>“weekday”</em>) - used to specify the weekday (Monday-Friday) nearest the given day.
-  As an example, if you were to specify “15W” as the value for the day-of-month field, the meaning is: <em>“the
-  nearest weekday to the 15th of the month”</em>. So if the 15th is a Saturday, the trigger will fire on Friday the 14th.
-  If the 15th is a Sunday, the trigger will fire on Monday the 16th. If the 15th is a Tuesday, then it will fire on
-  Tuesday the 15th. However if you specify “1W” as the value for day-of-month, and the 1st is a Saturday, the trigger
-  will fire on Monday the 3rd, as it will not ‘jump’ over the boundary of a month’s days. The ‘W’ character can only
-  be specified when the day-of-month is a single day, not a range or list of days.</p>
-  </li>
-</ul>
-<blockquote>
-            The 'L' and 'W' characters can also be combined in the day-of-month field to yield 'LW', which
-            translates to *"last weekday of the month"*.
-</blockquote>
-
-<ul>
-  <li><tt><strong>#</strong></tt> - used to specify “the nth” XXX day of the month. For example, the value of “6#3”
-  in the day-of-week field means <em>“the third Friday of the month”</em> (day 6 = Friday and “#3” = the 3rd one in
-  the month). Other examples: “2#1” = the first Monday of the month and “4#5” = the fifth Wednesday of the month. Note
-  that if you specify “#5” and there is not 5 of the given day-of-week in the month, then no firing will occur that
-  month.</li>
-</ul>
-<blockquote>
-            The legal characters and the names of months and days of the week are not case sensitive. <tt>MON</tt>
-            is the same as <tt>mon</tt>.
-</blockquote>
-
-<h2 id="examples">Examples</h2>
-
-<p>Here are some full examples:</p>
-<table cellpadding="3" cellspacing="1">
-    <tbody>
-        <tr>
-            <td width="200">**Expression**</td>
-            <td>**Meaning**</td>
-        </tr>
-        <tr>
-            <td><tt>0 0 12 * * ?</tt></td>
-            <td>Fire at 12pm (noon) every day</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 ? * *</tt></td>
-            <td>Fire at 10:15am every day</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 * * ?</tt></td>
-            <td>Fire at 10:15am every day</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 * * ? *</tt></td>
-            <td>Fire at 10:15am every day</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 * * ? 2005</tt></td>
-            <td>Fire at 10:15am every day during the year 2005</td>
-        </tr>
-        <tr>
-            <td><tt>0 * 14 * * ?</tt></td>
-            <td>Fire every minute starting at 2pm and ending at 2:59pm, every day</td>
-        </tr>
-        <tr>
-            <td><tt>0 0/5 14 * * ?</tt></td>
-            <td>Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day</td>
-        </tr>
-        <tr>
-            <td><tt>0 0/5 14,18 * * ?</tt></td>
-            <td>Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5
-            minutes starting at 6pm and ending at 6:55pm, every day</td>
-        </tr>
-        <tr>
-            <td><tt>0 0-5 14 * * ?</tt></td>
-            <td>Fire every minute starting at 2pm and ending at 2:05pm, every day</td>
-        </tr>
-        <tr>
-            <td><tt>0 10,44 14 ? 3 WED</tt></td>
-            <td>Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 ? * MON-FRI</tt></td>
-            <td>Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 15 * ?</tt></td>
-            <td>Fire at 10:15am on the 15th day of every month</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 L * ?</tt></td>
-            <td>Fire at 10:15am on the last day of every month</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 L-2 * ?</tt></td>
-            <td>Fire at 10:15am on the 2nd-to-last last day of every month</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 ? * 6L</tt></td>
-            <td>Fire at 10:15am on the last Friday of every month</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 ? * 6L</tt></td>
-            <td>Fire at 10:15am on the last Friday of every month</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 ? * 6L 2002-2005</tt></td>
-            <td>Fire at 10:15am on every last friday of every month during the years 2002,
-            2003, 2004 and 2005</td>
-        </tr>
-        <tr>
-            <td><tt>0 15 10 ? * 6#3</tt></td>
-            <td>Fire at 10:15am on the third Friday of every month</td>
-        </tr>
-        <tr>
-            <td><tt>0 0 12 1/5 * ?</tt></td>
-            <td>Fire at 12pm (noon) every 5 days every month, starting on the first day of the
-            month.</td>
-        </tr>
-        <tr>
-            <td><tt>0 11 11 11 11 ?</tt></td>
-            <td>Fire every November 11th at 11:11am.</td>
-        </tr>
-    </tbody>
-</table>
-<blockquote>
-        Pay attention to the effects of '?' and '*' in the day-of-week and day-of-month fields!
-</blockquote>
-
-<h3>Notes</h3>
-
-<ul>
-  <li>Support for specifying both a day-of-week and a day-of-month value is not complete (you must currently use
-  the ‘?’ character in one of these fields).</li>
-  <li>Be careful when setting fire times between the hours of the morning when “daylight savings” changes occur
-  in your locale (for US locales, this would typically be the hour before and after 2:00 AM - because the time
-  shift can cause a skip or a repeat depending on whether the time moves back or jumps forward.  You may find
-  this wikipedia entry helpful in determining the specifics to your locale:<br />
-  <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world">https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world</a></li>
-</ul>
 
 <strong>Backend:</strong><br>
 
@@ -1380,7 +1065,7 @@ SWITCH TO MyOracle;
 ```
 <br><br>
 
-<a id="declare statement"></a>
+<a id="declare_statement"></a>
 <h3>DECLARE STATEMENT</h3>
 
 ```EBNF
@@ -1404,12 +1089,12 @@ Declare native SQL statement. This command allows you to use native SQL statemen
 <br><br>
 <table>
 <tr><th>Clause</th><th>Required</th><th>Description</th></tr>
-<tr><td><code>DECLARE STATEMENT</code></td><td>&check;</td><td>Native SQL statement you would like to expose to frontend.</td></tr>
+<tr><td><code>DECLARE&nbsp;STATEMENT</code></td><td>&check;</td><td>Native SQL statement you would like to expose to frontend.</td></tr>
 <tr><td><code>STATIC</code></td><td></td><td>This clause used to mark native SQL statement results as immutable. Such statements are executed once when FBSQL server starts. Results compressed and cashed in server memory for fast access without further database interaction.</td></tr>
 <tr><td><code>COMPRESSION</code></td><td></td><td>Sets compression level for results. Available compression levels are: <code>BEST COMPRESSION</code> - compressed with best compression strategy, <code>BEST SPEED</code> - compressed with best compression speed strategy, <code>NO COMPRESSION</code> - no compression (the default)</td></tr>
 <tr><td><code>ROLES</code></td><td></td><td>Roles list (comma separated). Restrict statement usage to users that are not specified in the roles list.</td></tr>
-<tr><td><code>TRIGGER BEFORE</code></td><td></td><td>Procedure that executed before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occur execution will be rejected.</td></tr>
-<tr><td><code>TRIGGER AFTER</code></td><td></td><td>Procedure that executed after the native SQL statement execution. Procedure may return string with the arbitrary JSON event object. If the JSON object is not NULL the database event will fired. Please refer to client's <code>Connection#addDatabaseEventListener()</code> method for information about how to catch database events on frontend side.</td></tr>
+<tr><td><code>TRIGGER&nbsp;BEFORE</code></td><td></td><td>Procedure that executed before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occur execution will be rejected.</td></tr>
+<tr><td><code>TRIGGER&nbsp;AFTER</code></td><td></td><td>Procedure that executed after the native SQL statement execution. Procedure may return string with the arbitrary JSON event object. If the JSON object is not NULL the database event will fired. Please refer to client's <code>Connection#addDatabaseEventListener()</code> method for information about how to catch database events on frontend side.</td></tr>
 <tr><td><code>AS</code></td><td></td><td>The alias name for this statement. If specified, you can use this name on frontend side instead SQL statement source code. </td></tr>
 </table>
 <br>
@@ -1473,7 +1158,7 @@ Declare non-native stored procedure. This command allows you to custom non-nativ
 <br><br>
 <table>
 <tr><th>Clause</th><th>Required</th><th>Description</th></tr>
-<tr><td><code>DECLARE PROCEDURE</code></td><td>&check;</td><td>Stored procedure name.</td></tr>
+<tr><td><code>DECLARE&nbsp;PROCEDURE</code></td><td>&check;</td><td>Stored procedure name.</td></tr>
 <tr><td><code>TYPE</code></td><td>&check;</td><td>Stored procedure type.</td></tr>
 <tr><td><code>OPTIONS</code></td><td></td><td>Options for specified <code>TYPE</code>. Options is JSON string represents options object for specified type.</td></tr>
 <tr><td><code>OPTIONS FILE</code></td><td></td><td>Options file. Options file contains source of options object for specified type.</td></tr>
@@ -1534,9 +1219,266 @@ schedule_stmt
  : SCHEDULE procedure_name AT cron_expression
  ;
 
-
 ```
 <img src="images/schedule_stmt.png">
+
+Schedule periodic jobs.
+FBSQL has own scheduler to run periodic jobs.
+Stored procedures can be scheduled to run according <strong>cron</strong> expression.
+
+<br><br>
+<table>
+<tr><th>Clause</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>SCHEDULE</code></td><td>&check;</td><td>Stored procedure name.</td></tr>
+<tr><td><code>AT</code></td><td>&check;</td><td>cron expression.</td></tr>
+</table>
+<br>
+
+
+<p><i>
+Most of information here was taken from <a href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html">Cron Trigger Tutorial</a>
+</i></p>
+
+
+<p><a href="https://en.wikipedia.org/wiki/Cron" title="Article from wikipedia.org">cron</a> is a UNIX tool that has been around for a long time, so its scheduling capabilities are powerful
+and proven.</p>
+<p>SCHEDULE statement uses cron expressions, which are able to create firing schedules such as: “At 8:00am every
+Monday through Friday” or “At 1:30am every last Friday of the month”.</p>
+
+<h3>Format</h3>
+
+<p>A cron expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the
+allowed values, along with various combinations of the allowed special characters for that field. The fields are as
+follows:</p>
+<table cellpadding="3" cellspacing="1">
+    <tbody>
+        <tr>
+            <th>Field Name</th>
+            <th>Mandatory</th>
+            <th>Allowed Values</th>
+            <th>Allowed Special Characters</th>
+        </tr>
+        <tr>
+            <td>Seconds</td>
+            <td>YES</td>
+            <td>0-59</td>
+            <td>, - * /</td>
+        </tr>
+        <tr>
+            <td>Minutes</td>
+            <td>YES</td>
+            <td>0-59</td>
+            <td>, - * /</td>
+        </tr>
+        <tr>
+            <td>Hours</td>
+            <td>YES</td>
+            <td>0-23</td>
+            <td>, - * /</td>
+        </tr>
+        <tr>
+            <td>Day of month</td>
+            <td>YES</td>
+            <td>1-31</td>
+            <td>, - * ? / L W<br clear="all" />
+            </td>
+        </tr>
+        <tr>
+            <td>Month</td>
+            <td>YES</td>
+            <td>1-12 or JAN-DEC</td>
+            <td>, - * /</td>
+        </tr>
+        <tr>
+            <td>Day of week</td>
+            <td>YES</td>
+            <td>1-7 or SUN-SAT</td>
+            <td>, - * ? / L #</td>
+        </tr>
+        <tr>
+            <td>Year</td>
+            <td>NO</td>
+            <td>empty, 1970-2099</td>
+            <td>, - * /</td>
+        </tr>
+    </tbody>
+</table>
+<p>So cron expressions can be as simple as this: <tt>* * * * ? *</tt></p>
+<p>or more complex, like this: <tt>0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2002-2010</tt></p>
+
+<h3>Special characters</h3>
+
+<ul>
+  <li>
+    <p><tt><strong>*</strong></tt> (<em>“all values”</em>) - used to select all values within a field. For example, “<strong>*</strong>”
+  in the minute field means <em>“every minute”</em>.</p>
+  </li>
+  <li>
+    <p><tt><strong>?</strong></tt> (<em>“no specific value”</em>) - useful when you need to specify something in one of the
+  two fields in which the character is allowed, but not the other. For example, if I want my trigger to fire on a
+  particular day of the month (say, the 10th), but don’t care what day of the week that happens to be, I would put
+  “10” in the day-of-month field, and “?” in the day-of-week field. See the examples below for clarification.</p>
+  </li>
+  <li>
+    <p><tt><strong>-</strong></tt> - used to specify ranges. For example, “10-12” in the hour field means <em>“the
+  hours 10, 11 and 12”</em>.</p>
+  </li>
+  <li>
+    <p><tt><strong>,</strong></tt> - used to specify additional values. For example, “MON,WED,FRI” in the day-of-week
+  field means <em>“the days Monday, Wednesday, and Friday”</em>.</p>
+  </li>
+  <li>
+    <p><tt><strong>/</strong></tt> - used to specify increments. For example, “0/15” in the seconds field means <em>“the
+  seconds 0, 15, 30, and 45”</em>. And “5/15” in the seconds field means <em>“the seconds 5, 20, 35, and 50”</em>. You can
+  also specify ‘/’ after the ‘<strong>’ character - in this case ‘</strong>’ is equivalent to having ‘0’ before the ‘/’. ‘1/3’
+  in the day-of-month field means <em>“fire every 3 days starting on the first day of the month”</em>.</p>
+  </li>
+  <li>
+    <p><tt><strong>L</strong></tt> (<em>“last”</em>) - has different meaning in each of the two fields in which it is
+  allowed. For example, the value “L” in the day-of-month field means <em>“the last day of the month”</em> - day
+  31 for January, day 28 for February on non-leap years. If used in the day-of-week field by itself, it simply means
+  “7” or “SAT”. But if used in the day-of-week field after another value, it means <em>“the last xxx day of the
+  month”</em> - for example “6L” means <em>“the last friday of the month”</em>. You can also specify an offset
+  from the last day of the month, such as “L-3” which would mean the third-to-last day of the calendar month.
+  <em>When using the ‘L’ option, it is important not to specify lists, or ranges of values, as you’ll get
+  confusing/unexpected results.</em></p>
+  </li>
+  <li>
+    <p><tt><strong>W</strong></tt> (<em>“weekday”</em>) - used to specify the weekday (Monday-Friday) nearest the given day.
+  As an example, if you were to specify “15W” as the value for the day-of-month field, the meaning is: <em>“the
+  nearest weekday to the 15th of the month”</em>. So if the 15th is a Saturday, the trigger will fire on Friday the 14th.
+  If the 15th is a Sunday, the trigger will fire on Monday the 16th. If the 15th is a Tuesday, then it will fire on
+  Tuesday the 15th. However if you specify “1W” as the value for day-of-month, and the 1st is a Saturday, the trigger
+  will fire on Monday the 3rd, as it will not ‘jump’ over the boundary of a month’s days. The ‘W’ character can only
+  be specified when the day-of-month is a single day, not a range or list of days.</p>
+  </li>
+</ul>
+<blockquote>
+            The 'L' and 'W' characters can also be combined in the day-of-month field to yield 'LW', which
+            translates to *"last weekday of the month"*.
+</blockquote>
+
+<ul>
+  <li><tt><strong>#</strong></tt> - used to specify “the nth” XXX day of the month. For example, the value of “6#3”
+  in the day-of-week field means <em>“the third Friday of the month”</em> (day 6 = Friday and “#3” = the 3rd one in
+  the month). Other examples: “2#1” = the first Monday of the month and “4#5” = the fifth Wednesday of the month. Note
+  that if you specify “#5” and there is not 5 of the given day-of-week in the month, then no firing will occur that
+  month.</li>
+</ul>
+<blockquote>
+            The legal characters and the names of months and days of the week are not case sensitive. <tt>MON</tt>
+            is the same as <tt>mon</tt>.
+</blockquote>
+
+<h2 id="examples">Examples</h2>
+
+<p>Here are some full examples:</p>
+<table cellpadding="3" cellspacing="1">
+    <tbody>
+        <tr>
+            <td width="200">**Expression**</td>
+            <td>**Meaning**</td>
+        </tr>
+        <tr>
+            <td><tt>0 0 12 * * ?</tt></td>
+            <td>Fire at 12pm (noon) every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * *</tt></td>
+            <td>Fire at 10:15am every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 * * ?</tt></td>
+            <td>Fire at 10:15am every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 * * ? *</tt></td>
+            <td>Fire at 10:15am every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 * * ? 2005</tt></td>
+            <td>Fire at 10:15am every day during the year 2005</td>
+        </tr>
+        <tr>
+            <td><tt>0 * 14 * * ?</tt></td>
+            <td>Fire every minute starting at 2pm and ending at 2:59pm, every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 0/5 14 * * ?</tt></td>
+            <td>Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 0/5 14,18 * * ?</tt></td>
+            <td>Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5
+            minutes starting at 6pm and ending at 6:55pm, every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 0-5 14 * * ?</tt></td>
+            <td>Fire every minute starting at 2pm and ending at 2:05pm, every day</td>
+        </tr>
+        <tr>
+            <td><tt>0 10,44 14 ? 3 WED</tt></td>
+            <td>Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * MON-FRI</tt></td>
+            <td>Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 15 * ?</tt></td>
+            <td>Fire at 10:15am on the 15th day of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 L * ?</tt></td>
+            <td>Fire at 10:15am on the last day of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 L-2 * ?</tt></td>
+            <td>Fire at 10:15am on the 2nd-to-last last day of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * 6L</tt></td>
+            <td>Fire at 10:15am on the last Friday of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * 6L</tt></td>
+            <td>Fire at 10:15am on the last Friday of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * 6L 2002-2005</tt></td>
+            <td>Fire at 10:15am on every last friday of every month during the years 2002,
+            2003, 2004 and 2005</td>
+        </tr>
+        <tr>
+            <td><tt>0 15 10 ? * 6#3</tt></td>
+            <td>Fire at 10:15am on the third Friday of every month</td>
+        </tr>
+        <tr>
+            <td><tt>0 0 12 1/5 * ?</tt></td>
+            <td>Fire at 12pm (noon) every 5 days every month, starting on the first day of the
+            month.</td>
+        </tr>
+        <tr>
+            <td><tt>0 11 11 11 11 ?</tt></td>
+            <td>Fire every November 11th at 11:11am.</td>
+        </tr>
+    </tbody>
+</table>
+<blockquote>
+        Pay attention to the effects of '?' and '*' in the day-of-week and day-of-month fields!
+</blockquote>
+
+<h3>Notes</h3>
+
+<ul>
+  <li>Support for specifying both a day-of-week and a day-of-month value is not complete (you must currently use
+  the ‘?’ character in one of these fields).</li>
+  <li>Be careful when setting fire times between the hours of the morning when “daylight savings” changes occur
+  in your locale (for US locales, this would typically be the hour before and after 2:00 AM - because the time
+  shift can cause a skip or a repeat depending on whether the time moves back or jumps forward.  You may find
+  this wikipedia entry helpful in determining the specifics to your locale:<br />
+  <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world">https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world</a></li>
+</ul>
 
 <a id="include"></a>
 <h3>INCLUDE</h3>
@@ -1547,6 +1489,8 @@ include_script_file_stmt
  ;
 ```
 <img src="images/include_script_file_stmt.png">
+
+Include single or multiple SQL script file(s) into this SQL script.
 
 <i>Examples:</i><br>
 
