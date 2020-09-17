@@ -34,7 +34,7 @@ E-Mail: fbsql.team@gmail.com
 	<target name="main">
 		<property name="bin" value="${basedir}/bin" />
 
-		<java classname="org.antlr.v4.Tool" fork="yes" classpath="${basedir}/WEB-INF/lib/antlr-4.8-complete.jar">
+		<java classname="org.antlr.v4.Tool" fork="yes" classpath="${basedir}/lib/antlr-4.8-complete.jar">
 			<arg value="${basedir}/Fbsql.g4" />
 			<arg value="-o" />
 			<arg value="${basedir}/src/org/fbsql/antlr4/generated" />

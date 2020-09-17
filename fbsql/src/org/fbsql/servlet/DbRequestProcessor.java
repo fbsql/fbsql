@@ -351,7 +351,7 @@ public class DbRequestProcessor implements Runnable {
 
 							NonNativeProcedure nonNativeProcedure = proceduresMap.get(validatorStoredProcedureName);
 							if (nonNativeProcedure != null) { // Java or JavaScript
-								if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+								if (nonNativeProcedure.procedureType == ProcedureType.JAVA || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
 
 									List<Object> parameterValues = new ArrayList<>();
 									parameterValues.add(request);
@@ -363,7 +363,7 @@ public class DbRequestProcessor implements Runnable {
 									Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
 									Object obj = null;
-									if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+									if (nonNativeProcedure.procedureType == ProcedureType.JAVA) { // Java
 										Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
 										try {
 											obj = (String) method.invoke(null, parametersArray);
@@ -612,7 +612,7 @@ public class DbRequestProcessor implements Runnable {
 					NonNativeProcedure nonNativeProcedure = CallUtils.getCallStatementNonNativeProcedure(unprocessedNamedPreparedStatement, proceduresMap);
 
 					if (nonNativeProcedure != null) {
-						if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+						if (nonNativeProcedure.procedureType == ProcedureType.JAVA) { // Java
 							Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
 							if (executeTypeUpdate) {
 								int rowCount = 0;
@@ -970,7 +970,7 @@ public class DbRequestProcessor implements Runnable {
 										dbConnection0 = connectionPoolManager.getConnection();
 										NonNativeProcedure nonNativeProcedure = proceduresMap.get(notifierStoredProcedureName);
 										if (nonNativeProcedure != null) {
-											if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+											if (nonNativeProcedure.procedureType == ProcedureType.JAVA || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
 												Object obj = null;
 
 												List<Object> parameterValues = new ArrayList<>();
@@ -984,7 +984,7 @@ public class DbRequestProcessor implements Runnable {
 												parameterValues.add(executionResultJson);
 												Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
-												if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+												if (nonNativeProcedure.procedureType == ProcedureType.JAVA) { // Java
 													Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
 													obj = method.invoke(null, parametersArray);
 												} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript

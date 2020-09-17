@@ -1242,8 +1242,9 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME, COU
 ```
 https://github.com/GuntherRademacher/rr
 
-<h1>REFERENCE</h1>
+<h2>COMMANDS</h2>
 
+<a id="connect_to"></a>
 <h3>CONNECT TO</h3>
 
 ```EBNF
@@ -1269,11 +1270,13 @@ connect_to_stmt
  ;
 
 ```
-Connects FBSQL to database. through JDBC URL <code>(jdbc_url)</code>.
+<img src="images/connect_to_stmt.png"><br><br>
+
+Connects FBSQL to database through JDBC URL.<br>
 <br><br>
 <table>
 <tr><th>Clause</th><th>Required</th><th>Description</th></tr>
-<tr><td><code>cjdbc_url</code></td><td>&check;</td><td>JDBC URL. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
+<tr><td><code>CONNECT TO</code></td><td>&check;</td><td>JDBC URL. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
 <tr><td><code>USER</code></td><td></td><td>Database user name.</td></tr>
 <tr><td><code>PASSWORD</code></td><td></td><td>Database user password.</td></tr>
 <tr><td><code>PROPERTIES</code></td><td></td><td>File that contains JDBC connection properties. File must to be in <a href="https://en.wikipedia.org/wiki/.properties">Java properties format</a>. Please refer to your JDBC driver vendor documentation for more information.</td></tr>
@@ -1283,11 +1286,13 @@ Connects FBSQL to database. through JDBC URL <code>(jdbc_url)</code>.
 <tr><td><code>CONNECTION</code>&nbsp;<code>POOL</code>&nbsp;<code>MAX</code></td><td></td><td>Connection pool maximum size. Default value is: <code>100</code>.</td></tr>
 <tr><td><code>UNDECLARED</code>&nbsp;<code>STATEMENTS</code></td><td></td><td>Allow/reject undeclared statements. Default value is: <code>REJECT</code>.</td></tr>
 <tr><td><code>INCOMING</code>&nbsp;<code>CONNECTIONS</code></td><td></td><td>Allow/reject incomming connections. Default value is: <code>REJECT</code>. <code>INCOMING CONNECTIONS</code> can be used with <code>IF EXISTS</code> (native_sql) clause to provide authentication/authorization mechanism. native_sql can contain <code>:user</code>, <code>:password</code> and <code>:role</code> parameters.</td></tr>
-<tr><td><code>AS</code></td><td></td><td>The alias name for this connection. Incoming connections can not be established without the alias name</td></tr>
+<tr><td><code>AS</code></td><td></td><td>The alias name for this connection. Incoming connections can not be established if the alias name was not specified.</td></tr>
 </table>
+<br>
+See also: <a href="#switch_to"><code>SWITCH TO</code></a>
+<br><br>
 
-<img src="images/connect_to_stmt.png"><br><br>
-<i>Examples</i><br>
+<i>Examples:</i><br>
 
 ```sql
 
@@ -1298,13 +1303,17 @@ CONNECT TO 'jdbc:sqlite:sample';
 ```sql
 
 /* Connection is exposed to frontend */
-          CONNECT TO 'jdbc:sqlite:sample'
-INCOMING CONNECTIONS ALLOW
-                  AS MySQLite;
+           CONNECT TO 'jdbc:sqlite:sample'
+ INCOMING CONNECTIONS ALLOW
+                   AS MySQLite;
 ```
 
 ```sql
-/* All statements from frontend side are permitted */
+/*
+ * Connection is exposed to frontend
+ * All statements from frontend side are permitted
+ */
+
            CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
                  USER 'SA'
              PASSWORD ''
@@ -1315,25 +1324,28 @@ UNDECLARED STATEMENTS ALLOW
 ```
 
 ```sql
-/* Connect to remote database with connection pool settings and simple role based authentication/authorization mechanism */
-          CONNECT TO 'jdbc:as400://mysystem.example.com/mylibrary;naming=system;errors=full'
-                USER 'QSECOFR'
-            PASSWORD 'MYSECRET'
-              DRIVER 'com.ibm.as400.access.AS400JDBCDriver'
-                 LIB '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
- CONNECTION POOL MIN 50
- CONNECTION POOL MAX 1000
-INCOMING CONNECTIONS ALLOW IF EXISTS (SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
-        	                                  SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role
-        	                              )
+/*
+ * Connect to remote database with connection pool settings
+ * and simple role based authentication/authorization mechanism
+ */
+           CONNECT TO 'jdbc:as400://mysystem.example.com/mylibrary;naming=system;errors=full'
+                 USER 'QSECOFR'
+             PASSWORD 'MYSECRET'
+               DRIVER 'com.ibm.as400.access.AS400JDBCDriver'
+                  LIB '~/john/JTOpen/jt400.jar', '~/john/IBM/SQLLIB/java/db2jcc_license_cu.jar'
+  CONNECTION POOL MIN 50
+  CONNECTION POOL MAX 1000
+UNDECLARED STATEMENTS REJECT
+ INCOMING CONNECTIONS ALLOW IF EXISTS (SELECT TRUE FROM USERS U WHERE USERNAME=:user AND PASSWORD=:password AND EXISTS (
+                                       SELECT TRUE FROM USER_ROLES R WHERE U.USERNAME=R.USERNAME AND R.ROLE=:role
+                                      )
                                      )
-                  AS MyAS400;
-
+                   AS MyAS400;
 
 ```
 
 <br><br>
-
+<a id="switch_to"></a>
 <h3>SWITCH TO</h3>
 
 ```EBNF
@@ -1343,15 +1355,32 @@ switch_to_stmt
 
 ```
 <img src="images/switch_to_stmt.png"><br><br>
-<i>Examples</i><br>
+
+Switch the current connection to another. All statements in init script followed after <code>SWITCH TO</code> command are belongs to the specified connection.<br>
+See also: <a href="#connect_to"><code>CONNECT TO</code></a>
+<br><br>
+<i>Examples:</i><br>
 
 ```sql
 
 /* Switch to MySQLite connection */
 SWITCH TO MySQLite;
+
+/* SQLite statements */
+...
+...
+
+/* Switch to MyOracle connection */
+SWITCH TO MyOracle;
+
+/* Oracle statements */
+...
+...
+
 ```
 <br><br>
 
+<a id="declare statement"></a>
 <h3>DECLARE STATEMENT</h3>
 
 ```EBNF
@@ -1369,25 +1398,63 @@ declare_statement_stmt
  ;
 
 ```
-
 <img src="images/declare_statement_stmt.png"><br><br>
-<i>Examples</i><br>
+
+Declare native SQL statement. This command allows you to use native SQL statements on frontend side. If the <code>ROLES</code> clause was specified, the statement execution will be available only for roles specified in roles list.
+<br><br>
+<table>
+<tr><th>Clause</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>DECLARE STATEMENT</code></td><td>&check;</td><td>Native SQL statement you would like to expose to frontend.</td></tr>
+<tr><td><code>STATIC</code></td><td></td><td>This clause used to mark native SQL statement results as immutable. Such statements are executed once when FBSQL server starts. Results compressed and cashed in server memory for fast access without further database interaction.</td></tr>
+<tr><td><code>COMPRESSION</code></td><td></td><td>Sets compression level for results. Available compression levels are: <code>BEST COMPRESSION</code> - compressed with best compression strategy, <code>BEST SPEED</code> - compressed with best compression speed strategy, <code>NO COMPRESSION</code> - no compression (the default)</td></tr>
+<tr><td><code>ROLES</code></td><td></td><td>Roles list (comma separated). Restrict statement usage to users that are not specified in the roles list.</td></tr>
+<tr><td><code>TRIGGER BEFORE</code></td><td></td><td>Procedure that executed before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occur execution will be rejected.</td></tr>
+<tr><td><code>TRIGGER AFTER</code></td><td></td><td>Procedure that executed after the native SQL statement execution. Procedure may return string with the arbitrary JSON event object. If the JSON object is not NULL the database event will fired. Please refer to client's <code>Connection#addDatabaseEventListener()</code> method for information about how to catch database events on frontend side.</td></tr>
+<tr><td><code>AS</code></td><td></td><td>The alias name for this statement. If specified, you can use this name on frontend side instead SQL statement source code. </td></tr>
+</table>
+<br>
+<i>Examples:</i><br>
 
 ```sql
+
+/* Declare the immutable query using STATIC clause */ 
 DECLARE STATEMENT (SELECT * FROM COUNRIES)
            STATIC
       COMPRESSION BEST COMPRESSION
-            ROLES ('cto', 'admin', 'manager')
-               AS COUNTRIES_LIST
+               AS CountriesList;
+
+/*
+ * On frontend you can use both forms:
+ *
+ * preparedStatement.executeQuery("SELECT * FROM COUNRIES")
+ * preparedStatement.executeQuery("#CountriesList")
+ *
+ */
 
 ```
+
+```sql
+DECLARE STATEMENT (SELECT * FROM ORDERS WHERE ORDER_ID = :id)
+      COMPRESSION BEST COMPRESSION
+            ROLES ('admin', 'manager')
+               AS OrdersById;
+/*
+ * On frontend you can use both forms:
+ *
+ * preparedStatement.executeQuery("SELECT * FROM ORDERS WHERE ORDER_ID = :id")
+ * preparedStatement.executeQuery("#OrdersById")
+ *
+ */
+ 
+```
+<a id="declare_procedure"></a>
 <h3>DECLARE PROCEDURE</h3>
 
 ```EBNF
 declare_procedure_stmt
  : DECLARE PROCEDURE procedure_name TYPE
    (
-   	JVM  |
+   	JAVA |
    	JS   |
    	EXEC |
    	URL
@@ -1398,21 +1465,68 @@ declare_procedure_stmt
    )+
  ;
 ```
-<img src="images/declare_procedure_stmt.png">
 <br><br>
 
+<img src="images/declare_procedure_stmt.png">
+<br><br>
+Declare non-native stored procedure. This command allows you to custom non-native stored procedures available on both backend and frontend sides. If the <code>ROLES</code> clause was specified, the statement execution will be available only for roles specified in roles list.
+<br><br>
+<table>
+<tr><th>Clause</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>DECLARE PROCEDURE</code></td><td>&check;</td><td>Stored procedure name.</td></tr>
+<tr><td><code>TYPE</code></td><td>&check;</td><td>Stored procedure type.</td></tr>
+<tr><td><code>OPTIONS</code></td><td></td><td>Options for specified <code>TYPE</code>. Options is JSON string represents options object for specified type.</td></tr>
+<tr><td><code>OPTIONS FILE</code></td><td></td><td>Options file. Options file contains source of options object for specified type.</td></tr>
+</table>
+<br>
+
+<table>
+<tr><th>Type</th><th>Description</th><th>Options</th></tr>
+<tr><td><code>JAVA</code></td><td>Java language (or any JVM compatible languages)</td><td><ul><li><code>class</code> - Java class name</li><li><code>method</code> - Method name</li></ul></td></tr>
+<tr><td><code>JS</code></td><td>JavaScript/ECMAScript language</td><td><ul><li><code>file</code> - JavaScript file name</li><li><code>function</code> - Function name</li></ul></td></tr>
+<tr><td><code>EXEC</code></td><td>Operating system executable</td><td><ul><li><code>file</code> - OS executable file name</li></ul></td></tr>
+<tr><td><code>URL</code></td><td>Resource URL</td><td><ul><li><code>url</code> - Resource URL (<code>"http://"</code>, <code>"https://"</code>, <code>"file://"</code> are supported) or local file (absolute and relative path supported)</li></ul></td></tr>
+</table>
+
+<i>Examples:</i><br>
 
 
-<h3>INCLUDE</h3>
-
-```EBNF
-include_script_file_stmt
- : INCLUDE sql_script_file ( ',' sql_script_file )*
- ;
+```sql
+DECLARE PROCEDURE MY_PROC
+             TYPE JAVA
+          OPTIONS '{"class": "org.fbsql_examples.StoredProcedures", "method": "getCustomers"}';
+ 
 ```
-<img src="images/include_script_file_stmt.png">
 
+```sql
+DECLARE PROCEDURE GET_COUNTRIES
+             TYPE JS
+          OPTIONS '{"file": "/home/john/scripts/procedures.js", "function": "getCountries"}';
+ 
+```
 
+```sql
+DECLARE PROCEDURE SEND_SMS
+             TYPE EXEC
+          OPTIONS '{"file": "/home/john/send-sms"}';
+ 
+```
+
+```sql
+DECLARE PROCEDURE GET_ITEMS
+             TYPE URL
+          OPTIONS '{"url": "https://example.com/api/items"}';
+ 
+```
+
+```sql
+DECLARE PROCEDURE GET_ITEMS
+             TYPE URL
+     OPTIONS FILE '/home/john/my-options.json';
+ 
+```
+
+<a id="schedule"></a>
 <h3>SCHEDULE</h3>
 
 ```EBNF
@@ -1423,6 +1537,29 @@ schedule_stmt
 
 ```
 <img src="images/schedule_stmt.png">
+
+<a id="include"></a>
+<h3>INCLUDE</h3>
+
+```EBNF
+include_script_file_stmt
+ : INCLUDE sql_script_file ( ',' sql_script_file )*
+ ;
+```
+<img src="images/include_script_file_stmt.png">
+
+<i>Examples:</i><br>
+
+
+```sql
+
+/* Include single file */
+INCLUDE 'my.sql';
+
+/* Include multiple files */
+INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
+
+```
 
 <h3>Contacts and support:</h3>
 <ul>

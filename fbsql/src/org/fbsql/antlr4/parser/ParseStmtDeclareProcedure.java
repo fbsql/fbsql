@@ -96,6 +96,7 @@ public class ParseStmtDeclareProcedure {
 				String procedureTypeStr = ctx.getChild(4).getText().toUpperCase(Locale.ENGLISH);
 				st.nonNativeProcedure               = new NonNativeProcedure();
 				st.nonNativeProcedure.procedureType = ProcedureType.valueOf(procedureTypeStr);
+				st.nonNativeProcedure.optionsJson = "{}"; // default OPTIONS clause
 			}
 
 			@Override

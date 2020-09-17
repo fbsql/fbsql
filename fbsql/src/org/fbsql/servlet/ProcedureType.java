@@ -28,7 +28,7 @@ E-Mail: fbsql.team@gmail.com
 package org.fbsql.servlet;
 
 public enum ProcedureType {
-	JVM, // Java
+	JAVA, // Java
 	JS, // JavaScript
 	EXEC, // OS executable
 	URL // URL ("http://", "https://", "file://" are supported) or local file (absolute and relative path supported) 

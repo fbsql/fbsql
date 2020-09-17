@@ -84,7 +84,7 @@ PROCEDURE   : P R O C E D U R E;
 
 TYPE        : T Y P E;
 
-JVM         : J V M;
+JAVA        : J A V A;
 JS          : J S;
 EXEC        : E X E C;
 URL         : U R L;
@@ -263,7 +263,7 @@ declare_statement_stmt
 declare_procedure_stmt
  : DECLARE PROCEDURE procedure_name TYPE
    (
-   	JVM  |
+   	JAVA |
    	JS   |
    	EXEC |
    	URL

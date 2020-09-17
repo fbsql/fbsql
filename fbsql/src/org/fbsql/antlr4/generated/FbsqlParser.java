@@ -46,7 +46,7 @@ public class FbsqlParser extends Parser {
 	public static final int
 		T__0=1, T__1=2, T__2=3, T__3=4, STATIC=5, ROLES=6, TRIGGER=7, BEFORE=8, 
 		AFTER=9, AS=10, NO=11, COMPRESSION=12, BEST=13, SPEED=14, DECLARE=15, 
-		PROCEDURE=16, TYPE=17, JVM=18, JS=19, EXEC=20, URL=21, OPTIONS=22, FILE=23, 
+		PROCEDURE=16, TYPE=17, JAVA=18, JS=19, EXEC=20, URL=21, OPTIONS=22, FILE=23, 
 		STATEMENT=24, CONNECT=25, TO=26, USER=27, PASSWORD=28, PROPERTIES=29, 
 		DRIVER=30, LIB=31, CONNECTION=32, POOL=33, SIZE=34, MIN=35, MAX=36, UNDECLARED=37, 
 		STATEMENTS=38, INCOMING=39, CONNECTIONS=40, ALLOW=41, REJECT=42, IF=43, 
@@ -87,8 +87,8 @@ public class FbsqlParser extends Parser {
 		return new String[] {
 			null, null, null, null, null, "STATIC", "ROLES", "TRIGGER", "BEFORE", 
 			"AFTER", "AS", "NO", "COMPRESSION", "BEST", "SPEED", "DECLARE", "PROCEDURE", 
-			"TYPE", "JVM", "JS", "EXEC", "URL", "OPTIONS", "FILE", "STATEMENT", "CONNECT", 
-			"TO", "USER", "PASSWORD", "PROPERTIES", "DRIVER", "LIB", "CONNECTION", 
+			"TYPE", "JAVA", "JS", "EXEC", "URL", "OPTIONS", "FILE", "STATEMENT", 
+			"CONNECT", "TO", "USER", "PASSWORD", "PROPERTIES", "DRIVER", "LIB", "CONNECTION", 
 			"POOL", "SIZE", "MIN", "MAX", "UNDECLARED", "STATEMENTS", "INCOMING", 
 			"CONNECTIONS", "ALLOW", "REJECT", "IF", "EXISTS", "SWITCH", "SCHEDULE", 
 			"AT", "INCLUDE", "NULL", "IDENTIFIER", "NUMERIC_LITERAL", "STRING_LITERAL", 
@@ -1943,9 +1943,9 @@ public class FbsqlParser extends Parser {
 		public Json_fileContext json_file(int i) {
 			return getRuleContext(Json_fileContext.class,i);
 		}
-		public List<TerminalNode> JVM() { return getTokens(FbsqlParser.JVM); }
-		public TerminalNode JVM(int i) {
-			return getToken(FbsqlParser.JVM, i);
+		public List<TerminalNode> JAVA() { return getTokens(FbsqlParser.JAVA); }
+		public TerminalNode JAVA(int i) {
+			return getToken(FbsqlParser.JAVA, i);
 		}
 		public List<TerminalNode> JS() { return getTokens(FbsqlParser.JS); }
 		public TerminalNode JS(int i) {
@@ -1996,12 +1996,12 @@ public class FbsqlParser extends Parser {
 			setState(237);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << JVM) | (1L << JS) | (1L << EXEC) | (1L << URL))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << JAVA) | (1L << JS) | (1L << EXEC) | (1L << URL))) != 0)) {
 				{
 				{
 				setState(234);
 				_la = _input.LA(1);
-				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << JVM) | (1L << JS) | (1L << EXEC) | (1L << URL))) != 0)) ) {
+				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << JAVA) | (1L << JS) | (1L << EXEC) | (1L << URL))) != 0)) ) {
 				_errHandler.recoverInline(this);
 				}
 				else {
@@ -2219,7 +2219,7 @@ public class FbsqlParser extends Parser {
 			setState(278);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__1) | (1L << T__2) | (1L << T__3) | (1L << STATIC) | (1L << ROLES) | (1L << TRIGGER) | (1L << BEFORE) | (1L << AFTER) | (1L << AS) | (1L << NO) | (1L << COMPRESSION) | (1L << BEST) | (1L << SPEED) | (1L << DECLARE) | (1L << PROCEDURE) | (1L << TYPE) | (1L << JVM) | (1L << JS) | (1L << EXEC) | (1L << URL) | (1L << OPTIONS) | (1L << FILE) | (1L << STATEMENT) | (1L << CONNECT) | (1L << TO) | (1L << USER) | (1L << PASSWORD) | (1L << PROPERTIES) | (1L << DRIVER) | (1L << LIB) | (1L << CONNECTION) | (1L << POOL) | (1L << SIZE) | (1L << MIN) | (1L << MAX) | (1L << UNDECLARED) | (1L << STATEMENTS) | (1L << INCOMING) | (1L << CONNECTIONS) | (1L << ALLOW) | (1L << REJECT) | (1L << IF) | (1L << EXISTS) | (1L << SWITCH) | (1L << SCHEDULE) | (1L << AT) | (1L << INCLUDE) | (1L << NULL) | (1L << IDENTIFIER) | (1L << NUMERIC_LITERAL) | (1L << STRING_LITERAL) | (1L << SINGLE_LINE_COMMENT) | (1L << MULTILINE_COMMENT) | (1L << SPACES) | (1L << UNEXPECTED_CHAR))) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__1) | (1L << T__2) | (1L << T__3) | (1L << STATIC) | (1L << ROLES) | (1L << TRIGGER) | (1L << BEFORE) | (1L << AFTER) | (1L << AS) | (1L << NO) | (1L << COMPRESSION) | (1L << BEST) | (1L << SPEED) | (1L << DECLARE) | (1L << PROCEDURE) | (1L << TYPE) | (1L << JAVA) | (1L << JS) | (1L << EXEC) | (1L << URL) | (1L << OPTIONS) | (1L << FILE) | (1L << STATEMENT) | (1L << CONNECT) | (1L << TO) | (1L << USER) | (1L << PASSWORD) | (1L << PROPERTIES) | (1L << DRIVER) | (1L << LIB) | (1L << CONNECTION) | (1L << POOL) | (1L << SIZE) | (1L << MIN) | (1L << MAX) | (1L << UNDECLARED) | (1L << STATEMENTS) | (1L << INCOMING) | (1L << CONNECTIONS) | (1L << ALLOW) | (1L << REJECT) | (1L << IF) | (1L << EXISTS) | (1L << SWITCH) | (1L << SCHEDULE) | (1L << AT) | (1L << INCLUDE) | (1L << NULL) | (1L << IDENTIFIER) | (1L << NUMERIC_LITERAL) | (1L << STRING_LITERAL) | (1L << SINGLE_LINE_COMMENT) | (1L << MULTILINE_COMMENT) | (1L << SPACES) | (1L << UNEXPECTED_CHAR))) != 0)) {
 				{
 				{
 				setState(266);

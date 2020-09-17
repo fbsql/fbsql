@@ -48,8 +48,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.imageio.stream.FileImageInputStream;
-
 import org.fbsql.antlr4.parser.ParseNativeStmt;
 import org.fbsql.antlr4.parser.ParseNativeStmt.Procedure;
 import org.mozilla.javascript.Context;
@@ -71,35 +69,6 @@ public class CallUtils {
 
 	/* URL */
 	private static final String PLT_OPTIONS_URL_URL = "url";
-
-	//	public static String replace(String sql, Map<String /* stored procedure name */, NonNativeProcedure> proceduresMap, Connection connection, String instanceName, List<Object> parameterValues) throws Exception {
-	//		ParseNativeStmt p          = new ParseNativeStmt();
-	//		Procedure procedure = p.parse(sql);
-	//		NonNativeProcedure nonNativeProcedure = proceduresMap.get(procedure.name);
-	//		if (nonNativeProcedure.procedureType == ProcedureType.JVM) {
-	//			Method method = getMethod(nonNativeProcedure.optionsJson);
-	//
-	//			List<Object> parameterValues = new ArrayList<>();
-	//			parameterValues.add(connection);
-	//			parameterValues.add(instanceName);
-	//			CallUtils2.parseSqlParameters(procedure, parameterValues);
-	//			Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
-	//
-	//			Object result = method.invoke(null, parametersArray);
-	//			String sresult;
-	//			if (result == null)
-	//				sresult = "NULL";
-	//			else if (result instanceof Boolean)
-	//				sresult = ((Boolean) result).toString().toUpperCase(Locale.ENGLISH);
-	//			else if (result instanceof Number)
-	//				sresult = result.toString();
-	//			else
-	//				sresult = '\'' + result.toString() + '\'';
-	//			return sql.substring(0, procedure.startIndex) + sresult + sql.substring(procedure.stopIndex + 1);
-	//		}
-	//		return null;
-	//
-	//	}
 
 	/**
 	 * Get CALL Statement Method
@@ -157,14 +126,14 @@ public class CallUtils {
 	public static String executeUrl(String instanceDirectory, String optionsJson, Map<String, Object> parametersMap) throws Exception {
 		Map<String, Object> options = RhinoUtils.asMap(optionsJson);
 		String              urlStr  = (String) options.get(PLT_OPTIONS_URL_URL);
-		Path path;
-		InputStream is;
+		Path                path;
+		InputStream         is;
 		if (urlStr.charAt(0) == '/') {
 			path = Paths.get(urlStr);
-			is = new FileInputStream(path.toFile());
+			is   = new FileInputStream(path.toFile());
 		} else if (!urlStr.startsWith("http://") && !urlStr.startsWith("https://")) {
 			path = Paths.get(instanceDirectory + '/' + urlStr);
-			is = new FileInputStream(path.toFile());
+			is   = new FileInputStream(path.toFile());
 		} else {
 			boolean first = true;
 			for (Map.Entry<String, Object> entry : parametersMap.entrySet()) {

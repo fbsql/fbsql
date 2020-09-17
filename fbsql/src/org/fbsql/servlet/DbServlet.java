@@ -391,7 +391,7 @@ public class DbServlet extends HttpServlet {
 				String             text               = SqlParseUtils.canonizeSql(statement);
 				NonNativeProcedure nonNativeProcedure = CallUtils.getCallStatementNonNativeProcedure(statement, proceduresMap);
 				if (nonNativeProcedure != null) { // Java or JavaScript
-					if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+					if (nonNativeProcedure.procedureType == ProcedureType.JAVA || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
 						List<Object> parameterValues = new ArrayList<>();
 						parameterValues.add(connection);
 						parameterValues.add(instanceName);
@@ -399,7 +399,7 @@ public class DbServlet extends HttpServlet {
 						CallUtils.parseSqlParameters(parseNativeStmt, statement, parameterValues);
 						Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
-						if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+						if (nonNativeProcedure.procedureType == ProcedureType.JAVA) { // Java
 							Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
 							method.invoke(null, parametersArray);
 						} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript
@@ -508,7 +508,7 @@ public class DbServlet extends HttpServlet {
 
 								NonNativeProcedure nonNativeProcedure = proceduresMap.get(storedProcedureName);
 								if (nonNativeProcedure != null) {
-									if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+									if (nonNativeProcedure.procedureType == ProcedureType.JAVA || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
 										List<Object> parameterValues = new ArrayList<>();
 										parameterValues.add(dbConnection0.getConnection());
 										parameterValues.add(instanceName);
@@ -516,7 +516,7 @@ public class DbServlet extends HttpServlet {
 										Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
 										Object obj = null;
-										if (nonNativeProcedure.procedureType == ProcedureType.JVM) {// Java
+										if (nonNativeProcedure.procedureType == ProcedureType.JAVA) {// Java
 											Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
 											obj = method.invoke(null, parametersArray);
 										} else if (nonNativeProcedure.procedureType == ProcedureType.JS) { // JavaScript
@@ -748,7 +748,7 @@ public class DbServlet extends HttpServlet {
 						Map<String /* js file name */, Scriptable>                                mapScopes    = instancesScopesMap.get(instanceName);
 						Map<String /* js file name */, Map<String /* function name */, Function>> mapFunctions = instancesFunctionsMap.get(instanceName);
 
-						if (nonNativeProcedure.procedureType == ProcedureType.JVM || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
+						if (nonNativeProcedure.procedureType == ProcedureType.JAVA || nonNativeProcedure.procedureType == ProcedureType.JS) { // Java or JavaScript
 
 							List<Object> parameterValues = new ArrayList<>();
 							parameterValues.add(request);
@@ -768,7 +768,7 @@ public class DbServlet extends HttpServlet {
 							Object[] parametersArray = parameterValues.toArray(new Object[parameterValues.size()]);
 
 							Object obj = null;
-							if (nonNativeProcedure.procedureType == ProcedureType.JVM) { // Java
+							if (nonNativeProcedure.procedureType == ProcedureType.JAVA) { // Java
 								Method method = CallUtils.getMethod(nonNativeProcedure.optionsJson);
 								obj = method.invoke(null, parametersArray);
 								try (ResultSet rs = (ResultSet) obj;) {
