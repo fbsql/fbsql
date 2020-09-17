@@ -1,108 +1,86 @@
 <h1>FBSQL - Frontend Backend SQL</h1>
 Work (secure) with your backend database within HTML<br>
+<br><br>
+<strong>What is FBSQL?</strong><br>
+FBSQL is a server that transparently yet secure connects your frontend to the remote database.<br>
+<br>
+<strong>Is it really two-tier architecture?</strong><br>
+Well, yes and no. Look at the FBSQL as two-tier architecture with third tier under the hood.<br>
+<br>
+<strong>Which databases are supported?</strong><br>
+FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, Microsoft SQL Server, IBM Db2 etc.
+All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.<br>
+<br>
+<strong>What about security?</strong><br>
+FBSQL security based on principle of least privilege (<abbr title="Principle of Least Privilege">POLP</abbr>). By default, FBSQL does not accept incoming connections. It also rejects all SQL statements that were not declared explicitly. Pre-execution triggers can be used to verify and modify input parameters before execution or completely reject execution by custom conditions. Users must implement their own authentication and authorization mechanism.<br>
+<br>
+<strong>What about performance?</strong><br>
+FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimized communication and response compression.<br>
 
-<h3>Features</h3>
-	<ul>
-		<li>Prepared statements</li>
-		<li>Batch execution</li>
-		<li>Database agnostic stored procedures</li>
-		<li>Database events notification</li>
-		<li>Background jobs</li>
-		<li>No dependencies</li>
-	</ul>	
-
-<h3>F.A.Q.</h3>
-	<strong>What is FBSQL?</strong><br>
-	FBSQL is a server that transparently yet secure connects your frontend to the remote database.<br>
-	<br>
-	<strong>Is it really two-tier architecture?</strong><br>
-	Well, yes and no. Look at the FBSQL as two-tier architecture with third tier under the hood.<br>
-	<br>
-	<strong>Which databases are supported?</strong><br>
-	FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> compliant databases like SQLite, MySQL, PostgreSQL, Oracle, Microsoft SQL Server, IBM Db2 etc.
-	All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.<br>
-	<br>
-	<strong>What about security?</strong><br>
-	FBSQL security based on principle of least privilege (<abbr title="Principle of Least Privilege">POLP</abbr>). By default, FBSQL does not accept incoming connections. It also rejects all SQL statements that were not declared explicitly. Pre-execution triggers can be used to verify and modify input parameters before execution or completely reject execution by custom conditions. Users must implement their own authentication and authorization mechanism.<br>
-	<br>
-	<strong>What about performance?</strong><br>
-	FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimized communication and response compression.<br>
-
-
-
-<h2>Table of Contents</h2>
+<br><strong>SQL Commands</strong>
 <ul>
-	<br><strong>Overview</strong>
+	<li><a href="#connect_to"        title="CONNECT TO statement"       >CONNECT TO</a></li>
+	<li><a href="#switch_to"         title="SWITCH TO statement"        >SWITCH TO</a></li>
+	<li><a href="#declare_statement" title="DECLARE STATEMENT statement">DECLARE STATEMENT</a></li>
+	<li><a href="#declare_procedure" title="DECLARE PROCEDURE statement">DECLARE PROCEDURE</a></li>
+	<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
+	<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
+</ul>
+<br><strong>Client API</strong>
+<ul>
+	<li><a href="#connection_object" title="Connection object">Introduction</a></li>
+	<li><a href="#connection_object" title="Connection object">Connection</a></li>
 	<ul>
-		<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
-		<li><a href="#connect_to"        title="CONNECT TO statement"       >Installation</a></li>
+		<a href="#connection_object_constructor" title="Connection object constructor">Constructor</a><br>
+		Methods:
+			<ul>
+				<li><a href="#prepare_statement_method"           title="prepareStatement method">prepareStatement</a></li>
+				<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">addDatabaseEventListener</a></li>
+				<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">fireMockDatabaseEvent</a></li>
+			</ul>
 	</ul>
-	<br><strong>Server</strong>
+	<li><a href="#prepared_statement_object" title="PreparedStatement object">PreparedStatement</a></li>
 	<ul>
-		<li><a href="#switch_to"         title="SWITCH TO statement"        >Command line interface (CLI)</a></li>
-		<li><a href="#connect_to"        title="CONNECT TO statement"       >Init script</a></li>
+		Methods:
+			<ul>
+				<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
+				<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>
+				<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">setMockFunction</a></li>
+			</ul>
 	</ul>
-	<br><strong>SQL Commands</strong>
+</ul>
+<br><strong>Frontend debug tool</strong>
+<ul>
+	<a href="#connection_object" title="Connection object">Introduction</a><br>
+	Functions:
 	<ul>
-		<li><a href="#connect_to"        title="CONNECT TO statement"       >CONNECT TO</a></li>
-		<li><a href="#switch_to"         title="SWITCH TO statement"        >SWITCH TO</a></li>
-		<li><a href="#declare_statement" title="DECLARE STATEMENT statement">DECLARE STATEMENT</a></li>
-		<li><a href="#declare_procedure" title="DECLARE PROCEDURE statement">DECLARE PROCEDURE</a></li>
-		<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
-		<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
+		<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
+		<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
+		<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
 	</ul>
-	<br><strong>Client for browser</strong>
-	<ul>
-		<li><a href="#connection_object" title="Connection object">Introduction</a></li>
-		<li><a href="#connection_object" title="Connection object">Connection</a></li>
-		<ul>
-			<a href="#connection_object_constructor" title="Connection object constructor">Constructor</a><br>
-			Methods:
-				<ul>
-					<li><a href="#prepare_statement_method"           title="prepareStatement method">prepareStatement</a></li>
-					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">addDatabaseEventListener</a></li>
-					<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">fireMockDatabaseEvent</a></li>
-				</ul>
-		</ul>
-		<li><a href="#prepared_statement_object" title="PreparedStatement object">PreparedStatement</a></li>
-		<ul>
-			Methods:
-				<ul>
-					<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
-					<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>
-					<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">setMockFunction</a></li>
-				</ul>
-		</ul>
-	</ul>
-	<br><strong>Frontend debug tool</strong>
-	<ul>
-		<a href="#connection_object" title="Connection object">Introduction</a><br>
-		Functions:
-		<ul>
-			<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
-			<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
-			<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
-		</ul>
-	</ul>
-	<br><strong>Tutorial</strong>
-	<ul>
-		<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">«Hello world!» example</a></li>
-		<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
-		<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
-		<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
-		<li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
-		<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
-		<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
-		<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
-		<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
-		<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
-		<li><a href="#debug_utility" title="FBSQL server.">Server</a></li>
-		<li><a href="#debug_utility" title="FBSQL client (fbsql.js).">Client</a></li>
-		<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
-		<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
-		<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
-		<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Database event notification</a></li>
-	</ul>
+</ul>
+<br><strong>Tutorial</strong>
+<ul>
+	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">«Hello world!» example</a></li>
+	<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
+	<li><a href="#connect_to"        title="CONNECT TO statement"       >Installation</a></li>
+	<li><a href="#switch_to"         title="SWITCH TO statement"        >Command line interface (CLI)</a></li>
+	<li><a href="#connect_to"        title="CONNECT TO statement"       >Init script</a></li>
+	<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
+	<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
+	<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
+	<li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
+	<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
+	<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
+	<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
+	<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
+	<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
+	<li><a href="#debug_utility" title="FBSQL server.">Server</a></li>
+	<li><a href="#debug_utility" title="FBSQL client (fbsql.js).">Client</a></li>
+	<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
+	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
+	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
+	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Database event notification</a></li>
 </ul>
 
 
@@ -110,15 +88,16 @@ Work (secure) with your backend database within HTML<br>
 <h3>FBSQL distributions</h3>
 <table>
 <tr><th>                              </th><th>FBSQL Server</th><th>FBSQL Server Min</th><th>FBSQL Servlet</th></tr>
-<tr><td>FBSQL engine (servlet)        </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
-<tr><td>JavaScript client API         </td><td>&check;     </td><td>&check;         </td><td>&check;      </td></tr>
-<tr><td>Frontend debug tool           </td><td>&check;     </td><td>                </td><td>             </td></tr>
-<tr><td>Java Runtime Environment (JRE)</td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
-<tr><td>Servlet container             </td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
-<tr><td>Command line interface        </td><td>&check;     </td><td>&check;         </td><td>             </td></tr>
-<tr><td>Embedded database             </td><td>&check;     </td><td>                </td><td>             </td></tr>
+<tr><td>FBSQL engine (servlet)        </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
+<tr><td>JavaScript client API         </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
+<tr><td>Frontend debug tool           </td><td>&check;</td><td>       </td><td>       </td></tr>
+<tr><td>Java Runtime Environment (JRE)</td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Servlet container             </td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Command line interface        </td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Embedded database             </td><td>&check;</td><td>       </td><td>       </td></tr>
 </table>
 
+If you don't understand which distributions to choose, you probably need <strong>FBSQL Server</strong>.
 
 <a id="installation_and_basic_example"></a>
 <h2>«Hello world!» example</h2>
@@ -1224,7 +1203,7 @@ schedule_stmt
 
 Schedule periodic jobs.
 FBSQL has own scheduler to run periodic jobs.
-Stored procedures can be scheduled to run according <strong>cron</strong> expression.
+Stored procedures can be scheduled to run according <strong>cron</strong> expressions, which are able to create firing schedules such as: “At 8:00am every Monday through Friday” or “At 1:30am every last Friday of the month”.
 
 <br><br>
 <table>
@@ -1234,18 +1213,16 @@ Stored procedures can be scheduled to run according <strong>cron</strong> expres
 </table>
 <br>
 
-
-<p><i>
-Most of information here was taken from <a href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html">Cron Trigger Tutorial</a>
-</i></p>
-
-
-<p><a href="https://en.wikipedia.org/wiki/Cron" title="Article from wikipedia.org">cron</a> is a UNIX tool that has been around for a long time, so its scheduling capabilities are powerful
-and proven.</p>
-<p>SCHEDULE statement uses cron expressions, which are able to create firing schedules such as: “At 8:00am every
-Monday through Friday” or “At 1:30am every last Friday of the month”.</p>
+<blockquote>
+<a href="https://en.wikipedia.org/wiki/Cron" title="Article from wikipedia.org">cron</a> is a UNIX tool that has been around for a long time, so its scheduling capabilities are powerful
+and proven.
+</blockquote>
 
 <h3>Format</h3>
+
+<blockquote>
+Most of information here was taken from <a href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html">Cron Trigger Tutorial</a>
+</blockquote>
 
 <p>A cron expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the
 allowed values, along with various combinations of the allowed special characters for that field. The fields are as
