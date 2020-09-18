@@ -16,52 +16,11 @@ FBSQL security based on principle of least privilege (<abbr title="Principle of 
 <br>
 <strong>What about performance?</strong><br>
 FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimized communication and response compression.<br>
+<br>
 
-<br><strong>SQL Commands</strong>
-<ul>
-	<li><a href="#connect_to"        title="CONNECT TO statement"       >CONNECT TO</a></li>
-	<li><a href="#switch_to"         title="SWITCH TO statement"        >SWITCH TO</a></li>
-	<li><a href="#declare_statement" title="DECLARE STATEMENT statement">DECLARE STATEMENT</a></li>
-	<li><a href="#declare_procedure" title="DECLARE PROCEDURE statement">DECLARE PROCEDURE</a></li>
-	<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
-	<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
-</ul>
-<br><strong>Client API</strong>
-<ul>
-	<li><a href="#connection_object" title="Connection object">Introduction</a></li>
-	<li><a href="#connection_object" title="Connection object">Connection</a></li>
-	<ul>
-		<a href="#connection_object_constructor" title="Connection object constructor">Constructor</a><br>
-		Methods:
-			<ul>
-				<li><a href="#prepare_statement_method"           title="prepareStatement method">prepareStatement</a></li>
-				<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">addDatabaseEventListener</a></li>
-				<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">fireMockDatabaseEvent</a></li>
-			</ul>
-	</ul>
-	<li><a href="#prepared_statement_object" title="PreparedStatement object">PreparedStatement</a></li>
-	<ul>
-		Methods:
-			<ul>
-				<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
-				<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>
-				<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">setMockFunction</a></li>
-			</ul>
-	</ul>
-</ul>
-<br><strong>Frontend debug tool</strong>
-<ul>
-	<a href="#connection_object" title="Connection object">Introduction</a><br>
-	Functions:
-	<ul>
-		<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
-		<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
-		<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
-	</ul>
-</ul>
 <br><strong>Tutorial</strong>
 <ul>
-	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">«Hello world!» example</a></li>
+	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Hello world!</a></li>
 	<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
 	<li><a href="#connect_to"        title="CONNECT TO statement"       >Installation</a></li>
 	<li><a href="#switch_to"         title="SWITCH TO statement"        >Command line interface (CLI)</a></li>
@@ -82,25 +41,51 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
 	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Database event notification</a></li>
 </ul>
-
-
-<a id="fbsql_distributions"></a>
-<h3>FBSQL distributions</h3>
-<table>
-<tr><th>                              </th><th>FBSQL Server</th><th>FBSQL Server Min</th><th>FBSQL Servlet</th></tr>
-<tr><td>FBSQL engine (servlet)        </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
-<tr><td>JavaScript client API         </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
-<tr><td>Frontend debug tool           </td><td>&check;</td><td>       </td><td>       </td></tr>
-<tr><td>Java Runtime Environment (JRE)</td><td>&check;</td><td>&check;</td><td>       </td></tr>
-<tr><td>Servlet container             </td><td>&check;</td><td>&check;</td><td>       </td></tr>
-<tr><td>Command line interface        </td><td>&check;</td><td>&check;</td><td>       </td></tr>
-<tr><td>Embedded database             </td><td>&check;</td><td>       </td><td>       </td></tr>
-</table>
-
-If you don't understand which distributions to choose, you probably need <strong>FBSQL Server</strong>.
+<br><strong>Commands</strong>
+<ul>
+	<li><a href="#connect_to"        title="CONNECT TO statement"       >CONNECT TO</a></li>
+	<li><a href="#switch_to"         title="SWITCH TO statement"        >SWITCH TO</a></li>
+	<li><a href="#declare_statement" title="DECLARE STATEMENT statement">DECLARE STATEMENT</a></li>
+	<li><a href="#declare_procedure" title="DECLARE PROCEDURE statement">DECLARE PROCEDURE</a></li>
+	<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
+	<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
+</ul>
+<strong>Client API</strong>
+<ul>
+	<li><a href="#connection_object" title="Connection object">Connection</a></li>
+	<ul>
+		<a href="#connection_object_constructor" title="Connection object constructor">Constructor</a><br>
+		Methods:
+			<ul>
+				<li><a href="#prepare_statement_method"           title="prepareStatement method">prepareStatement</a></li>
+				<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">addDatabaseEventListener</a></li>
+				<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">fireMockDatabaseEvent</a></li>
+			</ul>
+	</ul>
+	<li><a href="#prepared_statement_object" title="PreparedStatement object">PreparedStatement</a></li>
+	<ul>
+		Methods:
+			<ul>
+				<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
+				<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>
+				<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">setMockFunction</a></li>
+			</ul>
+	</ul>
+</ul>
+<strong>Frontend debug tool</strong>
+<ul>
+	Functions:
+	<ul>
+		<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
+		<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
+		<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
+	</ul>
+</ul>
+<br>
+<hr>
 
 <a id="installation_and_basic_example"></a>
-<h2>«Hello world!» example</h2>
+<h1>«Hello world!» example</h1>
 <strong>Backend:</strong><br>
 
 <br>
@@ -108,7 +93,7 @@ If you don't understand which distributions to choose, you probably need <strong
 <li>
 Install FBSQL:<br><br>
 <ul>
-<li>Download the latest <i>«FBSQL Server»</i> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -180,7 +165,7 @@ Start FBSQL server:<br><br>
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <script src="fbsql.js"></script>
+        <script src="fbsql.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
@@ -199,9 +184,23 @@ Start FBSQL server:<br><br>
 <img src="images/hello-world-alert.png">
 </ol>
 
-<hr>
+<a id="fbsql_distributions"></a>
+<h1>FBSQL distributions</h1>
+<table>
+<tr><th>                              </th><th>FBSQL Server</th><th>FBSQL Server Min</th><th>FBSQL Servlet</th></tr>
+<tr><td>FBSQL engine (servlet)        </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
+<tr><td>JavaScript client API         </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
+<tr><td>Frontend debug tool           </td><td>&check;</td><td>       </td><td>       </td></tr>
+<tr><td>Java Runtime Environment (JRE)</td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Servlet container             </td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Command line interface        </td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Embedded database             </td><td>&check;</td><td>       </td><td>       </td></tr>
+</table>
+
+If you don't understand which distributions to choose, you probably need <strong>FBSQL Server</strong>.
+
 <a id="add_simple_role_based_authorization"></a>
-<h2>Authorization</h2>
+<h1>Authorization</h1>
 <p><i>
 In this chapter we will learn how to add simple role-based authorization to our CONNECT TO statement.<br>
 We are going to authenticate our users by username and password, and authorize by role.
@@ -285,7 +284,7 @@ INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
 ```
 <hr>
 <a id="secure_our_backend_with_declare_statement"></a>
-<h2>Expose our database to frontend</h2>
+<h1>Expose our database to frontend</h1>
 <p><i>
 In this chapter we will learn how to secure our backend with DECLARE STATEMENT statement
 and reference statements by name.
@@ -363,7 +362,7 @@ DECLARE STATEMENT (SELECT :msg AS greeting)
 
 <hr>
 <a id="execute_query_and_execute_update"></a>
-<h2>Execute SQL statements</h2>
+<h1>Execute SQL statements</h1>
 <p><i>
 In this chapter we will learn how to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.
 </i></p>
