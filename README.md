@@ -22,7 +22,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 
 <br><strong>Tutorial</strong>
 <ul>
-	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Hello world!</a></li>
+	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Quick start</a></li>
 	<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
 	<li><a href="#installation"        title="FBSQL Installation"       >Installation</a></li>
 	<li><a href="#cli"                 title="Command line interface (CLI)"        >Command line interface (CLI)</a></li>
@@ -89,7 +89,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 <hr>
 
 <a id="installation_and_basic_example"></a>
-<h1>«Hello world!» example</h1>
+<h1>Quick start</h1>
 <strong>Backend:</strong><br>
 
 <br>
@@ -97,7 +97,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 <li>
 Install FBSQL:<br><br>
 <ul>
-<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-server-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -218,7 +218,7 @@ If you are having troubles choosing a distribution, you probably need the <stron
 
 <strong>FBSQL Server</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-server-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-server-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -233,7 +233,7 @@ fbsql-server-2.3.4-linux-x86-64 ─┐
 ```
 <strong>FBSQL Server Min</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="fbsql-server-min-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="fbsql-server-min-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-min-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -247,7 +247,7 @@ fbsql-server-min-2.3.4-linux-x86-64 ─┐
 ```
 <strong>FBSQL Servlet</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Servlet</strong> release: <a href="fbsql-servlet-2.3.4.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Servlet</strong> release: <a href="fbsql-servlet-2.3.4.zip" title="The latest «FBSQL Servlet» release">fbsql-servlet-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -268,8 +268,6 @@ fbsql-servlet-2.3.4 ─┐
 
 <strong>Command line options</strong>
 <table>
-<tr><th>Option</th><th>Description</th></tr><strong>Command line options</strong>
-<table>
 <tr><th>Option</th><th>Description</th></tr>
 <tr><td><code>help</code></td><td>Outputs help text</td></tr>
 <tr><td><code>version</code></td><td>Outputs FBSQL version</td></tr>
@@ -283,7 +281,7 @@ fbsql-servlet-2.3.4 ─┐
 <h1>Configuration and fine tuning</h1>
 
 After FBSQL starts it automatically builds FBSQL home directory (by default user home directory).
-You can change the default FBSQL home directory location by specifying FBSQL_HOME operating system environment variable.
+You can change the default FBSQL home directory location by specifying <code>FBSQL_HOME</code> operating system environment variable.
 FBSQL home directory contains init scripts, logs and all configuration files related to application server and JVM.
 
 <strong>FBSQL home directory</strong>
@@ -296,8 +294,8 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
                         │  │                                            │
                         │  ├─ init                                      │-> FBSQL init scripts directory
                         │  │                                            │
-                        │  ├─ jre ......................................│-> Standard JVM configuration files
-                        │  │  └─ conf                                   │
+                        │  ├─ jre ......................................│-> JVM
+                        │  │  └─ conf                                   │   configuration files
                         │  │     ├─ logging.properties                  │
                         │  │     ├─ management                          │
                         │  │     │  ├─ jmxremote.access                 │
@@ -320,8 +318,8 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
                         │  │     │          └─ default_US_export.policy │
                         │  │     └─ sound.properties                    │
                         │  │                                            │
-                        │  └─ tomcat ...................................│-> Standard Apache Tomcat configuration files
-                        │     ├─ bin                                    │
+                        │  └─ tomcat ...................................│-> Apache Tomcat
+                        │     ├─ bin                                    │   configuration files
                         │     │  └─ setenv.sh                           │
                         │     ├─ conf                                   │
                         │     │  ├─ catalina.policy                     │
@@ -337,8 +335,8 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
                         │     └─ webapps                                │
                         │        └─ ROOT                                │
                         │            │                                  │
-                        │            └─ WEB-INF ........................│-> Standard servlet configuration files
-                        │                ├─ classes                     │
+                        │            └─ WEB-INF ........................│-> servlet
+                        │                ├─ classes                     │   configuration files
                         │                ├─ lib                         │
                         │                └─ web.xml                     │
                         │                                               │
@@ -1624,15 +1622,15 @@ Stored procedures can be scheduled to run according <strong>cron</strong> expres
 <br>
 
 <blockquote>
+Most of information about cron was taken from <a href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html">Cron Trigger Tutorial</a>
+</blockquote>
+
+<blockquote>
 <a href="https://en.wikipedia.org/wiki/Cron" title="Article from wikipedia.org">cron</a> is a UNIX tool that has been around for a long time, so its scheduling capabilities are powerful
 and proven.
 </blockquote>
 
 <h3>Format</h3>
-
-<blockquote>
-Most of information here was taken from <a href="http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html">Cron Trigger Tutorial</a>
-</blockquote>
 
 <p>A cron expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the
 allowed values, along with various combinations of the allowed special characters for that field. The fields are as
