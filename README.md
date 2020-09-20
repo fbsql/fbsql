@@ -25,8 +25,9 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Hello world!</a></li>
 	<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
 	<li><a href="#installation"        title="FBSQL Installation"       >Installation</a></li>
-	<li><a href="#switch_to"         title="SWITCH TO statement"        >Command line interface (CLI)</a></li>
-	<li><a href="#connect_to"        title="CONNECT TO statement"       >Init script</a></li>
+	<li><a href="#cli"                 title="Command line interface (CLI)"        >Command line interface (CLI)</a></li>
+	<li><a href="#init_script"        title="CONNECT TO statement"       >Init script</a></li>
+	<li><a href="#config"        title="Configuration and fine tuning"       >Configuration and fine tuning</a></li>
 	<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
 	<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
 	<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
@@ -217,7 +218,7 @@ If you are having troubles choosing a distribution, you probably need the <stron
 
 <strong>FBSQL Server</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-server-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -232,7 +233,7 @@ fbsql-server-2.3.4-linux-x86-64 ─┐
 ```
 <strong>FBSQL Server Min</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="fbsql-server-min-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -246,18 +247,116 @@ fbsql-server-min-2.3.4-linux-x86-64 ─┐
 ```
 <strong>FBSQL Servlet</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Servlet</strong> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Servlet</strong> release: <a href="fbsql-servlet-2.3.4.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
 ```text
 
-fbsql-servlet-2.3.4-linux-x86-64 ─┐
-                                  ├─ fbsql.war    - FBSQL servlet
-                                  ├─ fbsql-min.js - Client for browser
-                                  ├─ README       - Release information 
-                                  └─ LICENSES     - Third party licenses
+fbsql-servlet-2.3.4 ─┐
+                     ├─ fbsql.war    - FBSQL servlet
+                     ├─ fbsql-min.js - Client for browser
+                     ├─ README       - Release information 
+                     └─ LICENSES     - Third party licenses
 ```
+<ul>
+<li>Deploy <code>fbsql.war</code> to your application server infrastructure.</li>
+</ul>
+
+<a id="cli"></a>
+<h1>Command line interface (CLI)</h1>
+
+<strong>Command line options</strong>
+<table>
+<tr><th>Option</th><th>Description</th></tr><strong>Command line options</strong>
+<table>
+<tr><th>Option</th><th>Description</th></tr>
+<tr><td><code>help</code></td><td>Outputs help text</td></tr>
+<tr><td><code>version</code></td><td>Outputs FBSQL version</td></tr>
+<tr><td><code>srart</code></td><td>Starts FBSQL as background process</td></tr>
+<tr><td><code>stop</code></td><td>Stops FBSQL background process</td></tr>
+<tr><td><code>run</code></td><td>Runs FBSQL in foreground</td></tr>
+</table>
+
+
+<a id="config"></a>
+<h1>Configuration and fine tuning</h1>
+
+After FBSQL starts it automatically builds FBSQL home directory (by default user home directory).
+You can change the default FBSQL home directory location by specifying FBSQL_HOME operating system environment variable.
+FBSQL home directory contains init scripts, logs and all configuration files related to application server and JVM.
+
+<strong>FBSQL home directory</strong>
+```text
+<FBSQL_HOME> ─┐ ........................................................│-> FBSQL home directory
+              │                                                         │
+              └─ fbsql ─┐                                               │
+                        │                                               │
+                        ├─ config                                       │-> FBSQL config directory
+                        │  │                                            │
+                        │  ├─ init                                      │-> FBSQL init scripts directory
+                        │  │                                            │
+                        │  ├─ jre ......................................│-> Standard JVM configuration files
+                        │  │  └─ conf                                   │
+                        │  │     ├─ logging.properties                  │
+                        │  │     ├─ management                          │
+                        │  │     │  ├─ jmxremote.access                 │
+                        │  │     │  ├─ jmxremote.password.template      │
+                        │  │     │  └─ management.properties            │
+                        │  │     ├─ net.properties                      │
+                        │  │     ├─ sdp                                 │
+                        │  │     │  └─ sdp.conf.template                │
+                        │  │     ├─ security                            │
+                        │  │     │  ├─ java.policy                      │
+                        │  │     │  ├─ java.security                    │
+                        │  │     │  └─ policy                           │
+                        │  │     │      ├─ limited                      │
+                        │  │     │      │  ├─ default_local.policy      │
+                        │  │     │      │  ├─ default_US_export.policy  │
+                        │  │     │      │  └─ exempt_local.policy       │
+                        │  │     │      ├─ README.txt                   │
+                        │  │     │      └─ unlimited                    │
+                        │  │     │          ├─ default_local.policy     │
+                        │  │     │          └─ default_US_export.policy │
+                        │  │     └─ sound.properties                    │
+                        │  │                                            │
+                        │  └─ tomcat ...................................│-> Standard Apache Tomcat configuration files
+                        │     ├─ bin                                    │
+                        │     │  └─ setenv.sh                           │
+                        │     ├─ conf                                   │
+                        │     │  ├─ catalina.policy                     │
+                        │     │  ├─ catalina.properties                 │
+                        │     │  ├─ context.xml                         │
+                        │     │  ├─ jaspic-providers.xml                │
+                        │     │  ├─ jaspic-providers.xsd                │
+                        │     │  ├─ logging.properties                  │
+                        │     │  ├─ server.xml                          │
+                        │     │  ├─ tomcat-users.xml                    │
+                        │     │  ├─ tomcat-users.xsd                    │
+                        │     │  └─ web.xml                             │
+                        │     └─ webapps                                │
+                        │        └─ ROOT                                │
+                        │            │                                  │
+                        │            └─ WEB-INF ........................│-> Standard servlet configuration files
+                        │                ├─ classes                     │
+                        │                ├─ lib                         │
+                        │                └─ web.xml                     │
+                        │                                               │
+                        └─ logs ........................................│-> Logs directory
+
+```
+<a id="init_script"></a>
+<h1>Init script</h1>
+
+Initialization script executes on FBSQL startup,
+connects to database instance and performs (optionally)
+any operations that you want to be executed at start up time.
+
+To be executed at startup init scripts must have the name "init.sql"
+or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+
+Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
+
 
 <a id="add_simple_authentication"></a>
 <h1>Authentication</h1>
