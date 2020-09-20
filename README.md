@@ -1238,8 +1238,8 @@ CONNECT TO 'jdbc:sqlite:sample';
 
 ```sql
 /*
- * Connection is exposed to frontend
- * All statements from frontend side are permitted
+ * Connection is exposed to frontend.
+ * All statements from frontend side are permitted.
  */
 
            CONNECT TO 'jdbc:h2:~/fbsql/data/data;AUTO_SERVER=TRUE'
