@@ -24,7 +24,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 <ul>
 	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Hello world!</a></li>
 	<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
-	<li><a href="#connect_to"        title="CONNECT TO statement"       >Installation</a></li>
+	<li><a href="#installation"        title="FBSQL Installation"       >Installation</a></li>
 	<li><a href="#switch_to"         title="SWITCH TO statement"        >Command line interface (CLI)</a></li>
 	<li><a href="#connect_to"        title="CONNECT TO statement"       >Init script</a></li>
 	<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
@@ -211,6 +211,53 @@ If you are having troubles choosing a distribution, you probably need the <stron
 <tr><td>Embedded database             </td><td>&check;</td><td>       </td><td>       </td></tr>
 </table>
 
+
+<a id="installation"></a>
+<h1>Installation</h1>
+
+<strong>FBSQL Server</strong>
+<ul>
+<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Unzip the downloaded file on your machine:</li>
+</ul>
+
+```text
+
+fbsql-server-2.3.4-linux-x86-64 ─┐
+                                 ├─ fbsql              - Server executable (Linux-x86-64)
+                                 ├─ fbsql-min.js       - Client for browser
+                                 ├─ fbsql-debug-min.js - Frontend debug tool
+                                 ├─ README             - Release information 
+                                 └─ LICENSES           - Third party licenses
+```
+<strong>FBSQL Server Min</strong>
+<ul>
+<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Unzip the downloaded file on your machine:</li>
+</ul>
+
+```text
+
+fbsql-server-min-2.3.4-linux-x86-64 ─┐
+                                     ├─ fbsql        - Server executable (Linux-x86-64)
+                                     ├─ fbsql-min.js - Client for browser
+                                     ├─ README       - Release information 
+                                     └─ LICENSES     - Third party licenses
+```
+<strong>FBSQL Servlet</strong>
+<ul>
+<li>Download the latest <strong>FBSQL Servlet</strong> release: <a href="fbsql-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-2.3.4-linux-x86-64.zip</a></li>
+<li>Unzip the downloaded file on your machine:</li>
+</ul>
+
+```text
+
+fbsql-servlet-2.3.4-linux-x86-64 ─┐
+                                  ├─ fbsql.war    - FBSQL servlet
+                                  ├─ fbsql-min.js - Client for browser
+                                  ├─ README       - Release information 
+                                  └─ LICENSES     - Third party licenses
+```
 
 <a id="add_simple_authentication"></a>
 <h1>Authentication</h1>
