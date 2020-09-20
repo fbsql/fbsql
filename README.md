@@ -193,7 +193,7 @@ Start FBSQL server:<br><br>
 <ul>
 <li><strong>FBSQL Server</strong> is «all included» zero-config distribution for these who want complete backend solution including popular embedded databases and their JDBC drivers, connection engine and application server. It's best choice if you want to give try to FBSQL.</li>
 <br>
-<li><strong>FBSQL Server Min</strong> is minimalist distribution without embedded databases and debugging tools. Good for production usage.</li>
+<li><strong>FBSQL Server Min</strong> is minimalist distribution without embedded databases, JDBC drivers and debugging tools. Good for production usage.</li>
 <br>
 <li><strong>FBSQL Servlet</strong> targeted for these who want run FBSQL on own application server infrastructure.</li>
 </ul>
@@ -413,12 +413,9 @@ INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('D455', 'Dan  ');
 INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('J231', 'John ');
 INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
 
-
-DECLARE STATEMENT (SELECT 'Hello, World!' AS greeting);
-
-DECLARE STATEMENT (SELECT :msg AS greeting)
-                  COMPRESSION BEST COMPRESSION
-                  AS myStatement;
+DECLARE STATEMENT (SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id)
+      COMPRESSION BEST COMPRESSION
+               AS myStatement;
 
 ```
 
@@ -741,7 +738,7 @@ UNDECLARED STATEMENTS ALLOW
 
 /* Declare Java procedure */
 DECLARE PROCEDURE GET_EMPLOYEES
-             TYPE JVM
+             TYPE JAVA
           OPTIONS '{ "class": "org.fbsql_examples.DeclareStatementExample", "method": "getEmployees" }';
 
 /* Declare JavaScript procedure */
