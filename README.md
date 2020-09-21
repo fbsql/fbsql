@@ -1036,6 +1036,11 @@ EOF
 <a id="schedule_periodic_jobs"></a>
 <h1>Schedule periodic jobs</h1>
 
+FBSQL has own scheduler to run periodic jobs.
+Stored procedures can be scheduled to run according <strong>cron</strong> expressions, which are able to create firing schedules such as: “At 8:00am every Monday through Friday” or “At 1:30am every last Friday of the month”.
+
+See also: <a href="#schedule"><code>SCHEDULE</code></a>, <a href="#database_event_notification">Database event notification</a>
+
 <strong>Backend:</strong><br>
 
 ```sql
@@ -1062,7 +1067,36 @@ DECLARE PROCEDURE MY_PERIODIC_JOB TYPE JAVA
 SCHEDULE MY_PERIODIC_JOB AT "0/5 * * * * ?";
 
 ```
+<code>StroredProcedures.java</code>
+
+```java
+package org.fbsql_examples;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+
+public class StroredProcedures {
+
+	/**
+	 *
+	 * @param connection
+	 * @param instanceName
+	 * @param cronExpression
+	 * @return
+	 * @throws SQLException
+	 */
+	public static String myPeriodicJob(Connection connection, String instanceName, String cronExpression) throws SQLException {
+		String json = "{\"instanceName\": \"" + instanceName + "\", \"databaseProductName\": \"" + connection.getMetaData().getDatabaseProductName() + "\", \"cronExpression\": \"" + cronExpression + "\", \"timestamp\": \"" + new Timestamp(System.currentTimeMillis()) + "\"}";
+		System.out.println("Periodic job. Event: " + json);
+		return json;
+	}
+
+}
+```
 <strong>Frontend:</strong><br>
+
+Catch database events with debug tool:<br>
 
 ```html
 <!DOCTYPE html>
@@ -1080,6 +1114,25 @@ SCHEDULE MY_PERIODIC_JOB AT "0/5 * * * * ?";
 </html>
 
 ```
+Catch database events and print them on console:<br>
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('http://localhost:8080/db/ScheduleStatementExample');
+            conn.addDatabaseEventListener(event => console.log(event));
+        </script>
+    </body>
+</html>
+
+```
+
+
 
 <a id="blob_type"></a>
 <h1>Binary data</h1>
