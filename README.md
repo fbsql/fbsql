@@ -12,7 +12,7 @@ FBSQL supports any <abbr title="Java Database Connectivity">JDBC</abbr> complian
 All you need is <abbr title="Java Database Connectivity">JDBC</abbr> driver for your database.<br>
 <br>
 <strong>What about security?</strong><br>
-FBSQL security based on principle of least privilege (<abbr title="Principle of Least Privilege">POLP</abbr>). By default, FBSQL does not accept incoming connections. It also rejects all SQL statements that were not declared explicitly. Pre-execution triggers can be used to verify and modify input parameters before execution or completely reject execution by custom conditions. Users must implement their own authentication and authorization mechanism.<br>
+FBSQL security is based on the principle of least privilege (<abbr title="Principle of Least Privilege">POLP</abbr>). By default, FBSQL does not accept incoming connections. It also rejects all SQL statements that were not declared explicitly. Pre-execution triggers can be used to verify and modify input parameters before execution or completely reject execution by custom conditions. Users must implement their own authentication and authorization mechanism.<br>
 <br>
 <strong>What about performance?</strong><br>
 FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimized communication and response compression.<br>
@@ -42,7 +42,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
 	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
 	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
-	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Database event notification</a></li>
+	<li><a href="#database_event_notification" title="Database event notification.">Database event notification</a></li>
 </ul>
 <br><strong>Commands</strong>
 <ul>
@@ -286,61 +286,61 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
 
 <strong>FBSQL home directory</strong>
 ```text
-<FBSQL_HOME> ─┐ ........................................................│-> FBSQL home directory
-              │                                                         │
-              └─ fbsql ─┐                                               │
-                        │                                               │
-                        ├─ config                                       │-> FBSQL config directory
-                        │  │                                            │
-                        │  ├─ init                                      │-> init scripts directory
-                        │  │                                            │
-                        │  ├─ jre ......................................│-> JVM
-                        │  │  └─ conf                                   │   configuration files
-                        │  │     ├─ logging.properties                  │
-                        │  │     ├─ management                          │
-                        │  │     │  ├─ jmxremote.access                 │
-                        │  │     │  ├─ jmxremote.password.template      │
-                        │  │     │  └─ management.properties            │
-                        │  │     ├─ net.properties                      │
-                        │  │     ├─ sdp                                 │
-                        │  │     │  └─ sdp.conf.template                │
-                        │  │     ├─ security                            │
-                        │  │     │  ├─ java.policy                      │
-                        │  │     │  ├─ java.security                    │
-                        │  │     │  └─ policy                           │
-                        │  │     │      ├─ limited                      │
-                        │  │     │      │  ├─ default_local.policy      │
-                        │  │     │      │  ├─ default_US_export.policy  │
-                        │  │     │      │  └─ exempt_local.policy       │
-                        │  │     │      ├─ README.txt                   │
-                        │  │     │      └─ unlimited                    │
-                        │  │     │          ├─ default_local.policy     │
-                        │  │     │          └─ default_US_export.policy │
-                        │  │     └─ sound.properties                    │
-                        │  │                                            │
-                        │  └─ tomcat ...................................│-> Apache Tomcat
-                        │     ├─ bin                                    │   configuration files
-                        │     │  └─ setenv.sh                           │
-                        │     ├─ conf                                   │
-                        │     │  ├─ catalina.policy                     │
-                        │     │  ├─ catalina.properties                 │
-                        │     │  ├─ context.xml                         │
-                        │     │  ├─ jaspic-providers.xml                │
-                        │     │  ├─ jaspic-providers.xsd                │
-                        │     │  ├─ logging.properties                  │
-                        │     │  ├─ server.xml                          │
-                        │     │  ├─ tomcat-users.xml                    │
-                        │     │  ├─ tomcat-users.xsd                    │
-                        │     │  └─ web.xml                             │
-                        │     └─ webapps                                │
-                        │        └─ ROOT                                │
-                        │            │                                  │
-                        │            └─ WEB-INF ........................│-> servlet
-                        │                ├─ classes                     │   configuration files
-                        │                ├─ lib                         │
-                        │                └─ web.xml                     │
-                        │                                               │
-                        └─ logs ........................................│-> Logs directory
+<FBSQL_HOME> ─┐ ......................................................│-> FBSQL home directory
+              │                                                       │
+              └─ fbsql ─┐                                             │
+                        │                                             │
+                        ├─ config                                     │
+                        │  │                                          │
+                        │  ├─ init ...................................│-> init scripts
+                        │  │                                          │
+                        │  ├─ jre ....................................│-> JVM
+                        │  │  └─ conf                                 │   configuration files
+                        │  │     ├─ logging.properties                │
+                        │  │     ├─ management                        │
+                        │  │     │  ├─ jmxremote.access               │
+                        │  │     │  ├─ jmxremote.password.template    │
+                        │  │     │  └─ management.properties          │
+                        │  │     ├─ net.properties                    │
+                        │  │     ├─ sdp                               │
+                        │  │     │  └─ sdp.conf.template              │
+                        │  │     ├─ security                          │
+                        │  │     │  ├─ java.policy                    │
+                        │  │     │  ├─ java.security                  │
+                        │  │     │  └─ policy                         │
+                        │  │     │     ├─ limited                     │
+                        │  │     │     │  ├─ default_local.policy     │
+                        │  │     │     │  ├─ default_US_export.policy │
+                        │  │     │     │  └─ exempt_local.policy      │
+                        │  │     │     ├─ README.txt                  │
+                        │  │     │     └─ unlimited                   │
+                        │  │     │        ├─ default_local.policy     │
+                        │  │     │        └─ default_US_export.policy │
+                        │  │     └─ sound.properties                  │
+                        │  │                                          │
+                        │  └─ tomcat .................................│-> Apache Tomcat
+                        │     ├─ bin                                  │   configuration files
+                        │     │  └─ setenv.sh                         │
+                        │     ├─ conf                                 │
+                        │     │  ├─ catalina.policy                   │
+                        │     │  ├─ catalina.properties               │
+                        │     │  ├─ context.xml                       │
+                        │     │  ├─ jaspic-providers.xml              │
+                        │     │  ├─ jaspic-providers.xsd              │
+                        │     │  ├─ logging.properties                │
+                        │     │  ├─ server.xml                        │
+                        │     │  ├─ tomcat-users.xml                  │
+                        │     │  ├─ tomcat-users.xsd                  │
+                        │     │  └─ web.xml                           │
+                        │     └─ webapps                              │
+                        │        └─ ROOT                              │
+                        │           │                                 │
+                        │           └─ WEB-INF .......................│-> servlet
+                        │              ├─ classes                     │   configuration files
+                        │              ├─ lib                         │
+                        │              └─ web.xml                     │
+                        │                                             │
+                        └─ logs ......................................│-> Logs directory
 
 ```
 <a id="init_script"></a>
@@ -402,7 +402,7 @@ EXPOSE UNDECLARED STATEMENTS
 /* Users */
 DROP TABLE IF EXISTS USERS;
 CREATE TABLE USERS (
-    USERNAME VARCHAR(15) NOT NULL PRIMARY KEY,
+    USERNAME VARCHAR(15) PRIMARY KEY,
     PASSWORD VARCHAR(15) NOT NULL
 );
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('john',  'secret'   );
@@ -420,7 +420,7 @@ INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection("AuthenticationExample", "john", "secret");
+            const conn = new Connection("http://localhost:8080/db/AuthenticationExample", "john", "secret");
             const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS greeting");
             ps.executeQuery()
             .then(resultSet => alert(resultSet[0].greeting));
@@ -479,7 +479,7 @@ EXPOSE UNDECLARED STATEMENTS
 /* Users */
 DROP TABLE IF EXISTS USERS;
 CREATE TABLE USERS (
-    USERNAME VARCHAR(15) NOT NULL PRIMARY KEY,
+    USERNAME VARCHAR(15) PRIMARY KEY,
     PASSWORD VARCHAR(15) NOT NULL
 );
 INSERT INTO USERS (USERNAME, PASSWORD) VALUES('john',  'secret'   );
@@ -509,7 +509,7 @@ INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection("RoleBasedAuthorizationExample", "john", "secret", "manager");
+            const conn = new Connection("http://localhost:8080/db/RoleBasedAuthorizationExample", "john", "secret", "manager");
             const ps   = conn.prepareStatement("SELECT 'Hello, World!' AS greeting");
             ps.executeQuery()
             .then(resultSet => alert(resultSet[0].greeting));
@@ -625,7 +625,7 @@ EXPOSE UNDECLARED STATEMENTS
 
 DROP TABLE IF EXISTS COUNTRIES;
 CREATE TABLE COUNTRIES (
-    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
+    COUNTRY_ID   CHAR(2)     PRIMARY KEY,
     COUNTRY_NAME VARCHAR(50) NOT NULL
 );
 
@@ -720,7 +720,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 ```
 
 <a id="reseult_set_format"></a>
-<h2>Reseult set formats</h2>
+<h1>Reseult set formats</h1>
 <p>
 In this chapter we will learn how to receive result set in various formats by using PreparedStatement#setResultSetFormat() method.
 </p>
@@ -757,7 +757,7 @@ EXPOSE UNDECLARED STATEMENTS
 
 DROP TABLE IF EXISTS COUNTRIES;
 CREATE TABLE COUNTRIES (
-    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
+    COUNTRY_ID   CHAR(2)     PRIMARY KEY,
     COUNTRY_NAME VARCHAR(50) NOT NULL
 );
 
@@ -853,7 +853,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 ```
 
 <a id="database_agnostic_stored_procedures"></a>
-<h2>Database agnostic stored procedures</h2>
+<h1>Database agnostic stored procedures</h1>
 <p>
 In this chapter we will learn how to write and use database agnostic stored procedures written in JavaScript or <abbr title="Java Virtual Machine">JVM</abbr> languages (DECLARE PROCEDURE statement).
 </p>
@@ -1034,7 +1034,7 @@ EOF
 ```
 
 <a id="schedule_periodic_jobs"></a>
-<h2>Schedule periodic jobs</h2>
+<h1>Schedule periodic jobs</h1>
 
 <strong>Backend:</strong><br>
 
@@ -1073,7 +1073,7 @@ SCHEDULE MY_PERIODIC_JOB AT "0/5 * * * * ?";
     </head>
     <body>
         <script type="text/javascript">
-            const conn = new Connection('ScheduleStatementExample');
+            const conn = new Connection('http://localhost:8080/db/ScheduleStatementExample');
             logDatabaseEvents(conn);
         </script>
     </body>
@@ -1082,7 +1082,7 @@ SCHEDULE MY_PERIODIC_JOB AT "0/5 * * * * ?";
 ```
 
 <a id="blob_type"></a>
-<h2>Binary data</h2>
+<h1>Binary data</h1>
 <p>
 In this chapter we will learn how to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.
 </p>
@@ -1112,7 +1112,7 @@ UNDECLARED STATEMENTS ALLOW
 
 DROP TABLE IF EXISTS COUNTRIES;
 CREATE TABLE COUNTRIES (
-    COUNTRY_ID     CHAR(2)     NOT NULL PRIMARY KEY,
+    COUNTRY_ID     CHAR(2)     PRIMARY KEY,
     COUNTRY_NAME   VARCHAR(50) NOT NULL,
     COUNTRY_FLAG_1 BLOB,
     COUNTRY_FLAG_2 VARBINARY(5000)
@@ -1145,7 +1145,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IT', 'Italy');
             let myImage = document.getElementById("myImage");
             let myInput = document.getElementById("myInput");
 
-            const conn = new Connection('BlobAndVarbinaryExample');
+            const conn = new Connection('http://localhost:8080/db/BlobAndVarbinaryExample');
             let psSelect = conn.prepareStatement("SELECT COUNTRY_FLAG_1 FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
             let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_FLAG_1 = :country_flag WHERE COUNTRY_ID = 'AU'");
 
@@ -1204,7 +1204,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IT', 'Italy');
             let myImage = document.getElementById("myImage");
             let myInput = document.getElementById("myInput");
 
-            const conn = new Connection('BlobAndVarbinaryExample');
+            const conn = new Connection('http://localhost:8080/db/BlobAndVarbinaryExample');
             let psSelect = conn.prepareStatement("SELECT COUNTRY_FLAG_2 FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
             let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_FLAG_2 = :country_flag WHERE COUNTRY_ID = 'AU'");
 
@@ -1243,26 +1243,44 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IT', 'Italy');
 ```
 
 <a id="date_type"></a>
-<h2>Date and Time</h2>
-<p><i>
+<h1>Date and Time</h1>
+<p>
 In this chapter we will learn how to work with DATE, TIME and TIMESTAMP types.
-</i></p>
+</p>
 
 <strong>Backend:</strong><br>
 
 ```sql
-CONNECT TO 'jdbc:sqlite:sample';
+/*
+ * init.sql
+ *
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ */
+
+                  CONNECT TO 'jdbc:sqlite:date_and_time_example_db'
+EXPOSE UNDECLARED STATEMENTS
+  ALLOW INCOMING CONNECTIONS
+                             AS DateAndTimeExample;
+
 
 DROP TABLE IF EXISTS COUNTRIES;
 CREATE TABLE IF NOT EXISTS COUNTRIES (
-    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
-    COUNTRY_NAME VARCHAR(40) NOT NULL,
+    COUNTRY_ID   CHAR(2)     PRIMARY KEY,
+    COUNTRY_NAME VARCHAR(50) NOT NULL,
     COUNTRY_DATE DATE,
     COUNTRY_TIME TIME,
     COUNTRY_TIMESTAMP TIMESTAMP
 );
 
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME, COUNTRY_TIMESTAMP) VALUES('AU', 'Australia', '2014-12-27', '17:45:53', '2014-12-27 17:45:53');
+INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME,     COUNTRY_TIMESTAMP)
+     VALUES           (      'AU',  'Australia', '2014-12-27',   '17:45:53', '2014-12-27 17:45:53');
 
 ```
 <strong>Frontend:</strong><br>
@@ -1279,9 +1297,9 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME, COU
         <button id="myInput">Update</button>
 
         <script type="text/javascript">
-            let myInput = document.getElementById("myInput");
+            let myInput = document.getElementById("DateAndTimeExample");
 
-            const conn = new Connection('my-sqlite');
+            const conn = new Connection('http://localhost:8080/db/DateAndTimeExample');
             let psSelect = conn.prepareStatement("SELECT * FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
             let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_DATE = :country_date, COUNTRY_TIME = :country_time, COUNTRY_TIMESTAMP = :country_timestamp WHERE COUNTRY_ID = 'AU'");
 
@@ -1314,10 +1332,26 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME, COU
 </html>
 ```
 
-<h2>COMMANDS</h2>
+<a id="database_event_notification"></a>
+<h1>Database event notification</h1>
+
+Database event notification is implemented in two forms:
+<ol>
+	<li>
+		By using <code>TRIGGER AFTER</code> clause of <code>DECLARE STATEMENT</code> command.<br>
+		If trigger procedure ends without excepltion and returns JSON object, JSON object will be transmitted to subscribed clients as event object.
+	</li>
+	<br>
+	<li>
+		By <code>SCHEDULE</code> command.<br>
+		If scheduled procedure ends without excepltion and returns JSON object, JSON object will be transmitted to subscribed clients as event object.
+	</li>
+</ol>
+
+<h2>FBSQL COMMANDS</h2>
 
 <a id="connect_to"></a>
-<h3>CONNECT TO</h3>
+<h1>CONNECT TO</h1>
 
 ```EBNF
 connect_to_stmt
@@ -1418,7 +1452,7 @@ UNDECLARED STATEMENTS REJECT
 
 <br><br>
 <a id="switch_to"></a>
-<h3>SWITCH TO</h3>
+<h1>SWITCH TO</h1>
 
 ```EBNF
 switch_to_stmt
@@ -1453,7 +1487,7 @@ SWITCH TO MyOracle;
 <br><br>
 
 <a id="declare_statement"></a>
-<h3>DECLARE STATEMENT</h3>
+<h1>DECLARE STATEMENT</h1>
 
 ```EBNF
 declare_statement_stmt
@@ -1520,7 +1554,7 @@ DECLARE STATEMENT (SELECT * FROM ORDERS WHERE ORDER_ID = :id)
  
 ```
 <a id="declare_procedure"></a>
-<h3>DECLARE PROCEDURE</h3>
+<h1>DECLARE PROCEDURE</h1>
 
 ```EBNF
 declare_procedure_stmt
@@ -1599,7 +1633,7 @@ DECLARE PROCEDURE GET_ITEMS
 ```
 
 <a id="schedule"></a>
-<h3>SCHEDULE</h3>
+<h1>SCHEDULE</h1>
 
 ```EBNF
 schedule_stmt
@@ -1866,7 +1900,7 @@ follows:</p>
 </ul>
 
 <a id="include"></a>
-<h3>INCLUDE</h3>
+<h1>INCLUDE</h1>
 
 ```EBNF
 include_script_file_stmt
@@ -1889,9 +1923,3 @@ INCLUDE 'my.sql';
 INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
 
 ```
-
-<h3>Contacts and support:</h3>
-<ul>
-	<li>Home: <a href="https://fbsql.github.io" target="_blank">https://fbsql.github.io</a></li>
-	<li>E-Mail: <a href="mailto:fbsql.team@gmail.com" target="_blank">fbsql.team@gmail.com</a></li>
-</ul>

@@ -271,7 +271,7 @@ declare_procedure_stmt
    (
     OPTIONS json |
     OPTIONS FILE json_file
-   )+
+   )?
  ;
 
 include_script_file_stmt
