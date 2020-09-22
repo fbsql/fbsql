@@ -1388,18 +1388,33 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME,    
 <a id="database_event_notification"></a>
 <h1>Database event notification</h1>
 
-Database event notification is implemented in two forms:
+<strong>On server side:</strong>
+FBSQL supports two forms of database event notification:
 <ol>
 	<li>
-		By using <code>TRIGGER AFTER</code> clause of <code>DECLARE STATEMENT</code> command.<br>
+		By using <code>TRIGGER AFTER</code> clause of <a href="#declare_statement"><code>DECLARE STATEMENT</code></a> command.<br>
 		If trigger procedure ends without excepltion and returns JSON object, JSON object will be transmitted to subscribed clients as event object.
 	</li>
 	<br>
 	<li>
-		By <code>SCHEDULE</code> command.<br>
-		If scheduled procedure ends without excepltion and returns JSON object, JSON object will be transmitted to subscribed clients as event object.
+		By <a href="#schedule"><code>SCHEDULE</code></a> command.<br>
+		If scheduled procedure ends without exception and returns JSON object, JSON object will be transmitted to subscribed clients as event object.
 	</li>
 </ol>
+<br>
+<strong>On client side:</strong>
+To catch database events on client side you need to add database event listener(s) to your connection object.
+
+```js
+
+const conn = new Connection('http://localhost:8080/db/MyDatbase');
+conn.addDatabaseEventListener(myListener);
+
+function myListener(event) {
+	console.log(event);
+}
+
+```
 
 <h2>FBSQL COMMANDS</h2>
 
