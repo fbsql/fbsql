@@ -1416,7 +1416,7 @@ function listener(event) {
 }
 
 ```
-Catch database events and print them on console:<br>
+Catch database events and print them on console:
 
 ```html
 <!DOCTYPE html>
@@ -1433,7 +1433,7 @@ Catch database events and print them on console:<br>
 </html>
 
 ```
-Catch database events with debug tool:<br>
+Catch database events with debug tool:
 
 ```html
 <!DOCTYPE html>
@@ -1546,8 +1546,9 @@ ps.executeQuery()
 );
 
 ```
-
+<br>
 <strong>Mock Events</strong><br>
+<br>
 You can fire mock database events by using fireMockDatabaseEvent of Connection object. 
 
 ```html
