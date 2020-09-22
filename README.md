@@ -1322,17 +1322,17 @@ EXPOSE UNDECLARED STATEMENTS
                              AS DateAndTimeExample;
 
 
-DROP TABLE IF EXISTS COUNTRIES;
-CREATE TABLE IF NOT EXISTS COUNTRIES (
-    COUNTRY_ID   CHAR(2)     PRIMARY KEY,
-    COUNTRY_NAME VARCHAR(50) NOT NULL,
-    COUNTRY_DATE DATE,
-    COUNTRY_TIME TIME,
-    COUNTRY_TIMESTAMP TIMESTAMP
+DROP TABLE IF EXISTS CITIES;
+CREATE TABLE CITIES (
+    CITY_ID   CHAR(2)     PRIMARY KEY,
+    CITY_NAME VARCHAR(50) NOT NULL,
+    CITY_DATE DATE,
+    CITY_TIME TIME,
+    CITY_TIMESTAMP TIMESTAMP
 );
 
-INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME,     COUNTRY_TIMESTAMP)
-     VALUES           (      'AU',  'Australia', '2014-12-27',   '17:45:53', '2014-12-27 17:45:53');
+INSERT INTO CITIES (CITY_ID, CITY_NAME, CITY_DATE, CITY_TIME, CITY_TIMESTAMP)
+     VALUES        ('NY', 'New York', '2014-12-27', '17:45:53', '2014-12-27 17:45:53');
 
 ```
 <strong>Frontend:</strong><br>
@@ -1352,31 +1352,31 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME,    
             let myInput = document.getElementById("DateAndTimeExample");
 
             const conn = new Connection('http://localhost:8080/db/DateAndTimeExample');
-            let psSelect = conn.prepareStatement("SELECT * FROM COUNTRIES WHERE COUNTRY_ID = 'AU'");
-            let psUpdate = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_DATE = :country_date, COUNTRY_TIME = :country_time, COUNTRY_TIMESTAMP = :country_timestamp WHERE COUNTRY_ID = 'AU'");
+            let psSelect = conn.prepareStatement("SELECT * FROM CITIES WHERE CITY_ID = 'AU'");
+            let psUpdate = conn.prepareStatement("UPDATE CITIES SET CITY_DATE = :city_date, CITY_TIME = :cǐty_time, CITY_TIMESTAMP = :city_timestamp WHERE CITY_ID = 'AU'");
 
             psSelect.executeQuery()
             .then(resultSet => {
                 console.log('*** read from database ***');
-                console.log(`COUNTRY_DATE: ${resultSet[0].COUNTRY_DATE}`);
-                console.log(`COUNTRY_TIME: ${resultSet[0].COUNTRY_TIME}`);
-                console.log(`COUNTRY_TIMESTAMP: ${resultSet[0].COUNTRY_TIMESTAMP}`);
+                console.log(`CITY_DATE: ${resultSet[0].CITY_DATE}`);
+                console.log(`CITY_TIME: ${resultSet[0].CITY_TIME}`);
+                console.log(`CITY_TIMESTAMP: ${resultSet[0].CITY_TIMESTAMP}`);
             });
 
             myInput.onclick = function(event) {
                 var input = event.target;
                 let date = new Date();
                 console.log('*** update database ***');
-                psUpdate.executeUpdate({country_date: date, country_time: date, country_timestamp: date})
+                psUpdate.executeUpdate({city_date: date, city_time: date, city_timestamp: date})
                 .then(result => {
                     /* Load image from database */
                     return psSelect.executeQuery();
                 })
                 .then(resultSet => {
                     console.log('*** read updated values ***');
-                    console.log(`COUNTRY_DATE: ${resultSet[0].COUNTRY_DATE}`);
-                    console.log(`COUNTRY_TIME: ${resultSet[0].COUNTRY_TIME}`);
-                    console.log(`COUNTRY_TIMESTAMP: ${resultSet[0].COUNTRY_TIMESTAMP}`);
+                    console.log(`CITY_DATE: ${resultSet[0].CITY_DATE}`);
+                    console.log(`CITY_TIME: ${resultSet[0].CITY_TIME}`);
+                    console.log(`CITY_TIMESTAMP: ${resultSet[0].CITY_TIMESTAMP}`);
                 });
             };
         </script>
@@ -1454,12 +1454,34 @@ Catch database events with debug tool:
 <a id="debug_utility"></a>
 <h1>Frontend debug tool</h1>
 
+To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after <code>fbsql.min.js</code> in <code><head></code> section of your HTML:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+        <script src="fbsql-debug.min.js"></script>
+    </head>
+    ...
+</html>
+
+```
+Functions:
+<ul>
+	<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
+	<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
+	<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
+</ul>
+
+
 <a id="mocking_with_fbsql"></a>
 <h1>Mocking with FBSQL</h1>
 You can simulate FBSQL database interactions with mock functions.
+Mock functions does not need connection to backend and can be used completly offline (with no FBSQL).
 <br><br>
 <strong>Mock Functions</strong>
-
+<br>
 client-server version (without mock functions):
 
 ```js
