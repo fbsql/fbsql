@@ -1454,7 +1454,7 @@ Catch database events with debug tool:
 <a id="debug_utility"></a>
 <h1>Frontend debug tool</h1>
 
-To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after <code>fbsql.min.js</code> in <code><head></code> section of your HTML:
+To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after <code>fbsql.min.js</code> in <code>&lt;head&gt;</code> section of your HTML:
 
 ```html
 <!DOCTYPE html>
