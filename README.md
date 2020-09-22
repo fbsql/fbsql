@@ -37,11 +37,9 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
 	<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
 	<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
-	<li><a href="#debug_utility" title="FBSQL server.">Server</a></li>
-	<li><a href="#debug_utility" title="FBSQL client (fbsql.js).">Client</a></li>
 	<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
 	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
-	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
+	<li><a href="#parameters checking" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
 	<li><a href="#database_event_notification" title="Database event notification.">Database event notification</a></li>
 </ul>
 <br><strong>Commands</strong>
@@ -1096,6 +1094,23 @@ public class StroredProcedures {
 ```
 <strong>Frontend:</strong><br>
 
+Catch database events and print them on console:<br>
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('http://localhost:8080/db/ScheduleStatementExample');
+            conn.addDatabaseEventListener(event => console.log(event));
+        </script>
+    </body>
+</html>
+
+```
 Catch database events with debug tool:<br>
 
 ```html
@@ -1114,23 +1129,7 @@ Catch database events with debug tool:<br>
 </html>
 
 ```
-Catch database events and print them on console:<br>
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection('http://localhost:8080/db/ScheduleStatementExample');
-            conn.addDatabaseEventListener(event => console.log(event));
-        </script>
-    </body>
-</html>
-
-```
 
 
 
@@ -1388,31 +1387,184 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME, COUNTRY_DATE, COUNTRY_TIME,    
 <a id="database_event_notification"></a>
 <h1>Database event notification</h1>
 
-<strong>On server side:</strong>
+<strong>On server side:</strong><br>
 FBSQL supports two forms of database event notification:
 <ol>
 	<li>
 		By using <code>TRIGGER AFTER</code> clause of <a href="#declare_statement"><code>DECLARE STATEMENT</code></a> command.<br>
-		If trigger procedure ends without excepltion and returns JSON object, JSON object will be transmitted to subscribed clients as event object.
+		If trigger procedure ends without excepltion and returns JSON object, JSON object will be transmitted to subscribed clients as event object.<br>
+		See also: <a href="#declare_statement"><code>DECLARE STATEMENT</code></a>.
 	</li>
 	<br>
 	<li>
 		By <a href="#schedule"><code>SCHEDULE</code></a> command.<br>
-		If scheduled procedure ends without exception and returns JSON object, JSON object will be transmitted to subscribed clients as event object.
+		If scheduled procedure ends without exception and returns JSON object, JSON object will be transmitted to subscribed clients as event object.<br>
+		See also: <a href="#schedule"><code>SCHEDULE</code></a>, <a href="#schedule_periodic_jobs">Schedule periodic jobs</a>.
 	</li>
 </ol>
 <br>
-<strong>On client side:</strong>
-To catch database events on client side you need to add database event listener(s) to your connection object.
+<strong>On client side:</strong><br>
+To catch database events on client side you need to add database event listener(s) to your connection object:
 
 ```js
 
 const conn = new Connection('http://localhost:8080/db/MyDatbase');
-conn.addDatabaseEventListener(myListener);
+conn.addDatabaseEventListener(listener);
 
-function myListener(event) {
-	console.log(event);
+function listener(event) {
+    console.log(event);
 }
+
+```
+Catch database events and print them on console:<br>
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('http://localhost:8080/db/ScheduleStatementExample');
+            conn.addDatabaseEventListener(event => console.log(event));
+        </script>
+    </body>
+</html>
+
+```
+Catch database events with debug tool:<br>
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+        <script src="fbsql-debug.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('http://localhost:8080/db/ScheduleStatementExample');
+            logDatabaseEvents(conn);
+        </script>
+    </body>
+</html>
+
+```
+<a id="debug_utility"></a>
+<h1>Frontend debug tool</h1>
+
+<a id="mocking_with_fbsql"></a>
+<h1>Mocking with FBSQL</h1>
+You can simulate FBSQL database interactions.
+
+<strong>Mock Functions</strong>
+
+```js
+
+const conn = new Connection('http://localhost:8080/db/MyDatabase');
+const ps = conn.prepareStatement("SELECT * FROM COUNTRIES");
+ps.executeQuery()
+.then(resultSet => {
+   console.log(resultSet);
+   /*
+    *   Output:
+    *   
+    *   [
+    *       {
+    *           "COUNTRY_ID": "AU",
+    *           "COUNTRY_NAME": "Australia"
+    *       },
+    *       {
+    *           "COUNTRY_ID": "DE",
+    *           "COUNTRY_NAME": "Germany"
+    *       },
+    *       {
+    *           "COUNTRY_ID": "IN",
+    *           "COUNTRY_NAME": "India"
+    *       }
+    *   ]
+    */
+);
+
+```
+```js
+
+const mockFunc = function() {
+    return [
+               {
+                   "COUNTRY_ID": "AU",
+                   "COUNTRY_NAME": "Australia"
+               },
+               {
+                   "COUNTRY_ID": "DE",
+                   "COUNTRY_NAME": "Germany"
+               },
+               {
+                   "COUNTRY_ID": "IN",
+                   "COUNTRY_NAME": "India"
+               }
+           ];
+}
+
+const conn = new Connection('http://localhost:8080/db/MyDatabase');
+//
+// URL does not required when you use only mock functions.
+// So, you can just write:
+// const conn = new Connection();
+//
+const ps = conn.prepareStatement("SELECT * FROM COUNTRIES"); // query will not transmitted to server
+ps.setMockFunction(mockFunc);
+ps.executeQuery()
+.then(resultSet => {
+   console.log(resultSet);
+   /*
+    *   Output:
+    *   
+    *   [
+    *       {
+    *           "COUNTRY_ID": "AU",
+    *           "COUNTRY_NAME": "Australia"
+    *       },
+    *       {
+    *           "COUNTRY_ID": "DE",
+    *           "COUNTRY_NAME": "Germany"
+    *       },
+    *       {
+    *           "COUNTRY_ID": "IN",
+    *           "COUNTRY_NAME": "India"
+    *       }
+    *   ]
+    */
+);
+
+```
+<strong>Mock Events</strong>
+You can fire mock database events by using fireMockDatabaseEvent of Connection object. 
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+    </head>
+    <body>
+        <button id="myFireButton">Fire Event</button>
+        <script type="text/javascript">
+            const conn = new Connection('http://localhost:8080/db/ScheduleStatementExample');
+            conn.addDatabaseEventListener(event => console.log(event));
+            
+            const mockEventFunc = function() {
+                return {message: "Button clicked!", time = new Date()}; // our event object
+            }
+
+            const myFireButton = document.getElementById('myFireButton');
+            myFireButton.addEventListener('click', function() {
+                conn.fireMockDatabaseEvent(mockEventFunc);
+            });
+        </script>
+    </body>
+</html>
 
 ```
 
