@@ -1456,9 +1456,11 @@ Catch database events with debug tool:<br>
 
 <a id="mocking_with_fbsql"></a>
 <h1>Mocking with FBSQL</h1>
-You can simulate FBSQL database interactions.
+You can simulate FBSQL database interactions with mock functions.
 
 <strong>Mock Functions</strong>
+
+client-server version (without mock functions)<br>
 
 ```js
 
@@ -1488,6 +1490,8 @@ ps.executeQuery()
 );
 
 ```
+<br>
+client-only version (with mock functions)<br>
 ```js
 
 const mockFunc = function() {
@@ -1539,7 +1543,7 @@ ps.executeQuery()
 );
 
 ```
-<strong>Mock Events</strong>
+<strong>Mock Events</strong><br>
 You can fire mock database events by using fireMockDatabaseEvent of Connection object. 
 
 ```html
@@ -1555,7 +1559,7 @@ You can fire mock database events by using fireMockDatabaseEvent of Connection o
             conn.addDatabaseEventListener(event => console.log(event));
             
             const mockEventFunc = function() {
-                return {message: "Button clicked!", time = new Date()}; // our event object
+                return {message: "price changed", price: 24.90, time = new Date()}; // our event object
             }
 
             const myFireButton = document.getElementById('myFireButton');
