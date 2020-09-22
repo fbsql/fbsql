@@ -1480,7 +1480,7 @@ Functions:
 You can simulate FBSQL database interactions with mock functions.
 Mock functions does not need connection to backend and can be used completly offline (with no FBSQL).
 <br><br>
-<strong>Mock Functions</strong>
+<strong>Mock executeQuery/executeUpdate methods</strong>
 <br>
 client-server version (without mock functions):
 
@@ -1569,7 +1569,7 @@ ps.executeQuery()
 
 ```
 <br>
-<strong>Mock Events</strong><br>
+<strong>Fire database events on client</strong><br>
 <br>
 You can fire mock database events by using fireMockDatabaseEvent of Connection object. 
 
