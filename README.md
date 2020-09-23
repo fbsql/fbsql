@@ -205,14 +205,16 @@ If you are having troubles choosing a distribution, you probably need the <stron
 <br><br>
 <strong>FBSQL distributions overview</strong>
 <table>
-<tr><th>                              </th><th>FBSQL Server</th><th>FBSQL Server Min</th><th>FBSQL Servlet</th></tr>
-<tr><td>FBSQL engine (servlet)        </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
-<tr><td>JavaScript client API         </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
-<tr><td>Frontend debug tool           </td><td>&check;</td><td>       </td><td>       </td></tr>
-<tr><td>Java Runtime Environment (JRE)</td><td>&check;</td><td>&check;</td><td>       </td></tr>
-<tr><td>Servlet container             </td><td>&check;</td><td>&check;</td><td>       </td></tr>
-<tr><td>Command line interface        </td><td>&check;</td><td>&check;</td><td>       </td></tr>
-<tr><td>Embedded database             </td><td>&check;</td><td>       </td><td>       </td></tr>
+<tr><th>                                         </th><th>FBSQL Server</th><th>FBSQL Server Min</th><th>FBSQL Servlet</th></tr>
+<tr><td>FBSQL engine (servlet)                   </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
+<tr><td>JavaScript client API                    </td><td>&check;</td><td>&check;</td><td>&check;</td></tr>
+<tr><td>Frontend debug tool                      </td><td>&check;</td><td>       </td><td>       </td></tr>
+<tr><td>Java Runtime Environment (JRE)           </td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Servlet container                        </td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Command line interface                   </td><td>&check;</td><td>&check;</td><td>       </td></tr>
+<tr><td>Embedded SQLite, H2, HSQLDB, Apache Derby</td><td>&check;</td><td>       </td><td>       </td></tr>
+<tr><td>JDBC drivers for embedded databases      </td><td>&check;</td><td>       </td><td>       </td></tr>
+
 </table>
 <br>
 
