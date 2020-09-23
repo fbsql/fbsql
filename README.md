@@ -272,14 +272,14 @@ fbsql-servlet-2.3.4 ─┐
 <a id="cli"></a>
 <h1>Command line interface (CLI)</h1>
 
-<strong>Command line</strong>
+<strong>Command line:</strong>
 
 ```text
 
 fbsql [option]
 
 ```
-<strong>Command line options</strong>
+<strong>Command line options:</strong>
 <table>
 <tr><th>Option</th><th>Description</th></tr>
 <tr><td><code>help</code></td><td>Prints the command line interface help</td></tr>
@@ -736,7 +736,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 FBSQL allow check and/or modify parameters of any SQL statement before execution.
 This can be achieved by using <code>TRIGGER&nbsp;BEFORE</code> clause of <code>DECLARE&nbsp;STATEMENT</code> command.
 
-<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occur execution will be rejected.
+<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occur execution will be rejected.<br>
 <br>
 See also: <a href="#declare_statement"><code>DECLARE&nbsp;STATEMENT</code></a>.
 <br>
