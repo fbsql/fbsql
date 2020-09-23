@@ -130,7 +130,6 @@ footer {
 <div id="index">
 <h2>Rules</h2>
 <ol>
-  <li><a href="#EXPOSE">EXPOSE</a></li>
   <li><a href="#STATIC">STATIC</a></li>
   <li><a href="#ROLES">ROLES</a></li>
   <li><a href="#TRIGGER">TRIGGER</a></li>
@@ -144,7 +143,7 @@ footer {
   <li><a href="#DECLARE">DECLARE</a></li>
   <li><a href="#PROCEDURE">PROCEDURE</a></li>
   <li><a href="#TYPE">TYPE</a></li>
-  <li><a href="#JVM">JVM</a></li>
+  <li><a href="#JAVA">JAVA</a></li>
   <li><a href="#JS">JS</a></li>
   <li><a href="#EXEC">EXEC</a></li>
   <li><a href="#URL">URL</a></li>
@@ -244,23 +243,6 @@ footer {
 
 <div id="rules">
 <ul>
-  <li class="rule" id="EXPOSE">
-  <h3>EXPOSE <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
-  <div class="doc">
-    <p>
-    </p>
-  </div>
-  <div class="ebnf">
-  <h4>Text notation:</h4>
-  <div>
-    <span class="rule">EXPOSE</span> :  <a href="#E" class="token">E</a> <a href="#X" class="token">X</a> <a href="#P" class="token">P</a> <a href="#O" class="token">O</a> <a href="#S" class="token">S</a> <a href="#E" class="token">E</a> ;
-  </div>
-  </div>
-  <div class="railroad">
-  <h4>Visual notation:</h4>
-  <img border="0" src="images/EXPOSE.png" />
-  </div>
-  </li>
   <li class="rule" id="STATIC">
   <h3>STATIC <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
   <div class="doc">
@@ -482,8 +464,8 @@ footer {
   <img border="0" src="images/TYPE.png" />
   </div>
   </li>
-  <li class="rule" id="JVM">
-  <h3>JVM <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
+  <li class="rule" id="JAVA">
+  <h3>JAVA <a class="topLink" title="Go to top" href="Fbsql.g4.html">Top</a></h3>
   <div class="doc">
     <p>
     </p>
@@ -491,12 +473,12 @@ footer {
   <div class="ebnf">
   <h4>Text notation:</h4>
   <div>
-    <span class="rule">JVM</span> :  <a href="#J" class="token">J</a> <a href="#V" class="token">V</a> <a href="#M" class="token">M</a> ;
+    <span class="rule">JAVA</span> :  <a href="#J" class="token">J</a> <a href="#A" class="token">A</a> <a href="#V" class="token">V</a> <a href="#A" class="token">A</a> ;
   </div>
   </div>
   <div class="railroad">
   <h4>Visual notation:</h4>
-  <img border="0" src="images/JVM.png" />
+  <img border="0" src="images/JAVA.png" />
   </div>
   </li>
   <li class="rule" id="JS">
@@ -1409,7 +1391,7 @@ footer {
   <div class="ebnf">
   <h4>Text notation:</h4>
   <div>
-    <span class="rule">connect_to_stmt</span> :  <a href="#CONNECT" class="token">CONNECT</a> <a href="#TO" class="token">TO</a> <a href="#jdbc_url" class="rule">jdbc_url</a> <span class="operator">(</span> <span class="operator">(</span> <a href="#USER" class="token">USER</a> <a href="#user" class="rule">user</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#PASSWORD" class="token">PASSWORD</a> <a href="#password" class="rule">password</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#PROPERTIES" class="token">PROPERTIES</a> <a href="#jdbc_connection_properties" class="rule">jdbc_connection_properties</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#DRIVER" class="token">DRIVER</a> <a href="#jdbc_driver_class_name" class="rule">jdbc_driver_class_name</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#LIB" class="token">LIB</a> <a href="#jar_file" class="rule">jar_file</a> <span class="operator">(</span> <span class="literal">','</span> <a href="#jar_file" class="rule">jar_file</a> <span class="operator">)</span><span class="operator">*</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#CONNECTION" class="token">CONNECTION</a> <a href="#POOL" class="token">POOL</a> <span class="operator">(</span> <span class="operator">(</span> <a href="#MIN" class="token">MIN</a> <a href="#connection_pool_size_min" class="rule">connection_pool_size_min</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#MAX" class="token">MAX</a> <a href="#connection_pool_size_max" class="rule">connection_pool_size_max</a> <span class="operator">)</span> <span class="operator">)</span><span class="operator">+</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#EXPOSE" class="token">EXPOSE</a> <a href="#UNDECLARED" class="token">UNDECLARED</a> <a href="#STATEMENTS" class="token">STATEMENTS</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#ALLOW" class="token">ALLOW</a> <a href="#INCOMING" class="token">INCOMING</a> <a href="#CONNECTIONS" class="token">CONNECTIONS</a> <span class="operator">(</span> <a href="#IF" class="token">IF</a> <a href="#EXISTS" class="token">EXISTS</a> <span class="literal">'('</span> <a href="#native_sql" class="rule">native_sql</a> <span class="literal">')'</span> <span class="operator">)</span><span class="operator">?</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#AS" class="token">AS</a><span class="operator">?</span> <a href="#connection_alias" class="rule">connection_alias</a> <span class="operator">)</span> <span class="operator">)</span><span class="operator">*</span> ;
+    <span class="rule">connect_to_stmt</span> :  <a href="#CONNECT" class="token">CONNECT</a> <a href="#TO" class="token">TO</a> <a href="#jdbc_url" class="rule">jdbc_url</a> <span class="operator">(</span> <span class="operator">(</span> <a href="#USER" class="token">USER</a> <a href="#user" class="rule">user</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#PASSWORD" class="token">PASSWORD</a> <a href="#password" class="rule">password</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#PROPERTIES" class="token">PROPERTIES</a> <a href="#jdbc_connection_properties" class="rule">jdbc_connection_properties</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#DRIVER" class="token">DRIVER</a> <a href="#jdbc_driver_class_name" class="rule">jdbc_driver_class_name</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#LIB" class="token">LIB</a> <a href="#jar_file" class="rule">jar_file</a> <span class="operator">(</span> <span class="literal">','</span> <a href="#jar_file" class="rule">jar_file</a> <span class="operator">)</span><span class="operator">*</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#CONNECTION" class="token">CONNECTION</a> <a href="#POOL" class="token">POOL</a> <span class="operator">(</span> <span class="operator">(</span> <a href="#MIN" class="token">MIN</a> <a href="#connection_pool_size_min" class="rule">connection_pool_size_min</a> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#MAX" class="token">MAX</a> <a href="#connection_pool_size_max" class="rule">connection_pool_size_max</a> <span class="operator">)</span> <span class="operator">)</span><span class="operator">+</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#UNDECLARED" class="token">UNDECLARED</a> <a href="#STATEMENTS" class="token">STATEMENTS</a> <span class="operator">(</span> <a href="#ALLOW" class="token">ALLOW</a> <span class="operator">|</span> <a href="#REJECT" class="token">REJECT</a> <span class="operator">)</span><span class="operator">+</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#INCOMING" class="token">INCOMING</a> <a href="#CONNECTIONS" class="token">CONNECTIONS</a> <span class="operator">(</span> <a href="#ALLOW" class="token">ALLOW</a> <span class="operator">|</span> <a href="#REJECT" class="token">REJECT</a> <span class="operator">)</span><span class="operator">+</span> <span class="operator">(</span> <a href="#IF" class="token">IF</a> <a href="#EXISTS" class="token">EXISTS</a> <span class="literal">'('</span> <a href="#native_sql" class="rule">native_sql</a> <span class="literal">')'</span> <span class="operator">)</span><span class="operator">?</span> <span class="operator">)</span> <span class="operator">|</span> <span class="operator">(</span> <a href="#AS" class="token">AS</a><span class="operator">?</span> <a href="#connection_alias" class="rule">connection_alias</a> <span class="operator">)</span> <span class="operator">)</span><span class="operator">*</span> ;
   </div>
   </div>
   <div class="railroad">
@@ -1460,7 +1442,7 @@ footer {
   <div class="ebnf">
   <h4>Text notation:</h4>
   <div>
-    <span class="rule">declare_procedure_stmt</span> :  <a href="#DECLARE" class="token">DECLARE</a> <a href="#PROCEDURE" class="token">PROCEDURE</a> <a href="#procedure_name" class="rule">procedure_name</a> <a href="#TYPE" class="token">TYPE</a> <span class="operator">(</span> <a href="#JVM" class="token">JVM</a> <span class="operator">|</span> <a href="#JS" class="token">JS</a> <span class="operator">|</span> <a href="#EXEC" class="token">EXEC</a> <span class="operator">|</span> <a href="#URL" class="token">URL</a> <span class="operator">)</span><span class="operator">*</span> <span class="operator">(</span> <a href="#OPTIONS" class="token">OPTIONS</a> <a href="#json" class="rule">json</a> <span class="operator">|</span> <a href="#OPTIONS" class="token">OPTIONS</a> <a href="#FILE" class="token">FILE</a> <a href="#json_file" class="rule">json_file</a> <span class="operator">)</span><span class="operator">+</span> ;
+    <span class="rule">declare_procedure_stmt</span> :  <a href="#DECLARE" class="token">DECLARE</a> <a href="#PROCEDURE" class="token">PROCEDURE</a> <a href="#procedure_name" class="rule">procedure_name</a> <a href="#TYPE" class="token">TYPE</a> <span class="operator">(</span> <a href="#JAVA" class="token">JAVA</a> <span class="operator">|</span> <a href="#JS" class="token">JS</a> <span class="operator">|</span> <a href="#EXEC" class="token">EXEC</a> <span class="operator">|</span> <a href="#URL" class="token">URL</a> <span class="operator">)</span><span class="operator">*</span> <span class="operator">(</span> <a href="#OPTIONS" class="token">OPTIONS</a> <a href="#json" class="rule">json</a> <span class="operator">|</span> <a href="#OPTIONS" class="token">OPTIONS</a> <a href="#FILE" class="token">FILE</a> <a href="#json_file" class="rule">json_file</a> <span class="operator">)</span><span class="operator">?</span> ;
   </div>
   </div>
   <div class="railroad">
