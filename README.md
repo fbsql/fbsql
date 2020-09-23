@@ -157,9 +157,9 @@ Start FBSQL server:<br><br>
 ```sh
 ./fbsql start
 ```
+<br>
 </li>
 </ol>
-<br>
 
 <strong>Frontend:</strong><br>
 
@@ -182,11 +182,14 @@ Start FBSQL server:<br><br>
 </html>
 
 ```
+<br>
 </ol>
 <strong>Result:</strong><br><br>
 <ol>
 <img src="images/hello-world-alert.png">
 </ol>
+
+<br>
 
 <a id="fbsql_distributions"></a>
 <h1>FBSQL distributions</h1>
