@@ -146,6 +146,7 @@ INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('J231', 'John ');
 INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
 
 ```
+<br>
 <li>
 Start FBSQL server:<br><br>
 <ul>
@@ -158,6 +159,7 @@ Start FBSQL server:<br><br>
 ```
 </li>
 </ol>
+<br>
 
 <strong>Frontend:</strong><br>
 
@@ -264,6 +266,11 @@ fbsql-servlet-2.3.4 ─┐
 <a id="cli"></a>
 <h1>Command line interface (CLI)</h1>
 
+```text
+
+fbsql [option]
+
+```
 <strong>Command line options</strong>
 <table>
 <tr><th>Option</th><th>Description</th></tr>
@@ -271,7 +278,7 @@ fbsql-servlet-2.3.4 ─┐
 <tr><td><code>version</code></td><td>Outputs FBSQL version</td></tr>
 <tr><td><code>srart</code></td><td>Starts FBSQL as background process</td></tr>
 <tr><td><code>stop</code></td><td>Stops FBSQL background process</td></tr>
-<tr><td><code>run</code></td><td>Runs FBSQL in foreground</td></tr>
+<tr><td><code>run</code></td><td>Starts FBSQL in foreground</td></tr>
 </table>
 
 
@@ -282,7 +289,7 @@ After FBSQL starts it automatically builds FBSQL home directory (by default user
 You can change the default FBSQL home directory location by specifying <code>FBSQL_HOME</code> operating system environment variable.
 FBSQL home directory contains init scripts, logs and all configuration files related to application server and JVM.
 
-<strong>FBSQL home directory</strong>
+<strong>Anatomy of FBSQL home directory:</strong>
 ```text
 <FBSQL_HOME> ─┐ ......................................................│-> FBSQL home directory
               │                                                       │
@@ -1497,7 +1504,7 @@ Functions:
 	</li>
 </ul>
 
-<i>Examples:</i><br>
+<i>Example of calling debug tool functions:</i><br>
 
 ```html
 <!DOCTYPE html>
