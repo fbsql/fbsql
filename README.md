@@ -125,7 +125,7 @@ Put the initialization script <code>init.sql</code> into the <code>~/fbsql/confi
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
            CONNECT TO 'jdbc:sqlite:hello_world_db'
@@ -270,6 +270,8 @@ fbsql-servlet-2.3.4 ─┐
 <a id="cli"></a>
 <h1>Command line interface (CLI)</h1>
 
+<strong>Command line</strong>
+
 ```text
 
 fbsql [option]
@@ -301,7 +303,7 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
                         │                                             │
                         ├─ config                                     │
                         │  │                                          │
-                        │  ├─ init ...................................│-> init scripts
+                        │  ├─ init ...................................│-> init scripts dir.
                         │  │                                          │
                         │  ├─ jre ....................................│-> JVM
                         │  │  └─ conf                                 │   configuration files
@@ -349,7 +351,7 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
                         │              ├─ lib                         │
                         │              └─ web.xml                     │
                         │                                             │
-                        └─ logs ......................................│-> Logs directory
+                        └─ logs ......................................│-> Logs dir.
 
 ```
 <a id="init_script"></a>
@@ -386,7 +388,7 @@ We are going to authenticate our users by username and password.
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
                   CONNECT TO 'jdbc:sqlite:authentication_example_db'
@@ -459,7 +461,7 @@ We are going to authenticate our users by username and password, and authorize b
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
                   CONNECT TO 'jdbc:sqlite:role_based_auth_db'
@@ -547,7 +549,7 @@ and reference statements by name.
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
                 CONNECT TO 'jdbc:sqlite:declare_statement_example_db'
@@ -622,7 +624,7 @@ In this chapter we will learn how to execute SQL statements from frontend JavaSc
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
                   CONNECT TO 'jdbc:sqlite:execute_query_and_execute_update_example_db'
@@ -754,7 +756,7 @@ You can control the result set format by choosing one from the available formats
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
                   CONNECT TO 'jdbc:sqlite:result_set_format_example_db'
@@ -862,7 +864,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 <a id="database_agnostic_stored_procedures"></a>
 <h1>Database agnostic stored procedures</h1>
 <p>
-In this chapter we will learn how to write and use database agnostic stored procedures written in JavaScript or <abbr title="Java Virtual Machine">JVM</abbr> languages (DECLARE PROCEDURE statement).
+In this chapter we will learn how to write and use database agnostic stored procedures written in JavaScript or <abbr title="Java Virtual Machine">JVM</abbr> languages, Operating System programs and URLs.
 </p>
 Procedures can be called from <code>init.sql</code> and/or frontend.<br><br>
 
@@ -879,7 +881,7 @@ Procedures can be called from <code>init.sql</code> and/or frontend.<br><br>
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
            CONNECT TO 'jdbc:sqlite:declare_procedure_example_db'
@@ -1039,6 +1041,7 @@ EOF
     </body>
 </html>
 ```
+See also: <a href="#declare_procedure"><code>DECLARE PROCEDURE</code></a>
 
 <a id="schedule_periodic_jobs"></a>
 <h1>Schedule periodic jobs</h1>
@@ -1061,7 +1064,7 @@ See also: <a href="#schedule"><code>SCHEDULE</code></a>, <a href="#database_even
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
           CONNECT TO 'jdbc:schedule_statement_example_db'
@@ -1103,7 +1106,8 @@ public class StroredProcedures {
 ```
 <strong>Frontend:</strong><br>
 
-Catch database events and print them on console:<br>
+<i>Example 1</i><br>
+Catch database events and print them on console:
 
 ```html
 <!DOCTYPE html>
@@ -1120,7 +1124,10 @@ Catch database events and print them on console:<br>
 </html>
 
 ```
-Catch database events with debug tool:<br>
+<br>
+
+<i>Example 2</i><br>
+Catch database events with debug tool:
 
 ```html
 <!DOCTYPE html>
@@ -1161,7 +1168,7 @@ In this chapter we will learn how to work with BINARY, VARBINARY, LONGVARBINARY 
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
            CONNECT TO 'jdbc:h2:~/fbsql/data/BlobExample;AUTO_SERVER=TRUE;'
@@ -1322,7 +1329,7 @@ In this chapter we will learn how to work with DATE, TIME and TIMESTAMP types.
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
  *
- * Put your init scripts somewhere under ".../fbsql/config/init" directory.
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
  */
 
                   CONNECT TO 'jdbc:sqlite:date_and_time_example_db'
@@ -1945,6 +1952,8 @@ DECLARE PROCEDURE GET_ITEMS
      OPTIONS FILE '/home/john/my-options.json';
  
 ```
+<br>
+See also: <a href="#database_agnostic_stored_procedures">Database agnostic stored procedures</a>
 
 <a id="schedule"></a>
 <h1>SCHEDULE</h1>
@@ -2212,6 +2221,9 @@ follows:</p>
   this wikipedia entry helpful in determining the specifics to your locale:<br />
   <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world">https://secure.wikimedia.org/wikipedia/en/wiki/Daylight_saving_time_around_the_world</a></li>
 </ul>
+<br>
+See also: <a href="#schedule_periodic_jobs">Schedule periodic jobs</a>
+<br>
 
 <a id="include"></a>
 <h1>INCLUDE</h1>
