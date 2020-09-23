@@ -103,8 +103,8 @@ Install FBSQL:<br><br>
 
 fbsql-server-2.3.4-linux-x86-64 ─┐
                                  ├─ fbsql              - Server executable (Linux-x86-64)
-                                 ├─ fbsql-min.js       - Client for browser
-                                 ├─ fbsql-debug-min.js - Frontend debug tool
+                                 ├─ fbsql.min.js       - Client for browser
+                                 ├─ fbsql-debug.min.js - Frontend debug tool
                                  ├─ README             - Release information 
                                  └─ LICENSES           - Third party licenses
 ```
@@ -224,8 +224,8 @@ If you are having troubles choosing a distribution, you probably need the <stron
 
 fbsql-server-2.3.4-linux-x86-64 ─┐
                                  ├─ fbsql              - Server executable (Linux-x86-64)
-                                 ├─ fbsql-min.js       - Client for browser
-                                 ├─ fbsql-debug-min.js - Frontend debug tool
+                                 ├─ fbsql.min.js       - Client for browser
+                                 ├─ fbsql-debug.min.js - Frontend debug tool
                                  ├─ README             - Release information 
                                  └─ LICENSES           - Third party licenses
 ```
@@ -239,7 +239,7 @@ fbsql-server-2.3.4-linux-x86-64 ─┐
 
 fbsql-server-min-2.3.4-linux-x86-64 ─┐
                                      ├─ fbsql        - Server executable (Linux-x86-64)
-                                     ├─ fbsql-min.js - Client for browser
+                                     ├─ fbsql.min.js - Client for browser
                                      ├─ README       - Release information 
                                      └─ LICENSES     - Third party licenses
 ```
@@ -1352,8 +1352,8 @@ INSERT INTO CITIES (CITY_ID, CITY_NAME, CITY_DATE, CITY_TIME, CITY_TIMESTAMP)
             let myInput = document.getElementById("DateAndTimeExample");
 
             const conn = new Connection('http://localhost:8080/db/DateAndTimeExample');
-            let psSelect = conn.prepareStatement("SELECT * FROM CITIES WHERE CITY_ID = 'AU'");
-            let psUpdate = conn.prepareStatement("UPDATE CITIES SET CITY_DATE = :city_date, CITY_TIME = :cǐty_time, CITY_TIMESTAMP = :city_timestamp WHERE CITY_ID = 'AU'");
+            let psSelect = conn.prepareStatement("SELECT * FROM CITIES WHERE CITY_ID = 'NY'");
+            let psUpdate = conn.prepareStatement("UPDATE CITIES SET CITY_DATE = :city_date, CITY_TIME = :cǐty_time, CITY_TIMESTAMP = :city_timestamp WHERE CITY_ID = 'NY'");
 
             psSelect.executeQuery()
             .then(resultSet => {
@@ -1469,16 +1469,36 @@ To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after
 ```
 Functions:
 <ul>
-	<li><a href="#log_execute_query"   title="logExecuteQuery   function">logExecuteQuery</a></li>
-	<li><a href="#log_execute_update"  title="logExecuteUpdate  function">logExecuteUpdate</a></li>
-	<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
+	<li>
+		<code>logExecuteQuery</code> - helper for <code>executeQuery</code> method of <code>PreparedStatement</code><br>
+		Parameters are:
+		<ul>
+			<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute query.</li>
+			<li><code>Object</code> - parameters JSON object. E.g. <code>{nameStartsWith: "Samsu"}</code></li>
+		</ul>
+	</li>
+	<li>
+		<code>logExecuteUpdate</code> - helper for <code>executeUpdate</code> method of <code>PreparedStatement</code><br>
+		Parameters are:
+		<ul>
+			<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute update.</li>
+			<li><code>Object</code> - parameters JSON object. E.g. <code>{id: "LG-1134", newPrice: 950.00}</code></li>
+		</ul>
+	</li>
+	<li>
+		<code>logDatabaseEvents</code> - helper for <code>addDatabaseEventListener</code> method of <code>Connection</code><br>
+		Parameters are:
+		<ul>
+			<li><code>Connection</code> - <code>Connection</code> object of which we want listen for database events.</li>
+		</ul>
+	</li>
 </ul>
 
 
 <a id="mocking_with_fbsql"></a>
 <h1>Mocking with FBSQL</h1>
 You can simulate FBSQL database interactions with mock functions.
-Mock functions does not need connection to backend and can be used completly offline (with no FBSQL).
+Mock functions does not need connection to backend and can be used completly offline (without FBSQL).
 <br><br>
 <strong>Mock executeQuery/executeUpdate methods</strong>
 <br>
