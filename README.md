@@ -576,13 +576,11 @@ DECLARE STATEMENT (SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id)
 
             /* Allowed! Statement source was provided */
             const ps1   = conn.prepareStatement("SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id");
-            ps1.executeQuery({id: "W123"})
-            logExecuteQuery(ps1);
+            logExecuteQuery(ps1, {id: "W123"});
 
             /* Allowed! Statement alias name was provided */
             const ps2   = conn.prepareStatement("#myStatement");
-            ps2.executeQuery({id: "W123"})
-            logExecuteQuery(ps2);
+            logExecuteQuery(ps2, {id: "W123"});
 
             /* Rejected! Undeclared statement. */
             const ps3 = conn.prepareStatement("SELECT EMPLOYEE_NAME FROM EMPLOYEES);
@@ -1454,6 +1452,8 @@ Catch database events with debug tool:
 <a id="debug_utility"></a>
 <h1>Frontend debug tool</h1>
 
+The frontend debug tool allow you execute queries, updates and listen for database events. Major difference with calling debug tool functions and corresponding FBSQL methods is debug tool automatically outputs verbose debugging information to console and browser window.
+<br>
 To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after <code>fbsql.min.js</code> in <code>&lt;head&gt;</code> section of your HTML:
 
 ```html
@@ -1470,30 +1470,62 @@ To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after
 Functions:
 <ul>
 	<li>
-		<code>logExecuteQuery</code> - helper for <code>executeQuery</code> method of <code>PreparedStatement</code><br>
+		<code>logExecuteQuery</code> - helper for corresponding <code>executeQuery</code> method of <code>PreparedStatement</code>.<br>
 		Parameters are:
 		<ul>
 			<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute query.</li>
 			<li><code>Object</code> - parameters JSON object. E.g. <code>{nameStartsWith: "Samsu"}</code></li>
 		</ul>
+		<br>
 	</li>
 	<li>
-		<code>logExecuteUpdate</code> - helper for <code>executeUpdate</code> method of <code>PreparedStatement</code><br>
+		<code>logExecuteUpdate</code> - helper for corresponding <code>executeUpdate</code> method of <code>PreparedStatement</code>.<br>
 		Parameters are:
 		<ul>
 			<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute update.</li>
 			<li><code>Object</code> - parameters JSON object. E.g. <code>{id: "LG-1134", newPrice: 950.00}</code></li>
 		</ul>
+		<br>
 	</li>
 	<li>
-		<code>logDatabaseEvents</code> - helper for <code>addDatabaseEventListener</code> method of <code>Connection</code><br>
+		<code>logDatabaseEvents</code> - helper for corresponding <code>addDatabaseEventListener</code> method of <code>Connection</code>.<br>
 		Parameters are:
 		<ul>
 			<li><code>Connection</code> - <code>Connection</code> object of which we want listen for database events.</li>
 		</ul>
+		<br>
 	</li>
 </ul>
 
+<i>Examples:</i><br>
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+        <script src="fbsql-debug.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection("http://localhost:8080/db/MyExample");
+
+            /* Log database events for connection 'conn' */
+            logDatabaseEvents(conn);
+
+            const ps1   = conn.prepareStatement("SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id");
+            /* Log execute query for PreparedStatement 'ps1' */
+            logExecuteQuery(ps1, {id: "J123"});
+
+            const ps2   = conn.prepareStatement("UPDATE EMPLOYEES SET EMPLOYEE_NAME = :name WHERE EMPLOYEE_ID = :id");
+            /* Log execute update for PreparedStatement 'ps2' */
+            logExecuteUpdate(ps2, {id: "J123", name: "John"});
+
+        </script>
+    </body>
+</html>
+
+```
 
 <a id="mocking_with_fbsql"></a>
 <h1>Mocking with FBSQL</h1>
