@@ -32,6 +32,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
 	<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
 	<li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
+	<li><a href="#parameters_checking" title="Parameters checking and modifying.">Parameters checking and modifying</a></li>
 	<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
 	<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
 	<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
@@ -39,7 +40,6 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
 	<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
 	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
-	<li><a href="#parameters checking" title="Mocking with FBSQL.">Parameters checking and modifying</a></li>
 	<li><a href="#database_event_notification" title="Database event notification.">Database event notification</a></li>
 </ul>
 <br><strong>Commands</strong>
@@ -727,6 +727,17 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 </html>
 
 ```
+<br>
+<a id="parameters_checking"></a>
+<h1>Parameters checking and modifying</h1>
+
+FBSQL allow check and/or modify parameters of any SQL statement before execution.
+This can be achieved by using <code>TRIGGER&nbsp;BEFORE</code> clause of <code>DECLARE&nbsp;STATEMENT</code> command.
+
+<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occur execution will be rejected.
+<br>
+See also: <a href="#declare_statement"><code>DECLARE&nbsp;STATEMENT</code></a>.
+<br>
 
 <a id="reseult_set_format"></a>
 <h1>Reseult set formats</h1>
@@ -1041,7 +1052,7 @@ EOF
     </body>
 </html>
 ```
-See also: <a href="#declare_procedure"><code>DECLARE PROCEDURE</code></a>
+See also: <a href="#declare_procedure"><code>DECLARE PROCEDURE</code></a>.
 
 <a id="schedule_periodic_jobs"></a>
 <h1>Schedule periodic jobs</h1>
