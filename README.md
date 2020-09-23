@@ -214,7 +214,7 @@ If you are having troubles choosing a distribution, you probably need the <stron
 <tr><td>Command line interface        </td><td>&check;</td><td>&check;</td><td>       </td></tr>
 <tr><td>Embedded database             </td><td>&check;</td><td>       </td><td>       </td></tr>
 </table>
-
+<br>
 
 <a id="installation"></a>
 <h1>Installation</h1>
@@ -265,6 +265,7 @@ fbsql-servlet-2.3.4 ─┐
 <ul>
 <li>Deploy <code>fbsql.war</code> to your application server infrastructure.</li>
 </ul>
+<br>
 
 <a id="cli"></a>
 <h1>Command line interface (CLI)</h1>
@@ -277,13 +278,13 @@ fbsql [option]
 <strong>Command line options</strong>
 <table>
 <tr><th>Option</th><th>Description</th></tr>
-<tr><td><code>help</code></td><td>Outputs help text</td></tr>
-<tr><td><code>version</code></td><td>Outputs FBSQL version</td></tr>
-<tr><td><code>srart</code></td><td>Starts FBSQL as background process</td></tr>
-<tr><td><code>stop</code></td><td>Stops FBSQL background process</td></tr>
-<tr><td><code>run</code></td><td>Starts FBSQL in foreground</td></tr>
+<tr><td><code>help</code></td><td>Prints the command line interface help</td></tr>
+<tr><td><code>version</code></td><td>Prints FBSQL version, build timestamp and release information</td></tr>
+<tr><td><code>start</code></td><td>Starts FBSQL server as background process</td></tr>
+<tr><td><code>stop</code></td><td>Stops FBSQL server background process started with <code>start</code> option</td></tr>
+<tr><td><code>run</code></td><td>Starts FBSQL server in foreground</td></tr>
 </table>
-
+<br>
 
 <a id="config"></a>
 <h1>Configuration and fine tuning</h1>
@@ -358,10 +359,10 @@ Initialization script executes on FBSQL startup,
 connects to database instance and performs (optionally)
 any operations that you want to be executed at start up time.
 
-To be executed at startup init scripts must have the name "init.sql"
-or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+To be executed at startup init scripts must have the name <code>"init.sql"</code>
+or have any other name that ends with <code>".init.sql"</code>. E.g.: "my.init.sql"
 
-Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
+Put your init scripts somewhere under <code>&lt;FBSQL_HOME&gt;/fbsql/config/init</code> directory.
 
 
 <a id="add_simple_authentication"></a>
