@@ -51,6 +51,25 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
 	<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
 </ul>
+<br><strong>Functions</strong>
+<ul>
+	<li><a href="#remote_user"                           title="">REMOTE_USER()</a></li>
+	<li><a href="#remote_role"                           title="">REMOTE_ROLE()</a></li>
+	<li><a href="#remote_session_id"                     title="">REMOTE_SESSION_ID()</a></li>
+	<li><a href="#remote_session_creation_time"          title="">REMOTE_SESSION_CREATION_TIME()</a></li>
+	<li><a href="#remote_session_last_accessed_time"     title="">REMOTE_SESSION_LAST_ACCESSED_TIME()</a></li>
+	<li><a href="#user_info"                             title="">USER_INFO()</a></li>
+	<li><a href="#in_role"                               title="">IN_ROLE()</a></li>
+	<li><a href="#get_cookie"                            title="">COOKIE()</a></li>
+	<li><a href="#get_http_session_attribute_as_char"    title="">GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</a></li>
+	<li><a href="#get_http_session_attribute_as_integer" title="">GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</a></li>
+	<li><a href="#get_http_header_as_char"               title="">GET_HTTP_HEADER_AS_CHAR()</a></li>
+	<li><a href="#get_http_header_as_date"               title="">GET_HTTP_HEADER_AS_DATE()</a></li>
+	<li><a href="#get_http_header_as_integer"            title="">GET_HTTP_HEADER_AS_INTEGER()</a></li>
+	
+</ul>
+
+
 <strong>Client API</strong>
 <ul>
 	<li><a href="#connection_object" title="Connection object">Connection</a></li>
