@@ -652,9 +652,10 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('DE', 'Germany'  );
 INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 
 ```
+<br>
 <strong>Frontend:</strong><br>
 
-Example of non-parametrized execution.
+Example of non-parametrized execution:
 
 ```html
 <!DOCTYPE html>
@@ -738,7 +739,8 @@ Example of non-parametrized execution.
 </html>
 
 ```
-Example of parametrized execution.
+<br>
+Example of parametrized execution:
 
 ```html
 <!DOCTYPE html>
@@ -1658,7 +1660,7 @@ You can simulate FBSQL database interactions with mock functions.
 Mock functions does not need connection to backend and can be used completly offline (without FBSQL).
 <br><br>
 <strong>Mock executeQuery/executeUpdate methods</strong>
-<br>
+<br><br>
 client-server version (without mock functions):
 
 ```js
@@ -1776,7 +1778,7 @@ You can fire mock database events by using fireMockDatabaseEvent of Connection o
 
 ```
 
-<h1>COMMANDS</h1>
+<h1 align="center">COMMANDS</h1>
 
 <a id="connect_to"></a>
 <h1>CONNECT TO</h1>
