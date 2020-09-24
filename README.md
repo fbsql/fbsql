@@ -299,7 +299,8 @@ fbsql [option]
 <a id="config"></a>
 <h1>Configuration and fine tuning</h1>
 
-After FBSQL starts it automatically builds FBSQL home directory (by default user home directory).
+After FBSQL starts it automatically copy all the nessesary configuration files to FBSQL home directory (by default user home directory).
+By security reasons all changes you do in FBSQL home directory are immutable across FBSQL server running session. Configuration changes will loaded after FBSQL server starts next time.
 You can change the default FBSQL home directory location by specifying <code>FBSQL_HOME</code> operating system environment variable.
 FBSQL home directory contains init scripts, logs and all configuration files related to application server and JVM.
 
@@ -372,7 +373,7 @@ any operations that you want to be executed at start up time.
 To be executed at startup init scripts must have the name <code>"init.sql"</code>
 or have any other name that ends with <code>".init.sql"</code>. E.g.: "my.init.sql"
 
-Put your init scripts somewhere under <code>&lt;FBSQL_HOME&gt;/fbsql/config/init</code> directory.
+Put your init scripts somewhere (directory <code>&lt;FBSQL_HOME&gt;/fbsql/config/init</code> can have arbitrary hierarchy structure) under <code>&lt;FBSQL_HOME&gt;/fbsql/config/init</code> directory.
 
 
 <a id="add_simple_authentication"></a>
@@ -653,6 +654,8 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 ```
 <strong>Frontend:</strong><br>
 
+Example of non-parametrized execution.
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -735,6 +738,91 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 </html>
 
 ```
+Example of parametrized execution.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('http://localhost:8080/db/ExecuteQueryAndExecuteUpdateExample');
+
+            /* Select all records */
+            const ps1 = conn.prepareStatement("SELECT * FROM COUNTRIES");
+
+            /* Update one record */
+            const ps2 = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_NAME = :name WHERE COUNTRY_ID = :id");
+
+
+            ps1.executeQuery()
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *   
+                 *   [
+                 *       {
+                 *           "COUNTRY_ID": "AU",
+                 *           "COUNTRY_NAME": "Australia"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "DE",
+                 *           "COUNTRY_NAME": "Germany"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "IN",
+                 *           "COUNTRY_NAME": "India"
+                 *       }
+                 *   ]
+                 */
+                 return ps2.executeUpdate({id: 'DE', name: 'Federal Republic of Germany'});
+            })
+            .then(result => {
+                console.log(result);
+                /*
+                 *   Output:
+                 *   
+                 *   {
+                 *       "rowCount": 1,                                  // one record updated
+                 *       "generatedKeys": [
+                 *                          {
+                 *                              "last_insert_rowid()": 0 // database product specific key names
+                 *                          }
+                 *                      ]
+                 *   }
+                 */
+                return ps1.executeQuery();
+            })
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *   
+                 *   [
+                 *       {
+                 *           "COUNTRY_ID": "AU",
+                 *           "COUNTRY_NAME": "Australia"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "DE",
+                 *           "COUNTRY_NAME": "Federal Republic of Germany"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "IN",
+                 *           "COUNTRY_NAME": "India"
+                 *       }
+                 *   ]
+                 */
+            });
+        </script>
+    </body>
+</html>
+
+```
+
 <br>
 <a id="parameters_checking"></a>
 <h1>Parameters checking and modifying</h1>
@@ -1688,7 +1776,7 @@ You can fire mock database events by using fireMockDatabaseEvent of Connection o
 
 ```
 
-<h2>FBSQL COMMANDS</h2>
+<h1>COMMANDS</h1>
 
 <a id="connect_to"></a>
 <h1>CONNECT TO</h1>
