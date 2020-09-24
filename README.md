@@ -82,6 +82,12 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 		<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
 	</ul>
 </ul>
+<strong>Appendices</strong>
+<ul>
+	<li><a href="https://fbsql.github.io/Fbsql.g4.html">FBSQL Grammar</a></li>
+	<li><a href="https://fbsql.github.io/javadoc/index.html">Javadoc</a></li>
+</ul>
+
 <br>
 
 <hr>
@@ -2262,8 +2268,4 @@ INCLUDE 'my.sql';
 INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
 
 ```
-
-<a id="appendix"></a>
-<h1>Appendix</h1>
-
-<a href="https://fbsql.github.io/Fbsql.g4.html">FBSQL Grammar</a> 
+ 
