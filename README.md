@@ -66,7 +66,6 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#get_http_header_as_char"               title="">GET_HTTP_HEADER_AS_CHAR()</a></li>
 	<li><a href="#get_http_header_as_date"               title="">GET_HTTP_HEADER_AS_DATE()</a></li>
 	<li><a href="#get_http_header_as_integer"            title="">GET_HTTP_HEADER_AS_INTEGER()</a></li>
-	
 </ul>
 
 
@@ -2377,4 +2376,44 @@ INCLUDE 'my.sql';
 INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
 
 ```
- 
+<h1 align="center">FUNCTIONS</h1>
+
+<a id="remote_user"                          ></a>
+<h1>REMOTE_USER()</h1>
+
+<a id="remote_role"                          ></a>
+<h1>REMOTE_ROLE()</h1>
+
+<a id="remote_session_id"                    ></a>
+<h1>REMOTE_SESSION_ID()</h1>
+
+<a id="remote_session_creation_time"         ></a>
+<h1>REMOTE_SESSION_CREATION_TIME()</h1>
+
+<a id="remote_session_last_accessed_time"    ></a>
+<h1>REMOTE_SESSION_LAST_ACCESSED_TIME()</h1>
+
+<a id="user_info"                            ></a>
+<h1>USER_INFO()</h1>
+
+<a id="in_role"                              ></a>
+<h1>IN_ROLE()</h1>
+
+<a id="get_cookie"                           ></a>
+<h1>COOKIE()</h1>
+
+<a id="get_http_session_attribute_as_char"   ></a>
+<h1>GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</h1>
+
+<a id="get_http_session_attribute_as_integer"></a>
+<h1>GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</h1>
+
+<a id="get_http_header_as_char"              ></a>
+<h1>GET_HTTP_HEADER_AS_CHAR()</h1>
+
+<a id="get_http_header_as_date"              ></a>
+<h1>GET_HTTP_HEADER_AS_DATE()</h1>
+
+<a id="get_http_header_as_integer"           ></a>
+<h1>GET_HTTP_HEADER_AS_INTEGER()</h1>
+
