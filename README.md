@@ -2380,40 +2380,53 @@ INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
 
 <a id="remote_user"                          ></a>
 <h1>REMOTE_USER()</h1>
+Return remote user name. Remote user name transmitted to server from client's Connection object.
 
 <a id="remote_role"                          ></a>
 <h1>REMOTE_ROLE()</h1>
+Return remote user role. Remote user role transmitted to server from client's Connection object.
 
 <a id="remote_session_id"                    ></a>
 <h1>REMOTE_SESSION_ID()</h1>
+Return remote session id.
 
 <a id="remote_session_creation_time"         ></a>
 <h1>REMOTE_SESSION_CREATION_TIME()</h1>
+Return remote session creation time.
 
 <a id="remote_session_last_accessed_time"    ></a>
 <h1>REMOTE_SESSION_LAST_ACCESSED_TIME()</h1>
+Return remote session last accessed time.
 
 <a id="user_info"                            ></a>
 <h1>USER_INFO()</h1>
+Return verbose client information.
 
 <a id="in_role"                              ></a>
 <h1>IN_ROLE()</h1>
+Checks if remote user in role from provided role list.
 
 <a id="get_cookie"                           ></a>
 <h1>COOKIE()</h1>
+Get cookie value.
 
 <a id="get_http_session_attribute_as_char"   ></a>
 <h1>GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</h1>
+Get HTTP session attribute as CHARACTER type.
 
 <a id="get_http_session_attribute_as_integer"></a>
 <h1>GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</h1>
+Get HTTP session attribute as INTEGER type.
 
 <a id="get_http_header_as_char"              ></a>
 <h1>GET_HTTP_HEADER_AS_CHAR()</h1>
+Get HTTP header value as CHARACTER type.
 
 <a id="get_http_header_as_date"              ></a>
 <h1>GET_HTTP_HEADER_AS_DATE()</h1>
+Get HTTP header value as DATE type.
 
 <a id="get_http_header_as_integer"           ></a>
 <h1>GET_HTTP_HEADER_AS_INTEGER()</h1>
+Get HTTP header value as INTEGER type.
 
