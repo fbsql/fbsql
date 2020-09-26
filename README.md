@@ -68,8 +68,18 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#get_http_header_as_integer"            title="">GET_HTTP_HEADER_AS_INTEGER()</a></li>
 </ul>
 
+<br><strong>Constants</strong>
+<ul>
+	<li><a href="#fbsql_remote_user"                           title="">FBSQL_REMOTE_USER</a></li>
+	<li><a href="#fbsql_remote_role"                           title="">FBSQL_REMOTE_ROLE</a></li>
+	<li><a href="#fbsql_remote_session_id"                     title="">FBSQL_REMOTE_SESSION_ID</a></li>
+	<li><a href="#fbsql_remote_session_creation_time"          title="">FBSQL_REMOTE_SESSION_CREATION_TIME</a></li>
+	<li><a href="#fbsql_remote_session_last_accessed_time"     title="">FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME</a></li>
+	<li><a href="#fbsql_user_info"                             title="">FBSQL_USER_INFO</a></li>
+</ul>
 
-<strong>Client API</strong>
+
+<br><strong>Client API</strong>
 <ul>
 	<li><a href="#connection_object" title="Connection object">Connection</a></li>
 	<ul>
@@ -85,13 +95,14 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<ul>
 		Methods:
 			<ul>
-				<li><a href="#prepare_statement_method"           title="prepareStatement method">executeQuery</a></li>
-				<li><a href="#add_database_event_listener_method" title="addDatabaseEventListener method">executeUpdate</a></li>
-				<li><a href="#fire_mock_database_event_method"    title="fireMockDatabaseEvent method">setMockFunction</a></li>
+				<li><a href="#execute_query_method"          title="executeQuery method">executeQuery</a></li>
+				<li><a href="#execute_update_method"        title="executeUpdate method">executeUpdate</a></li>
+				<li><a href="#set_result_set_format_method" title="setResultSetFormat">setResultSetFormat</a></li>
+				<li><a href="#set_mock_function_method"     title="setMockFunction method">setMockFunction</a></li>
 			</ul>
 	</ul>
 </ul>
-<strong>Frontend debug tool</strong>
+<br><strong>Frontend debug tool</strong>
 <ul>
 	Functions:
 	<ul>
@@ -100,7 +111,8 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 		<li><a href="#log_database_events" title="logDatabaseEvents function">logDatabaseEvents</a></li>
 	</ul>
 </ul>
-<strong>Appendices</strong>
+
+<br><strong>Appendices</strong>
 <ul>
 	<li><a href="https://fbsql.github.io/Fbsql.g4.html">FBSQL Grammar</a></li>
 	<li><a href="https://fbsql.github.io/javadoc/index.html">Javadoc</a></li>
@@ -2376,6 +2388,7 @@ INCLUDE 'my.sql';
 INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
 
 ```
+
 <h1 align="center">FUNCTIONS</h1>
 
 <a id="remote_user"                          ></a>
@@ -2535,3 +2548,123 @@ Get HTTP request header value as <code>INTEGER</code> type.
 GET_HTTP_HEADER_AS_INTEGER('Content-Length')
 
 ```
+
+<h1 align="center">CONSTANTS</h1>
+
+<a id="fbsql_remote_user"                          ></a>
+<h1>FBSQL_REMOTE_USER</h1>
+Return remote user name as <code>CHARACTER</code> type. Remote user name transmitted to server from client's Connection object.
+
+
+<br><i>Example:</i>
+
+```text
+
+FBSQL_REMOTE_USER
+
+```
+
+<a id="fbsql_remote_role"                          ></a>
+<h1>FBSQL_REMOTE_ROLE</h1>
+Return remote user role as <code>CHARACTER</code> type. Remote user role transmitted to server from client's Connection object.
+
+
+<br><i>Example:</i>
+
+```text
+
+FBSQL_REMOTE_ROLE
+
+```
+
+<a id="fbsql_remote_session_id"                    ></a>
+<h1>FBSQL_REMOTE_SESSION_ID</h1>
+Return remote session id as <code>CHARACTER</code> type.
+
+
+<br><i>Example:</i>
+
+```text
+
+FBSQL_REMOTE_SESSION_ID
+
+```
+
+<a id="fbsql_remote_session_creation_time"         ></a>
+<h1>FBSQL_REMOTE_SESSION_CREATION_TIME</h1>
+Return remote session creation time as <code>INTEGER</code> type.
+
+<br><i>Example:</i>
+
+```text
+
+FBSQL_REMOTE_SESSION_CREATION_TIME
+
+```
+
+<a id="fbsql_remote_session_last_accessed_time"    ></a>
+<h1>FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME</h1>
+Return remote session last accessed time as <code>INTEGER</code> type.
+
+<br><i>Example:</i>
+
+```text
+
+FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME
+
+```
+
+<a id="fbsql_user_info"                            ></a>
+<h1>FBSQL_USER_INFO</h1>
+Return verbose client information as <code>CHARACTER</code> type in form of JSON object.
+
+<br><i>Example:</i>
+
+```text
+
+FBSQL_USER_INFO
+
+```
+
+<h1 align="center">Client API</h1>
+
+
+<a id="connection_object"></a>
+<h1>Connection</h1>
+
+<a id="prepare_statement_method"></a>
+<h1>Method prepareStatement()</h1>
+
+<a id="add_database_event_listener_method"></a>
+<h1>Method addDatabaseEventListener()</h1>
+
+<a id="fire_mock_database_event_method"></a>
+<h1>Method fireMockDatabaseEvent()</h1>
+
+<a id="prepared_statement_object"></a>
+<h1>PreparedStatement</h1>
+
+<a id="execute_query_method"></a>
+<h1>Method executeQuery()</h1>
+
+<a id="execute_update_method"></a>
+<h1>Method executeUpdate()</h1>
+
+<a id="set_result_set_format_method"></a>
+<h1>Method setResultSetFormat()</h1>
+
+<a id="set_mock_function_method"></a>
+<h1>Method setMockFunction()</h1>
+
+
+<h1 align="center">Frontend debug tool</h1>
+
+<a id="log_execute_query"></a>
+<h1>Function logExecuteQuery()</h1>
+
+<a id="log_execute_update"></a>
+<h1>Function logExecuteUpdate()</h1>
+
+<a id="log_database_events"></a>
+<h1>Function logDatabaseEvents()</h1>
+
