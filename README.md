@@ -2897,6 +2897,9 @@ ps.executeQuery()
 
 <h1 align="center">Frontend debug tool</h1>
 
+Frontend debug tool <code>fbsql-debug.min.js</code> is a client side script contains three helper functions that you can use to test execution of your SQL statements.
+
+
 <a id="log_execute_query"></a>
 <h1>Function logExecuteQuery()</h1>
 <code>logExecuteQuery</code> - helper function for corresponding <code>executeQuery</code> method of <code>PreparedStatement</code>.<br>
