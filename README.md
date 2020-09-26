@@ -1693,7 +1693,7 @@ Functions:
 You can simulate FBSQL database interactions with mock functions.
 Mock functions does not need connection to backend and can be used completly offline (without FBSQL).
 <br><br>
-<strong>Mock executeQuery/executeUpdate methods</strong>
+<strong>Mock <code>executeQuery()</code> / <code>executeUpdate()</code> methods</strong>
 <br><br>
 client-server version (without mock functions):
 
@@ -2839,6 +2839,7 @@ ps.executeQuery()
 <a id="set_mock_function_method"></a>
 <h1>Method setMockFunction()</h1>
 Sets custom mock function.
+<br><i>Examples:</i>
 
 ```js
 
@@ -2858,8 +2859,6 @@ const mockFunc = function() {
                }
            ];
 }
-
-<br><i>Example:</i>
 
 const conn = new Connection('http://localhost:8080/db/MyDatabase');
 //
