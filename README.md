@@ -2902,7 +2902,7 @@ Frontend debug tool <code>fbsql-debug.min.js</code> is a client side script cont
 
 <a id="log_execute_query"></a>
 <h1>Function logExecuteQuery()</h1>
-<code>logExecuteQuery</code> - helper function for corresponding <code>executeQuery</code> method of <code>PreparedStatement</code>.<br>
+<code>logExecuteQuery()</code> - helper function for corresponding <code>executeQuery</code> method of <code>PreparedStatement</code>.<br>
 Parameters are:
 <ul>
 	<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute query.</li>
@@ -2911,7 +2911,7 @@ Parameters are:
 
 <a id="log_execute_update"></a>
 <h1>Function logExecuteUpdate()</h1>
-<code>logExecuteUpdate</code> - helper function for corresponding <code>executeUpdate</code> method of <code>PreparedStatement</code>.<br>
+<code>logExecuteUpdate()</code> - helper function for corresponding <code>executeUpdate</code> method of <code>PreparedStatement</code>.<br>
 Parameters are:
 <ul>
 	<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute update.</li>
@@ -2920,7 +2920,7 @@ Parameters are:
 
 <a id="log_database_events"></a>
 <h1>Function logDatabaseEvents()</h1>
-<code>logDatabaseEvents</code> - helper function for corresponding <code>addDatabaseEventListener</code> method of <code>Connection</code>.<br>
+<code>logDatabaseEvents()</code> - helper function for corresponding <code>addDatabaseEventListener</code> method of <code>Connection</code>.<br>
 Parameters are:
 <ul>
 	<li><code>Connection</code> - <code>Connection</code> object of which we want listen for database events.</li>
