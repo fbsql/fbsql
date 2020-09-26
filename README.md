@@ -2838,7 +2838,7 @@ ps.executeQuery()
 
 <a id="set_mock_function_method"></a>
 <h1>Method setMockFunction()</h1>
-
+Sets custom mock function.
 
 ```js
 
