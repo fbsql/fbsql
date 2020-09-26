@@ -1760,24 +1760,24 @@ ps.setMockFunction(mockFunc);
 ps.executeQuery()
 .then(resultSet => {
    console.log(resultSet);
-   /*
-    *   Output:
-    *   
-    *   [
-    *       {
-    *           "COUNTRY_ID": "AU",
-    *           "COUNTRY_NAME": "Australia"
-    *       },
-    *       {
-    *           "COUNTRY_ID": "DE",
-    *           "COUNTRY_NAME": "Germany"
-    *       },
-    *       {
-    *           "COUNTRY_ID": "IN",
-    *           "COUNTRY_NAME": "India"
-    *       }
-    *   ]
-    */
+  /*
+   *   Output:
+   *   
+   *   [
+   *       {
+   *           "COUNTRY_ID": "AU",
+   *           "COUNTRY_NAME": "Australia"
+   *       },
+   *       {
+   *           "COUNTRY_ID": "DE",
+   *           "COUNTRY_NAME": "Germany"
+   *       },
+   *       {
+   *           "COUNTRY_ID": "IN",
+   *           "COUNTRY_NAME": "India"
+   *       }
+   *   ]
+   */
 );
 
 ```
@@ -2734,7 +2734,15 @@ Returns: execution result information (row count and generated keys for SQL Data
 <a id="reseult_set_format"></a>
 Sets the result set format.
 
-<br><i>Example:</i>
+<i>Available formats:</i>
+<ul>
+	<li><code>PreparedStatement.FORMAT_ARRAY_OF_OBJECTS</code><br>Arrays with records as plain JSON objects. The default.</li><br>
+	<li><code>PreparedStatement.FORMAT_ARRAY_OF_ARRAYS</code><br>2D-array</li><br>
+	<li><code>PreparedStatement.FORMAT_OBJECT_OF_ARRAYS</code><br>Pivot object with column names as keys and arrays of cell values as values</li>
+</ul>
+See also: <a href="#reseult_set_format">Reseult set formats</a>.
+
+<br><i>Examples:</i>
 
 
 ```js
@@ -2827,17 +2835,66 @@ ps.executeQuery()
 });
 
 ```
-<i>Available formats:</i>
-<ul>
-	<li><code>PreparedStatement.FORMAT_ARRAY_OF_OBJECTS</code><br>Arrays with records as plain JSON objects. The default.</li><br>
-	<li><code>PreparedStatement.FORMAT_ARRAY_OF_ARRAYS</code><br>2D-array</li><br>
-	<li><code>PreparedStatement.FORMAT_OBJECT_OF_ARRAYS</code><br>Pivot object with column names as keys and arrays of cell values as values</li>
-</ul>
-See also: <a href="#reseult_set_format">Reseult set formats</a>.
 
 <a id="set_mock_function_method"></a>
 <h1>Method setMockFunction()</h1>
 
+
+```js
+
+const mockFunc = function() {
+    return [
+               {
+                   "COUNTRY_ID": "AU",
+                   "COUNTRY_NAME": "Australia"
+               },
+               {
+                   "COUNTRY_ID": "DE",
+                   "COUNTRY_NAME": "Germany"
+               },
+               {
+                   "COUNTRY_ID": "IN",
+                   "COUNTRY_NAME": "India"
+               }
+           ];
+}
+
+<br><i>Example:</i>
+
+const conn = new Connection('http://localhost:8080/db/MyDatabase');
+//
+// URL does not required when you use only mock functions.
+// So, you can just write:
+// const conn = new Connection();
+//
+
+// query will not transmitted to server
+const ps = conn.prepareStatement("SELECT * FROM COUNTRIES");
+ps.setMockFunction(mockFunc);
+ps.executeQuery()
+.then(resultSet => {
+   console.log(resultSet);
+  /*
+   *   Output:
+   *   
+   *   [
+   *       {
+   *           "COUNTRY_ID": "AU",
+   *           "COUNTRY_NAME": "Australia"
+   *       },
+   *       {
+   *           "COUNTRY_ID": "DE",
+   *           "COUNTRY_NAME": "Germany"
+   *       },
+   *       {
+   *           "COUNTRY_ID": "IN",
+   *           "COUNTRY_NAME": "India"
+   *       }
+   *   ]
+   */
+);
+
+```
 
 <h1 align="center">Frontend debug tool</h1>
 
