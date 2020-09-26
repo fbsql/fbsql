@@ -876,12 +876,15 @@ In this chapter we will learn how to receive result set in various formats by us
 
 You can control the result set format by choosing one from the available formats:
 
-*Available formats:*
+<i>Available formats:</i>
 <ul>
 	<li><code>PreparedStatement.FORMAT_ARRAY_OF_OBJECTS</code><br>Arrays with records as plain JSON objects. The default.</li><br>
 	<li><code>PreparedStatement.FORMAT_ARRAY_OF_ARRAYS</code><br>2D-array</li><br>
 	<li><code>PreparedStatement.FORMAT_OBJECT_OF_ARRAYS</code><br>Pivot object with column names as keys and arrays of cell values as values</li>
 </ul>
+
+See also: <a href="#reseult_set_format"><code>setResultSetFormat()</code></a>.
+
 
 <strong>Backend:</strong><br>
 
@@ -2653,6 +2656,22 @@ FBSQL_USER_INFO
 
 <a id="set_result_set_format_method"></a>
 <h1>Method setResultSetFormat()</h1>
+<a id="reseult_set_format"></a>
+Sets the result set format.
+
+```js
+
+setResultSetFormat(format)
+
+```
+
+<i>Available formats:</i>
+<ul>
+	<li><code>PreparedStatement.FORMAT_ARRAY_OF_OBJECTS</code><br>Arrays with records as plain JSON objects. The default.</li><br>
+	<li><code>PreparedStatement.FORMAT_ARRAY_OF_ARRAYS</code><br>2D-array</li><br>
+	<li><code>PreparedStatement.FORMAT_OBJECT_OF_ARRAYS</code><br>Pivot object with column names as keys and arrays of cell values as values</li>
+</ul>
+See also: <a href="#reseult_set_format">Reseult set formats</a>.
 
 <a id="set_mock_function_method"></a>
 <h1>Method setMockFunction()</h1>
