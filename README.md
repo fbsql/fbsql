@@ -42,6 +42,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
 	<li><a href="#database_event_notification" title="Database event notification.">Database event notification</a></li>
 </ul>
+
 <br><strong>Commands</strong><br>
 <ul>
 	<li><a href="#connect_to"        title="CONNECT TO statement"       >CONNECT TO</a></li>
@@ -51,6 +52,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#schedule"          title="SCHEDULE statement"         >SCHEDULE</a></li>
 	<li><a href="#include"           title="INCLUDE statement"          >INCLUDE</a></li>
 </ul>
+
 <br><strong>Functions</strong><br>
 <ul>
 	<li><a href="#remote_user"                           title="">REMOTE_USER()</a></li>
