@@ -22,7 +22,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 
 <br><strong>Tutorial</strong>
 <ul>
-	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Quick start</a></li>
+	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Getting started</a></li>
 	<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
 	<li><a href="#installation"        title="FBSQL Installation"       >Installation</a></li>
 	<li><a href="#cli"                 title="Command line interface (CLI)"        >Command line interface (CLI)</a></li>
@@ -124,7 +124,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 <hr>
 
 <a id="installation_and_basic_example"></a>
-<h1>Quick start</h1>
+<h1>Getting started</h1>
 <strong>Backend:</strong><br>
 
 <br>
@@ -192,7 +192,7 @@ Start FBSQL server:<br><br>
 </ul>
 
 ```sh
-./fbsql start
+./fbsql --start
 ```
 <br>
 </li>
@@ -313,17 +313,31 @@ fbsql-servlet-2.3.4 ─┐
 
 ```text
 
-fbsql [option]
+fbsql [options]
+
+Options:
+
+  --help, -h         Prints the command line interface help
+  --version, -v      Prints FBSQL version, build timestamp and release information
+  --start, -s        Starts FBSQL server as background process
+  --stop, -p         Stops FBSQL server background process started with start option
+  --run, -r          Starts FBSQL server in foreground
+
+Examples:
+  fbsql --start
+  fbsql --stop
+  fbsql --run
+
 
 ```
 <strong>Command line options:</strong>
 <table>
 <tr><th>Option</th><th>Description</th></tr>
-<tr><td><code>help</code></td><td>Prints the command line interface help</td></tr>
-<tr><td><code>version</code></td><td>Prints FBSQL version, build timestamp and release information</td></tr>
-<tr><td><code>start</code></td><td>Starts FBSQL server as background process</td></tr>
-<tr><td><code>stop</code></td><td>Stops FBSQL server background process started with <code>start</code> option</td></tr>
-<tr><td><code>run</code></td><td>Starts FBSQL server in foreground</td></tr>
+<tr><td><code>--help, -h</code></td><td>Prints the command line interface help</td></tr>
+<tr><td><code>--version, -v</code></td><td>Prints FBSQL version, build timestamp and release information</td></tr>
+<tr><td><code>--start, -s</code></td><td>Starts FBSQL server as background process</td></tr>
+<tr><td><code>--stop, -p</code></td><td>Stops FBSQL server background process started with <code>start</code> option</td></tr>
+<tr><td><code>--run, -r</code></td><td>Starts FBSQL server in foreground</td></tr>
 </table>
 <br>
 
