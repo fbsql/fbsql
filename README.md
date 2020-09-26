@@ -2383,7 +2383,7 @@ INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
 Return remote user name as <code>CHARACTER</code> type. Remote user name transmitted to server from client's Connection object.
 
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2396,7 +2396,7 @@ REMOTE_USER()
 Return remote user role as <code>CHARACTER</code> type. Remote user role transmitted to server from client's Connection object.
 
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2409,7 +2409,7 @@ REMOTE_ROLE()
 Return remote session id as <code>CHARACTER</code> type.
 
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2421,7 +2421,7 @@ REMOTE_SESSION_ID()
 <h1>REMOTE_SESSION_CREATION_TIME()</h1>
 Return remote session creation time as <code>INTEGER</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2433,7 +2433,7 @@ REMOTE_SESSION_CREATION_TIME()
 <h1>REMOTE_SESSION_LAST_ACCESSED_TIME()</h1>
 Return remote session last accessed time as <code>INTEGER</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2445,7 +2445,7 @@ REMOTE_SESSION_LAST_ACCESSED_TIME()
 <h1>USER_INFO()</h1>
 Return verbose client information as <code>CHARACTER</code> type in form of JSON object.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2457,7 +2457,7 @@ USER_INFO()
 <h1>IN_ROLE(character)</h1>
 Checks if remote user in role provided as parameter as <code>BOOLEAN</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2469,7 +2469,7 @@ IN_ROLE('manager')
 <h1>COOKIE(character)</h1>
 Get cookie value as <code>CHARACTER</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2480,7 +2480,7 @@ COOKIE('customer_id')
 <h1>GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</h1>
 Get HTTP session attribute as <code>CHARACTER</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2492,7 +2492,7 @@ GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR('my_entry')
 <h1>GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</h1>
 Get HTTP session attribute as <code>INTEGER</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2504,7 +2504,7 @@ GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER('my_entry')
 <h1>GET_HTTP_HEADER_AS_CHAR(character)</h1>
 Get HTTP request header value as <code>CHARACTER</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2516,7 +2516,7 @@ GET_HTTP_HEADER_AS_CHAR('Accept-Charset')
 <h1>GET_HTTP_HEADER_AS_DATE(character)</h1>
 Get HTTP request header value as <code>DATE</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
@@ -2528,7 +2528,7 @@ GET_HTTP_HEADER_AS_DATE('Date')
 <h1>GET_HTTP_HEADER_AS_INTEGER(character)</h1>
 Get HTTP request header value as <code>INTEGER</code> type.
 
-<i>Example:</i><br>
+<br><i>Example:</i>
 
 ```text
 
