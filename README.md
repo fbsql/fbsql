@@ -38,9 +38,9 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
 	<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
 	<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
-	<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
-	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
 	<li><a href="#database_event_notification" title="Database event notification.">Database event notification</a></li>
+	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
+	<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
 </ul>
 
 <br><strong>Commands</strong><br>
@@ -157,7 +157,7 @@ Put the initialization script <code>init.sql</code> into the <code>~/fbsql/confi
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -414,7 +414,7 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
 
 Initialization script executes on FBSQL startup,
 connects to database instance and performs (optionally)
-any operations that you want to be executed at start up time.
+any operations that you want to be executed at the server start up time.
 
 To be executed at startup init scripts must have the name <code>"init.sql"</code>
 or have any other name that ends with <code>".init.sql"</code>. E.g.: "my.init.sql"
@@ -425,7 +425,7 @@ Put your init scripts somewhere (directory <code>&lt;FBSQL_HOME&gt;/fbsql/config
 <a id="add_simple_authentication"></a>
 <h1>Authentication</h1>
 <p>
-In this chapter we will learn how to add simple authentication to our CONNECT TO statement.<br>
+In this chapter we will learn how to add simple authentication to our <code>CONNECT TO</code> statement.<br>
 We are going to authenticate our users by username and password.
 </p>
 
@@ -438,7 +438,7 @@ We are going to authenticate our users by username and password.
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -499,7 +499,7 @@ INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
 <a id="add_simple_role_based_authorization"></a>
 <h1>Authorization</h1>
 <p>
-In this chapter we will learn how to add simple role-based authorization to our CONNECT TO statement.<br>
+In this chapter we will learn how to add simple role-based authorization to our <code>CONNECT TO</code> statement.<br>
 We are going to authenticate our users by username and password, and authorize by role.
 </p>
 
@@ -511,7 +511,7 @@ We are going to authenticate our users by username and password, and authorize b
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -587,7 +587,7 @@ INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
 <a id="secure_our_backend_with_declare_statement"></a>
 <h1>Expose our database to frontend</h1>
 <p>
-In this chapter we will learn how to secure our backend with DECLARE STATEMENT statement
+In this chapter we will learn how to secure our backend with <code>DECLARE STATEMENT</code> command
 and reference statements by name.
 </p>
 
@@ -599,7 +599,7 @@ and reference statements by name.
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -674,7 +674,7 @@ In this chapter we will learn how to execute SQL statements from frontend JavaSc
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -749,12 +749,8 @@ Example of non-parametrized execution:
                  *   Output:
                  *   
                  *   {
-                 *       "rowCount": 1,                                  // one record updated
-                 *       "generatedKeys": [
-                 *                          {
-                 *                              "last_insert_rowid()": 0 // database product specific key names
-                 *                          }
-                 *                      ]
+                 *       "rowCount": 1,      // one record updated
+                 *       "generatedKeys": []
                  *   }
                  */
                 return ps1.executeQuery();
@@ -962,7 +958,7 @@ Example of batch execution:
 FBSQL allow check and/or modify parameters of any SQL statement before execution.
 This can be achieved by using <code>TRIGGER&nbsp;BEFORE</code> clause of <code>DECLARE&nbsp;STATEMENT</code> command.
 
-<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occur execution will be rejected.<br>
+<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is <code>NULL</code> or exception occur execution will be rejected.<br>
 <br>
 See also: <a href="#declare_statement"><code>DECLARE&nbsp;STATEMENT</code></a>
 <br>
@@ -993,7 +989,7 @@ See also: <a href="#set_result_set_format_method"><code>setResultSetFormat()</co
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -1118,7 +1114,7 @@ Procedures can be called from <code>init.sql</code> and/or frontend.<br><br>
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -1301,7 +1297,7 @@ See also: <a href="#schedule"><code>SCHEDULE</code></a>, <a href="#database_even
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -1405,7 +1401,7 @@ In this chapter we will learn how to work with BINARY, VARBINARY, LONGVARBINARY 
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -1566,7 +1562,7 @@ In this chapter we will learn how to work with DATE, TIME and TIMESTAMP types.
  *
  * Initialization script executes on FBSQL startup,
  * connects to database instance and performs (optionally)
- * any operations that you want to be executed at start up time.
+ * any operations that you want to be executed at the server start up time.
  *
  * To be executed at startup init scripts must have the name "init.sql"
  * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
@@ -1709,87 +1705,6 @@ Catch database events with debug tool:
 </html>
 
 ```
-<a id="debug_utility"></a>
-<h1>Frontend debug tool</h1>
-
-The frontend debug tool allow you execute queries, updates and listen for database events. Major difference with calling debug tool functions and corresponding FBSQL methods is debug tool automatically outputs verbose debugging information to console and browser window.
-<br>
-To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after <code>fbsql.min.js</code> in <code>&lt;head&gt;</code> section of your HTML:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="fbsql.min.js"></script>
-        <script src="fbsql-debug.min.js"></script>
-    </head>
-    ...
-</html>
-
-```
-Functions:
-<ul>
-	<li>
-		<code>logExecuteQuery</code> - helper function for corresponding <code>executeQuery</code> method of <code>PreparedStatement</code>.<br>
-		Parameters are:
-		<ul>
-			<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute query.</li>
-			<li><code>Object</code> - parameters JSON object. E.g. <code>{nameStartsWith: "Samsu"}</code></li>
-		</ul>
-		<br>
-	</li>
-	<li>
-		<code>logExecuteUpdate</code> - helper function for corresponding <code>executeUpdate</code> method of <code>PreparedStatement</code>.<br>
-		Parameters are:
-		<ul>
-			<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute update.</li>
-			<li><code>Object</code> - parameters JSON object. E.g. <code>{id: "LG-1134", newPrice: 950.00}</code></li>
-		</ul>
-		<br>
-	</li>
-	<li>
-		<code>logDatabaseEvents</code> - helper function for corresponding <code>addDatabaseEventListener</code> method of <code>Connection</code>.<br>
-		Parameters are:
-		<ul>
-			<li><code>Connection</code> - <code>Connection</code> object of which we want listen for database events.</li>
-		</ul>
-		<br>
-	</li>
-</ul>
-
-<a id="frontend_debug_tool_ref"></a>
-See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manual)</a>
-
-<i>Example of calling debug tool functions:</i><br>
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="fbsql.min.js"></script>
-        <script src="fbsql-debug.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection("http://localhost:8080/db/MyExample");
-
-            /* Log database events for connection 'conn' */
-            logDatabaseEvents(conn);
-
-            const ps1   = conn.prepareStatement("SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id");
-            /* Log execute query for PreparedStatement 'ps1' */
-            logExecuteQuery(ps1, {id: "J123"});
-
-            const ps2   = conn.prepareStatement("UPDATE EMPLOYEES SET EMPLOYEE_NAME = :name WHERE EMPLOYEE_ID = :id");
-            /* Log execute update for PreparedStatement 'ps2' */
-            logExecuteUpdate(ps2, {id: "J123", name: "John"});
-
-        </script>
-    </body>
-</html>
-
-```
-
 <a id="mocking_with_fbsql"></a>
 <h1>Mocking with FBSQL</h1>
 You can simulate FBSQL database interactions with mock functions.
@@ -1908,6 +1823,87 @@ You can fire mock database events by using <code>fireMockDatabaseEvent()</code> 
             myFireButton.addEventListener('click', function() {
                 conn.fireMockDatabaseEvent(mockEventFunc);
             });
+        </script>
+    </body>
+</html>
+
+```
+
+<a id="debug_utility"></a>
+<h1>Frontend debug tool</h1>
+
+The frontend debug tool allow you execute queries, updates and listen for database events. Major difference with calling debug tool functions and corresponding FBSQL methods is debug tool automatically outputs verbose debugging information to console and browser window.
+<br>
+To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after <code>fbsql.min.js</code> in <code>&lt;head&gt;</code> section of your HTML:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+        <script src="fbsql-debug.min.js"></script>
+    </head>
+    ...
+</html>
+
+```
+Functions:
+<ul>
+	<li>
+		<code>logExecuteQuery</code> - helper function for corresponding <code>executeQuery</code> method of <code>PreparedStatement</code>.<br>
+		Parameters are:
+		<ul>
+			<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute query.</li>
+			<li><code>Object</code> - parameters JSON object. E.g. <code>{nameStartsWith: "Samsu"}</code></li>
+		</ul>
+		<br>
+	</li>
+	<li>
+		<code>logExecuteUpdate</code> - helper function for corresponding <code>executeUpdate</code> method of <code>PreparedStatement</code>.<br>
+		Parameters are:
+		<ul>
+			<li><code>PreparedStatement</code> - <code>PreparedStatement</code> object of which we want execute update.</li>
+			<li><code>Object</code> - parameters JSON object. E.g. <code>{id: "LG-1134", newPrice: 950.00}</code></li>
+		</ul>
+		<br>
+	</li>
+	<li>
+		<code>logDatabaseEvents</code> - helper function for corresponding <code>addDatabaseEventListener</code> method of <code>Connection</code>.<br>
+		Parameters are:
+		<ul>
+			<li><code>Connection</code> - <code>Connection</code> object of which we want listen for database events.</li>
+		</ul>
+		<br>
+	</li>
+</ul>
+
+<a id="frontend_debug_tool_ref"></a>
+See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manual)</a>
+
+<i>Example of calling debug tool functions:</i><br>
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+        <script src="fbsql-debug.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection("http://localhost:8080/db/MyExample");
+
+            /* Log database events for connection 'conn' */
+            logDatabaseEvents(conn);
+
+            const ps1   = conn.prepareStatement("SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id");
+            /* Log execute query for PreparedStatement 'ps1' */
+            logExecuteQuery(ps1, {id: "J123"});
+
+            const ps2   = conn.prepareStatement("UPDATE EMPLOYEES SET EMPLOYEE_NAME = :name WHERE EMPLOYEE_ID = :id");
+            /* Log execute update for PreparedStatement 'ps2' */
+            logExecuteUpdate(ps2, {id: "J123", name: "John"});
+
         </script>
     </body>
 </html>
