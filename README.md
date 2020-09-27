@@ -350,6 +350,43 @@ By security reasons all changes you do in FBSQL home directory are immutable acr
 You can change the default FBSQL home directory location by specifying <code>FBSQL_HOME</code> operating system environment variable.
 FBSQL home directory contains init scripts, logs and all configuration files related to application server and JVM.
 
+<br>
+<strong>Setup JDBC drivers</strong>
+To setup your database instance copy all the necessary JDBC drivers jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.
+
+<br>
+<strong>Setup custom classess and jars</strong>
+To setup custom classess and jars copy:
+<ul>
+<li>all the necessary jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.</li>
+<li>all the necessary classes into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/classes</code> directory.</li>
+</ul>
+<br>
+<strong>Setup CORS policy</strong>
+To setup your CORS policy please modify value of <code>CORS_ALLOW_ORIGIN</code> parameter in <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file.
+
+<br>
+<strong>Setup static frontens files like *.html, *.js, *.css etc. </strong>
+To setup your static content please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file.
+
+```xml
+
+
+...
+
+<init-param>
+	<!--
+	https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin 
+ 	-->
+	<description>"Access-Control-Allow-Origin" HTTP header value</description>
+	<param-name>CORS_ALLOW_ORIGIN</param-name>
+	<param-value></param-value>
+</init-param>
+
+...
+
+```
+
 <strong>Anatomy of FBSQL home directory:</strong>
 ```text
 <FBSQL_HOME> ─┐ ......................................................│-> FBSQL home directory
@@ -358,10 +395,10 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
                         │                                             │
                         ├─ config                                     │
                         │  │                                          │
-                        │  ├─ init ...................................│-> init scripts dir.
+                        │  ├─ init ...................................│-> init scripts
                         │  │                                          │
-                        │  ├─ jre ....................................│-> JVM
-                        │  │  └─ conf                                 │   configuration files
+                        │  ├─ jre ....................................│-> JVM conf
+                        │  │  └─ conf                                 │
                         │  │     ├─ logging.properties                │
                         │  │     ├─ management                        │
                         │  │     │  ├─ jmxremote.access               │
@@ -384,8 +421,8 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
                         │  │     │        └─ default_US_export.policy │
                         │  │     └─ sound.properties                  │
                         │  │                                          │
-                        │  └─ tomcat .................................│-> Apache Tomcat
-                        │     ├─ bin                                  │   configuration files
+                        │  └─ tomcat .................................│-> Apache Tomcat conf
+                        │     ├─ bin                                  │
                         │     │  └─ setenv.sh                         │
                         │     ├─ conf                                 │
                         │     │  ├─ catalina.policy                   │
@@ -401,9 +438,9 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
                         │     └─ webapps                              │
                         │        └─ ROOT                              │
                         │           │                                 │
-                        │           └─ WEB-INF .......................│-> servlet
-                        │              ├─ classes                     │   configuration files
-                        │              ├─ lib                         │
+                        │           └─ WEB-INF .......................│-> servlet conf
+                        │              ├─ classes                     │ 
+                        │              ├─ lib ........................│-> JDBC drivers
                         │              └─ web.xml                     │
                         │                                             │
                         └─ logs ......................................│-> Logs dir.
