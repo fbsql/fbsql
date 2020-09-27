@@ -334,11 +334,11 @@ Examples:
 <strong>Command line options:</strong>
 <table>
 <tr><th>Option</th><th>Description</th></tr>
-<tr><td><code>--help</code></td><td>Prints the command line interface help</td></tr>
-<tr><td><code>--version</code></td><td>Prints FBSQL version, build timestamp and release information</td></tr>
-<tr><td><code>--start</code></td><td>Starts FBSQL server as background process</td></tr>
-<tr><td><code>--stop</code></td><td>Stops FBSQL server background process started with <code>start</code> option</td></tr>
-<tr><td><code>--run</code></td><td>Starts FBSQL server in foreground</td></tr>
+<tr><td><code>help</code></td><td>Prints the command line interface help</td></tr>
+<tr><td><code>version</code></td><td>Prints FBSQL version, build timestamp and release information</td></tr>
+<tr><td><code>start</code></td><td>Starts FBSQL server as background process</td></tr>
+<tr><td><code>stop</code></td><td>Stops FBSQL server background process started with <code>start</code> option</td></tr>
+<tr><td><code>run</code></td><td>Starts FBSQL server in foreground</td></tr>
 </table>
 <br>
 
@@ -662,9 +662,9 @@ DECLARE STATEMENT (SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id)
 
 <a id="execute_query_and_execute_update"></a>
 <h1>Execute SQL statements</h1>
-<p><i>
-In this chapter we will learn how to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.
-</i></p>
+<p>
+In this chapter we will learn how to execute SQL statements from frontend JavaScript by using <code>executeQuery()</code> and <code>executeUpdate()</code> methods.
+</p>
 
 <strong>Backend:</strong><br>
 
@@ -834,12 +834,8 @@ Example of parametrized execution:
                  *   Output:
                  *   
                  *   {
-                 *       "rowCount": 1,                                  // one record updated
-                 *       "generatedKeys": [
-                 *                          {
-                 *                              "last_insert_rowid()": 0 // database product specific key names
-                 *                          }
-                 *                      ]
+                 *       "rowCount": 1,      // one record updated
+                 *       "generatedKeys": []
                  *   }
                  */
                 return ps1.executeQuery();
@@ -861,6 +857,94 @@ Example of parametrized execution:
                  *       {
                  *           "COUNTRY_ID": "IN",
                  *           "COUNTRY_NAME": "India"
+                 *       }
+                 *   ]
+                 */
+            });
+        </script>
+    </body>
+</html>
+
+```
+
+<br>
+Example of batch execution:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('http://localhost:8080/db/ExecuteQueryAndExecuteUpdateExample');
+
+            /* Select all records */
+            const ps1 = conn.prepareStatement("SELECT * FROM COUNTRIES");
+
+            /* Update one record */
+            const ps2 = conn.prepareStatement("UPDATE COUNTRIES SET COUNTRY_NAME = :name WHERE COUNTRY_ID = :id");
+
+
+            ps1.executeQuery()
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *   
+                 *   [
+                 *       {
+                 *           "COUNTRY_ID": "AU",
+                 *           "COUNTRY_NAME": "Australia"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "DE",
+                 *           "COUNTRY_NAME": "Germany"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "IN",
+                 *           "COUNTRY_NAME": "India"
+                 *       }
+                 *   ]
+                 */
+                 return ps2.executeUpdate(
+                     [
+                         {id: 'DE', name: 'Federal Republic of Germany'},
+                         {id: 'IN', name: 'Republic of India'          }
+                     ]
+                     
+                 );
+            })
+            .then(result => {
+                console.log(result);
+                /*
+                 *   Output:
+                 *   
+                 *   {
+                 *       "rowCount": 2,      // two records updated
+                 *       "generatedKeys": []
+                 *   }
+                 */
+                return ps1.executeQuery();
+            })
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 *   Output:
+                 *   
+                 *   [
+                 *       {
+                 *           "COUNTRY_ID": "AU",
+                 *           "COUNTRY_NAME": "Australia"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "DE",
+                 *           "COUNTRY_NAME": "Federal Republic of Germany"
+                 *       },
+                 *       {
+                 *           "COUNTRY_ID": "IN",
+                 *           "COUNTRY_NAME": "Republic of India"
                  *       }
                  *   ]
                  */
