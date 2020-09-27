@@ -379,10 +379,11 @@ To setup your CORS policy please modify value of <code>CORS_ALLOW_ORIGIN</code> 
 ...
 
 ```
+<br>
 
-<strong>Setup static frontens files:</strong><br>
-To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc. ) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file.
-<br><br>
+<strong>Setup static frontend files:</strong><br>
+FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc. ) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file.
+<br><br><br>
 <strong>Anatomy of FBSQL home directory:</strong>
 ```text
 <FBSQL_HOME> ─┐ ......................................................│-> FBSQL home directory
