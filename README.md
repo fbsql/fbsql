@@ -2723,8 +2723,8 @@ a result set array that contains the data produced by the query; never null.
 ```
 <a id="execute_update_method"></a>
 <h1>Method executeUpdate()</h1>
-Executes the SQL statement in this PreparedStatement object, which must be an SQL Data Manipulation Language (DML) statement, such as INSERT, UPDATE or DELETE; or an SQL statement that returns nothing, such as a DDL statement.
-Returns: execution result information (row count and generated keys for SQL Data Manipulation Language (DML) statements) in form JSON object. rowCount = 0 for SQL statements that return nothing.
+Executes the SQL statement in this PreparedStatement object, which must be an SQL Data Manipulation Language (DML) statement, such as <code>INSERT</code>, <code>UPDATE</code> or <code>DELETE</code>; or an SQL statement that returns nothing, such as a DDL statement.
+Returns: execution result information (row count and generated keys for SQL Data Manipulation Language (DML) statements) in form JSON object. <code>rowCount = 0</code> for SQL statements that return nothing.
 
 <br><i>Example:</i>
 
