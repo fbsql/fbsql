@@ -350,28 +350,21 @@ By security reasons all changes you do in FBSQL home directory are immutable acr
 You can change the default FBSQL home directory location by specifying <code>FBSQL_HOME</code> operating system environment variable.
 FBSQL home directory contains init scripts, logs and all configuration files related to application server and JVM.
 
-<br>
 <strong>Setup JDBC drivers:</strong><br>
 To setup your database instance copy all the necessary JDBC drivers jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.
 
-<br>
+<br><br>
 <strong>Setup custom classess and jars:</strong><br>
 To setup custom classess and jars copy:
 <ul>
 <li>all the necessary jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.</li>
 <li>all the necessary classes into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/classes</code> directory.</li>
 </ul>
-<br>
+<br><br>
 <strong>Setup CORS policy:</strong><br>
 To setup your CORS policy please modify value of <code>CORS_ALLOW_ORIGIN</code> parameter in <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file.
 
-<br>
-<strong>Setup static frontens files:</strong><br>
-To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc. ) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file.
-
 ```xml
-
-
 ...
 
 <init-param>
@@ -386,6 +379,9 @@ To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.cs
 ...
 
 ```
+<br>
+<strong>Setup static frontens files:</strong><br>
+To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc. ) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file.
 
 <strong>Anatomy of FBSQL home directory:</strong>
 ```text
