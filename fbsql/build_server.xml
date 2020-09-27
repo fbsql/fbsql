@@ -135,15 +135,16 @@ Important properties:
 		</tstamp>
 
 		<property name="start-script" value="${tomcat-dir}/start.sh" />
+		<echo file="${start-script}" append="true"><![CDATA[#!/bin/bash${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[clear${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[echo "┌─────────────────────────────────────┐";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "│ \033[1mFBSQL\033[0m - Frontend Backend SQL server │";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "│ FBSQL - Frontend Backend SQL server │";]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[echo "│ Build:  ${timestamp}        │";]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[echo "└─────────────────────────────────────┘";]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[echo "                                                                 ";]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[parentdir="$(dirname "$PWD")"${line.separator}]]></echo>
 
-		<echo file="${start-script}" append="true"><![CDATA[if [[ "$1" = "--stop" || "$1" = "-p" ]] && [ ! -d "$parentdir"/fbsql-server ]; then${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[if [ "$1" = "stop" ] && [ ! -d "$parentdir"/fbsql-server ]; then${line.separator}]]></echo>
 
 		<echo file="${start-script}" append="true"><![CDATA[echo "Running instance not found. Already stopped?";]]></echo>
 		
@@ -152,12 +153,12 @@ Important properties:
 		<echo file="${start-script}" append="true"><![CDATA[export JRE_HOME=jre${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[export JAVA_OPTS="-Djdk.lang.Process.launchMechanism=vfork"${line.separator}]]></echo>
 
-		<echo file="${start-script}" append="true"><![CDATA[if [ "$1" = "--stop" ] || [ "$1" = "-p" ]; then${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[if [ "$1" = "stop" ]; then${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[bin/catalina.sh stop >/dev/null 2>&1${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[rm -rf "$parentdir"/fbsql-server${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[echo "The server was successfully stopped.${line.separator}";]]></echo>
 
-		<echo file="${start-script}" append="true"><![CDATA[elif [ "$1" = "--start" ] || [ "$1" = "-s" ] || [ "$1" = "--run" ] || [ "$1" = "-r" ]; then${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[elif [ "$1" = "start" ] || [ "$1" = "run" ]; then${line.separator}]]></echo>
 
 		<echo file="${start-script}" append="true"><![CDATA[rm -rf "$parentdir"/fbsql-server${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[mv "$PWD" "$parentdir"/fbsql-server${line.separator}]]></echo>
@@ -191,27 +192,30 @@ Important properties:
 		<echo file="${start-script}" append="true"><![CDATA[cd "$parentdir"/fbsql-server${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[$JRE_HOME/bin/java -cp ".:webapps/ROOT/WEB-INF/lib/*:webapps/ROOT/WEB-INF/classes" org.fbsql_server.Main${line.separator}]]></echo>
 		
-		<echo file="${start-script}" append="true"><![CDATA[if [ "$1" = "--run" ] || [ "$1" = "-r" ]; then${line.separator}]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[if [ "$1" = "run" ]; then${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[echo "running...";]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[bin/catalina.sh run${line.separator}]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[elif [ "$1" = "--start" ] || [ "$1" = "-s" ]; then${line.separator}]]></echo>		
+		<echo file="${start-script}" append="true"><![CDATA[elif [ "$1" = "start" ]; then${line.separator}]]></echo>		
 		<echo file="${start-script}" append="true"><![CDATA[bin/catalina.sh start >/dev/null 2>&1${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[fi${line.separator}]]></echo>
 		<echo file="${start-script}" append="true"><![CDATA[echo "The server was successfully started.${line.separator}";]]></echo>
 
+		<echo file="${start-script}" append="true"><![CDATA[elif [ "$1" = "version" ]; then${line.separator}]]></echo>		
+		<echo file="${start-script}" append="true"><![CDATA[echo "";]]></echo>
+
 		<echo file="${start-script}" append="true"><![CDATA[else${line.separator}]]></echo>
 
-		<echo file="${start-script}" append="true"><![CDATA[echo "Usage:                                                ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "                                                      ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "fbsql [options]                                       ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "                                                      ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "Options:                                              ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "         --help, -h    - print help                   ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "         --version, -v - print version                ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "         --start, -s   - start server (in basckground)";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "         --stop, -p    - stop server                  ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "         --run, -r     - run server (in foreground)   ";]]></echo>
-		<echo file="${start-script}" append="true"><![CDATA[echo "                                                      ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "Usage:                                          ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "                                                ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "fbsql [options]                                 ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "                                                ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "Options:                                        ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "         help    - print help                   ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "         version - print version                ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "         start   - start server (in basckground)";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "         stop    - stop server                  ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "         run     - run server (in foreground)   ";]]></echo>
+		<echo file="${start-script}" append="true"><![CDATA[echo "                                                ";]]></echo>
 
 		<echo file="${start-script}" append="true"><![CDATA[fi]]></echo>
 

@@ -1,15 +1,16 @@
 
-┌──────────────────────────────┐
-│ FBSQL - Frontend Backend SQL │
-└──────────────────────────────┘
+┌─────────────────────────────────────┐
+│ FBSQL - Frontend Backend SQL server │
+└─────────────────────────────────────┘
 
-Usage:
-
-fbsql <command>
-
-commands:
-          start - start server (in basckground)
-          stop  - stop server                  
-
-          run   - run server (in foreground)   
-
+Usage:                                          
+                                                
+fbsql [options]                                 
+                                                
+Options:                                        
+         help    - print help                   
+         version - print version                
+         start   - start server (in basckground)
+         stop    - stop server                  
+         run     - run server (in foreground)   
+                                                

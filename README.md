@@ -313,31 +313,32 @@ fbsql-servlet-2.3.4 ─┐
 
 ```text
 
-fbsql [options]
-
-Options:
-
-  --help, -h         Prints the command line interface help
-  --version, -v      Prints FBSQL version, build timestamp and release information
-  --start, -s        Starts FBSQL server as background process
-  --stop, -p         Stops FBSQL server background process started with start option
-  --run, -r          Starts FBSQL server in foreground
+Usage:                                          
+                                                
+fbsql [options]                                 
+                                                
+Options:                                        
+         help    - print help                   
+         version - print version                
+         start   - start server (in basckground)
+         stop    - stop server                  
+         run     - run server (in foreground)   
 
 Examples:
-  fbsql --start
-  fbsql --stop
-  fbsql --run
+  fbsql start
+  fbsql stop
+  fbsql run
 
 
 ```
 <strong>Command line options:</strong>
 <table>
 <tr><th>Option</th><th>Description</th></tr>
-<tr><td><code>--help, -h</code></td><td>Prints the command line interface help</td></tr>
-<tr><td><code>--version, -v</code></td><td>Prints FBSQL version, build timestamp and release information</td></tr>
-<tr><td><code>--start, -s</code></td><td>Starts FBSQL server as background process</td></tr>
-<tr><td><code>--stop, -p</code></td><td>Stops FBSQL server background process started with <code>start</code> option</td></tr>
-<tr><td><code>--run, -r</code></td><td>Starts FBSQL server in foreground</td></tr>
+<tr><td><code>--help</code></td><td>Prints the command line interface help</td></tr>
+<tr><td><code>--version</code></td><td>Prints FBSQL version, build timestamp and release information</td></tr>
+<tr><td><code>--start</code></td><td>Starts FBSQL server as background process</td></tr>
+<tr><td><code>--stop</code></td><td>Stops FBSQL server background process started with <code>start</code> option</td></tr>
+<tr><td><code>--run</code></td><td>Starts FBSQL server in foreground</td></tr>
 </table>
 <br>
 
@@ -890,7 +891,7 @@ In this chapter we will learn how to receive result set in various formats by us
 
 You can control the result set format by choosing one from the available formats:
 
-<i>Available formats:</i>
+Available formats:
 <ul>
 	<li><code>PreparedStatement.FORMAT_ARRAY_OF_OBJECTS</code><br>Arrays with records as plain JSON objects. The default.</li><br>
 	<li><code>PreparedStatement.FORMAT_ARRAY_OF_ARRAYS</code><br>2D-array</li><br>
@@ -1796,9 +1797,9 @@ ps.executeQuery()
 
 ```
 <br>
-<strong>Fire database events on client</strong><br>
+<strong>Fire mock database events in client environment</strong><br>
 <br>
-You can fire mock database events by using fireMockDatabaseEvent of Connection object. 
+You can fire mock database events by using <code>fireMockDatabaseEvent()</code> method of <code>Connection</code> object. 
 
 ```html
 <!DOCTYPE html>
@@ -2748,7 +2749,7 @@ Returns: execution result information (row count and generated keys for SQL Data
 <a id="reseult_set_format"></a>
 Sets the result set format.
 
-<i>Available formats:</i>
+Available formats:
 <ul>
 	<li><code>PreparedStatement.FORMAT_ARRAY_OF_OBJECTS</code><br>Arrays with records as plain JSON objects. The default.</li><br>
 	<li><code>PreparedStatement.FORMAT_ARRAY_OF_ARRAYS</code><br>2D-array</li><br>
