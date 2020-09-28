@@ -1142,9 +1142,9 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 <p>
 In this chapter we will learn how to write and use database agnostic stored procedures written in JavaScript or <abbr title="Java Virtual Machine">JVM</abbr> languages, Operating System programs and URLs.
 </p>
-Procedures can be called from <code>init.sql</code> and/or frontend.
+Procedures can be called from <code>init.sql</code> and/or frontend.<br>
 <blockquote>
-Opposite to native, FBSQL stored procedures and functions are executed before native statement execution. Procedure/function result is calculated and procedure/function call source replaced with calculated value.
+Opposite to native, FBSQL stored procedures and functions are executed <strong>before</strong> native statement execution. Procedure/function result is calculated and procedure/function call source replaced with calculated value.
 
 E.g.
 
