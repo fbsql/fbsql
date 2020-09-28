@@ -1,5 +1,5 @@
 
-List of third party libraries and tools used to develop, compile and run FBSQL WAR and FBSQL SERVER.
+List of third party libraries and tools used to develop, compile and run FBSQL
 ----------------------------------------------------------------------------------------------------
 
 
@@ -37,12 +37,6 @@ NAME       : makeself
 LICENSE    : GPL-2.0 (GNU General Public License v2.0)
 HOME PAGE  : https://github.com/megastep/makeself
 DESCRIPTION: Used to make FBSQL binary
-
-
-NAME       : Alasql
-LICENSE    : MIT License
-HOME PAGE  : http://alasql.org
-DESCRIPTION: Used as client in-browser database
 
 
 NAME       : H2 Database Engine
