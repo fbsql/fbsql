@@ -1,0 +1,42 @@
+
+List of third party JDBC drivers included  in FBSQL Server distribution
+----------------------------------------------------------------------------------------------------
+
+
+NAME         : SQLite
+LICENSE      : Apache License 2.0
+HOME PAGE    : https://www.sqlite.org
+DOWNLOAD PAGE: https://www.sqlite.org/download.html
+DRIVER CLASS : org.sqlite.JDBC
+DESCRIPTION  : SQLite JDBC Driver
+
+
+NAME         : HSQLDB JDBC Driver
+LICENSE      : BSD License
+HOME PAGE    : http://hsqldb.org
+DOWNLOAD PAGE: http://www.hsqldb.org/download
+DRIVER CLASS : org.hsqldb.jdbc.JDBCDriver
+DESCRIPTION  : HSQLDB JDBC Driver
+
+
+NAME         : H2 Database Engine
+LICENSE      : MPL-2.0 (Mozilla Public License v2.0), EPL-1.0 (Eclipse Public License v1.0)
+HOME PAGE    : https://www.h2database.com
+DOWNLOAD PAGE: https://www.h2database.com/html/download.html
+DRIVER CLASS : org.h2.Driver
+DESCRIPTION  : Used modified version of SQL script reader FBSQL (org.h2.util.ScriptReader.java)
+
+
+NAME         : Apache Derby JDBC Driver
+LICENSE      : Apache License 2.0
+HOME PAGE    : http://db.apache.org/derby
+DOWNLOAD PAGE: http://db.apache.org/derby/derby_downloads.html
+DRIVER CLASS : org.apache.derby.jdbc.EmbeddedDriver
+DRIVER CLASS : org.apache.derby.jdbc.ClientDriver
+DESCRIPTION  : Apache Derby JDBC Driver
+
+
+----------------------------------------------------------------------------------------------------
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
+or visit https://fbsql.github.io if you need additional
+information or have any questions.

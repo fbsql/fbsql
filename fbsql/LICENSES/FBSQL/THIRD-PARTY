@@ -69,6 +69,14 @@ HOME PAGE  : http://github.com/whitequark/murmurhash3-js
 DESCRIPTION: Used if JavaScript client to create hash to make URL unique
 
 
+NAME       : ANTLR4
+LICENSE    : BSD License
+HOME PAGE  : https://www.antlr.org
+DESCRIPTION: Used as FBSQL dialect parser tool
+
+
+
+EMBEDDED DATABASES AND THEIR JDBC DRIVERS:
 
 
 NAME         : SQLite
@@ -77,22 +85,6 @@ HOME PAGE    : https://www.sqlite.org
 DOWNLOAD PAGE: https://www.sqlite.org/download.html
 DRIVER CLASS : org.sqlite.JDBC
 DESCRIPTION  : SQLite JDBC Driver
-
-
-NAME         : MariaDB Connector/J
-LICENSE      : LGPL-2.1 (GNU Lesser General Public License v2.1)
-HOME PAGE    : https://downloads.mariadb.org
-DOWNLOAD PAGE: https://downloads.mariadb.org/connector-java/
-DRIVER CLASS : org.mariadb.jdbc.Driver
-DESCRIPTION  : MariaDB and MySQL JDBC Driver
-
-
-NAME         : PostgreSQL JDBC Driver
-LICENSE      : BSD-2-Clause License
-HOME PAGE    : https://jdbc.postgresql.org
-DOWNLOAD PAGE: https://jdbc.postgresql.org/download.html
-DRIVER CLASS : org.postgresql.Driver
-DESCRIPTION  : PostgreSQL JDBC Driver
 
 
 NAME         : HSQLDB JDBC Driver
@@ -120,15 +112,7 @@ DRIVER CLASS : org.apache.derby.jdbc.ClientDriver
 DESCRIPTION  : Apache Derby JDBC Driver
 
 
-NAME         : JTOpen
-LICENSE      : IPL-1.0 (IBM Public License v1.0)
-HOME PAGE    : http://jt400.sourceforge.net
-DOWNLOAD PAGE: https://sourceforge.net/projects/jt400/files/JTOpen-full
-DRIVER CLASS : com.ibm.as400.access.AS400JDBCDriver
-DESCRIPTION  : IBM i (or i5/OS or OS/400) JDBC Driver
-
-
 ----------------------------------------------------------------------------------------------------
-Please contact Nėuro Lab by E-Mail neuro.lab.team@gmail.com
-or visit https://neuro-lab.github.io if you need additional
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
+or visit https://fbsql.github.io if you need additional
 information or have any questions.
