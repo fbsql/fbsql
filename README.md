@@ -20,6 +20,10 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 
 <hr>
 
+<blockquote>
+We wish to improve the documentation. Any help is welcome!
+</blockquote>
+
 <br><strong>Tutorial</strong>
 <ul>
 	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Getting started</a></li>
