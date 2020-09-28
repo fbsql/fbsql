@@ -354,7 +354,8 @@ Due to security reasons all changes you do in FBSQL home directory are immutable
 </blockquote>
 
 <strong>Setup JDBC drivers:</strong><br>
-To setup your database instance copy all the necessary JDBC drivers jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.
+Install the JDBC drivers for your database, and set them up so they are in your classpath.
+The easiest way to do this is to copy all the necessary JDBC drivers jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.
 
 <br>
 <strong>Setup custom classes, resources and jars:</strong><br>
@@ -1141,8 +1142,29 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 <p>
 In this chapter we will learn how to write and use database agnostic stored procedures written in JavaScript or <abbr title="Java Virtual Machine">JVM</abbr> languages, Operating System programs and URLs.
 </p>
-Procedures can be called from <code>init.sql</code> and/or frontend.<br><br>
+Procedures can be called from <code>init.sql</code> and/or frontend.
+<blockquote>
+Opposite to native, FBSQL stored procedures and functions are executed before native statement execution. Procedure/function result is calculated and procedure/function call source replaced with calculated value.
 
+E.g.
+
+```sql
+
+SELECT CALC_PRICE(4) AS PRICE FROM MYTABLE
+
+```
+
+will translated to:
+
+
+```sql
+
+SELECT 28 AS PRICE FROM MYTABLE
+
+```
+
+</blockquote>
+<br><br>
 <strong>Backend:</strong><br>
 
 ```sql
