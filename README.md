@@ -346,19 +346,22 @@ Examples:
 <h1>Configuration and fine tuning</h1>
 
 After FBSQL starts it automatically copy all the nessesary configuration files to FBSQL home directory (by default user home directory).
-By security reasons all changes you do in FBSQL home directory are immutable across FBSQL server running session. Configuration changes will loaded after FBSQL server starts next time.
 You can change the default FBSQL home directory location by specifying <code>FBSQL_HOME</code> operating system environment variable.
 FBSQL home directory contains init scripts, logs and all configuration files related to application server and JVM.
+
+<blockquote>
+Due to security reasons all changes you do in FBSQL home directory are immutable across FBSQL server running session. Configuration changes will loaded after FBSQL server starts next time.
+</blockquote>
 
 <strong>Setup JDBC drivers:</strong><br>
 To setup your database instance copy all the necessary JDBC drivers jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.
 
 <br>
-<strong>Setup custom classess and jars:</strong><br>
-To setup custom classess and jars copy:
+<strong>Setup custom classes, resources and jars:</strong><br>
+To setup custom classes, resources and jars copy:
 <ul>
 <li>all the necessary jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.</li>
-<li>all the necessary classes into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/classes</code> directory.</li>
+<li>all the necessary classes and resources into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/classes</code> directory.</li>
 </ul>
 <br>
 <strong>Setup CORS policy:</strong><br>
@@ -451,7 +454,7 @@ connects to database instance and performs (optionally)
 any operations that you want to be executed at the server start up time.
 
 To be executed at startup init scripts must have the name <code>"init.sql"</code>
-or have any other name that ends with <code>".init.sql"</code>. E.g.: "my.init.sql"
+or have any other name that ends with <code>".init.sql"</code>. E.g.: <code>"my.init.sql"</code>.
 
 Put your init scripts somewhere (directory <code>&lt;FBSQL_HOME&gt;/fbsql/config/init</code> can have arbitrary hierarchy structure) under <code>&lt;FBSQL_HOME&gt;/fbsql/config/init</code> directory.
 
