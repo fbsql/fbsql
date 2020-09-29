@@ -391,8 +391,8 @@ To setup your CORS policy please modify value of <code>CORS_ALLOW_ORIGIN</code> 
 ...
 
 ```
-See also: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin</a>
-<br>
+See also: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin</a>
+<br><br>
 
 <strong>Setup static frontend files:</strong><br>
 FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
