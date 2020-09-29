@@ -2006,15 +2006,26 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 </html>
 
 ```
+<br>
 <strong>FBSQL server can be sweet home for all of your static stuff</strong><br>
 FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
 <br><br>
-<strong>FBSQL break applicative limits of your SQL by providing custom stored procedures</strong><br>
-custom stored procedures are database agnostic, can be written in a variety of programming  languages including Java, JavaScript, and Python.
+
+<strong>With FBSQL mock methods you can fast prototype your application</strong><br>
+FBSQL have mock functions that allow you create application prototype even without database instance.
+<br><br>
+
+<strong>With FBSQL debug tool you can execute SQL statements before your UI/UX ready</strong><br>
+The frontend debug tool allow you execute queries, updates and listen for database events. Major difference with calling debug tool functions and corresponding FBSQL methods is debug tool automatically outputs verbose debugging information to console and browser window.
+<br><br>
+
+<strong>FBSQL break your database applicative limits by providing custom stored procedures</strong><br>
+Custom stored procedures are database agnostic, can be written in a variety of programming  languages such as Java, JavaScript and Python.
+<br><br>
+
 	</li>
 	
 </ul>
-
 <h1 align="center">COMMANDS</h1>
 
 <a id="connect_to"></a>
