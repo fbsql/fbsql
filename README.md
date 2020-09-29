@@ -361,42 +361,7 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
 Due to security reasons all changes you do in FBSQL home directory are immutable across FBSQL server running session. Configuration changes will loaded after FBSQL server starts next time.
 </blockquote>
 
-<strong>Setup JDBC drivers:</strong><br>
-Install the JDBC drivers for your database, and set them up so they are in your classpath.
-The easiest way to do this is to copy all the necessary JDBC drivers jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.
-
-<br>
-<strong>Setup custom classes, resources and jars:</strong><br>
-To setup custom classes, resources and jars copy:
-<ul>
-<li>all the necessary jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.</li>
-<li>all the necessary classes and resources into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/classes</code> directory.</li>
-</ul>
-<br>
-<strong>Setup CORS policy:</strong><br>
-To setup your CORS policy please modify value of <code>CORS_ALLOW_ORIGIN</code> parameter in <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file:<br>
-
-```xml
-...
-
-<init-param>
-	<!--
-	https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin
- 	-->
-	<description>"Access-Control-Allow-Origin" HTTP header value</description>
-	<param-name>CORS_ALLOW_ORIGIN</param-name>
-	<param-value></param-value>
-</init-param>
-
-...
-
-```
-See also: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin</a>
 <br><br>
-
-<strong>Setup static frontend files:</strong><br>
-FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
-<br><br><br>
 <strong>Anatomy of FBSQL home directory:</strong>
 ```text
 <FBSQL_HOME> ─┐ ......................................................│-> FBSQL home directory
@@ -456,6 +421,43 @@ FBSQL server (optionally) can host your static frontend files. To setup your sta
                         └─ logs ......................................│-> Logs dir.
 
 ```
+<br>
+<strong>Setup JDBC drivers:</strong><br>
+Install the JDBC drivers for your database, and set them up so they are in your classpath.
+The easiest way to do this is to copy all the necessary JDBC drivers jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.
+
+<br>
+<strong>Setup custom classes, resources and jars:</strong><br>
+To setup custom classes, resources and jars copy:
+<ul>
+<li>all the necessary jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.</li>
+<li>all the necessary classes and resources into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/classes</code> directory.</li>
+</ul>
+<br>
+<strong>Setup CORS policy:</strong><br>
+To setup your CORS policy please modify value of <code>CORS_ALLOW_ORIGIN</code> parameter in <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/web.xml</code> file:<br>
+
+```xml
+...
+
+<init-param>
+	<!--
+	https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin
+ 	-->
+	<description>"Access-Control-Allow-Origin" HTTP header value</description>
+	<param-name>CORS_ALLOW_ORIGIN</param-name>
+	<param-value></param-value>
+</init-param>
+
+...
+
+```
+See also: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin</a>
+<br><br>
+
+<strong>Setup static frontend files:</strong><br>
+FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
+<br>
 <a id="init_script"></a>
 <h1>Init script</h1>
 
