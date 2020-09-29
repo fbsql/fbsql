@@ -45,6 +45,7 @@ We wish to improve the documentation. Any help is welcome!
 	<li><a href="#database_event_notification" title="Database event notification.">Database event notification</a></li>
 	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
 	<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
+	<li><a href="#did_you_know" title="Did you know?">Did you know?</a></li>
 </ul>
 
 <br><strong>Commands</strong><br>
@@ -457,7 +458,7 @@ See also: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Acc
 <br><br>
 
 <strong>Setup static frontend files:</strong><br>
-FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
+FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
 <br><br>
 <a id="init_script"></a>
 <h1>Init script</h1>
@@ -1980,6 +1981,43 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 </html>
 
 ```
+<a id="did_you_know"></a>
+<h1>Did you know?</h1>
+<ul>
+	<li>
+		<strong>You can use self-hosted FBSQL browser client and debug tool</strong><br>
+		
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="http://localhost:8080/fbsql.min.js"></script>
+        <script src="http://localhost:8080/fbsql-debug.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            //
+            // Because we use self-hosted client we can use connection name instead of URL
+            // const conn = new Connection("http://localhost:8080/db/MyExample");
+            //
+            const conn = new Connection("MyExample");
+            ...
+        </script>
+    </body>
+</html>
+
+```
+	</li>
+	<li>
+		<strong>FBSQL server can be sweet home for all of your static stuff</strong><br>
+FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
+	</li>
+	<li>
+		<strong>FBSQL break applicative limits of your SQL by providing custom stored procedures</strong><br>
+custom stored procedures are database agnostic, can be written in a variety of programming  languages including Java, JavaScript, and Python.
+	</li>
+	
+</ul>
 
 <h1 align="center">COMMANDS</h1>
 
