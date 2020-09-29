@@ -2007,7 +2007,7 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 
 ```
 <br>
-<strong>FBSQL server can be sweet home for all of your static stuff</strong><br>
+<strong>FBSQL server is a sweet home for all of your static stuff</strong><br>
 FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
 <br><br>
 
@@ -2607,6 +2607,11 @@ INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
 
 ```
 
+
+```text
+
+```
+
 <h1 align="center">FUNCTIONS</h1>
 
 <a id="remote_user"                          ></a>
@@ -2767,6 +2772,10 @@ GET_HTTP_HEADER_AS_INTEGER('Content-Length')
 
 ```
 
+```text
+
+```
+
 <h1 align="center">CONSTANTS</h1>
 
 <a id="fbsql_remote_user"                          ></a>
@@ -2841,6 +2850,10 @@ Return verbose client information as <code>CHARACTER</code> type in form of JSON
 ```text
 
 FBSQL_USER_INFO
+
+```
+
+```text
 
 ```
 
@@ -3106,6 +3119,10 @@ ps.executeQuery()
    *   ]
    */
 );
+
+```
+
+```text
 
 ```
 
