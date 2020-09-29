@@ -1983,9 +1983,8 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 ```
 <a id="did_you_know"></a>
 <h1>Did you know?</h1>
-<ul>
-	<li>
-		<strong>You can use self-hosted FBSQL browser client and debug tool</strong><br>
+
+<strong>You can use self-hosted FBSQL browser client and debug tool</strong><br>
 		
 ```html
 <!DOCTYPE html>
@@ -2007,15 +2006,10 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 </html>
 
 ```
-
-	</li>
-
-	<li>
-		<strong>FBSQL server can be sweet home for all of your static stuff</strong><br>
+<strong>FBSQL server can be sweet home for all of your static stuff</strong><br>
 FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
-	</li>
-	<li>
-		<strong>FBSQL break applicative limits of your SQL by providing custom stored procedures</strong><br>
+<br>
+<strong>FBSQL break applicative limits of your SQL by providing custom stored procedures</strong><br>
 custom stored procedures are database agnostic, can be written in a variety of programming  languages including Java, JavaScript, and Python.
 	</li>
 	
