@@ -2023,9 +2023,9 @@ The frontend debug tool allow you execute queries, updates and listen for databa
 Custom stored procedures are database agnostic, can be written in a variety of programming  languages such as Java, JavaScript and Python.
 <br><br>
 
-	</li>
-	
-</ul>
+```text
+
+```
 <h1 align="center">COMMANDS</h1>
 
 <a id="connect_to"></a>
