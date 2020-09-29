@@ -381,7 +381,7 @@ To setup your CORS policy please modify value of <code>CORS_ALLOW_ORIGIN</code> 
 
 <init-param>
 	<!--
-	https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin 
+	https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin
  	-->
 	<description>"Access-Control-Allow-Origin" HTTP header value</description>
 	<param-name>CORS_ALLOW_ORIGIN</param-name>
@@ -391,6 +391,7 @@ To setup your CORS policy please modify value of <code>CORS_ALLOW_ORIGIN</code> 
 ...
 
 ```
+See also: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin">HTTP Access-Control-Allow-Origin</a>
 <br>
 
 <strong>Setup static frontend files:</strong><br>

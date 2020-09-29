@@ -123,10 +123,10 @@ Important properties:
 			<fileset dir="${jdk-dir}" includes="release" />
 		</delete>
 
-		<mkdir dir="${tomcat-dir}/org/neuro/fbsql_server" />
+		<mkdir dir="${tomcat-dir}/org/fbsql/fbsql_server" />
 		<copy todir="${tomcat-dir}">
 			<fileset dir="${basedir}/bin">
-				<include name="org/neuro/fbsql_server/*.class" />
+				<include name="org/fbsql/fbsql_server/*.class" />
 			</fileset>
 		</copy>
 

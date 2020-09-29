@@ -32,7 +32,7 @@ E-Mail: fbsql.team@gmail.com
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee webapp_4_0.xsd"
 	version="4.0">
 
-	<display-name>Neuro FB SQL Service</display-name>
+	<display-name>FBSQL Service</display-name>
 
 	<servlet>
 		<servlet-name>DbServlet</servlet-name>

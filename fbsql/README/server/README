@@ -1,15 +1,10 @@
-                           ┌──────────────────────────────┐
-                           │ FBSQL - Frontend Backend SQL │
-                           └──────────────────────────────┘
+                ┌──────────────────────────────┐
+                │ FBSQL - Frontend Backend SQL │
+                └──────────────────────────────┘
 
-                             FBSQL SERVER (MIT License)
+                  FBSQL SERVER (MIT License)
 
 
-FBSQL - server that allow SQL statements execution directly from browser JavaScript code.
-Any SQL database that provide JDBC compliant driver can be used at backend side.
-
-How it works?
-=============
 
 ┌──────────────────────────────────────────────────────────┐
 │                           FRONTEND                       │
@@ -29,18 +24,23 @@ How it works?
 └──────────────────────────────────────────────────────────┘
 
 
-Usage:
-======
+Usage:                                          
+                                                
+fbsql [options]                                 
+                                                
+Options:                                        
+         help    - print help                   
+         version - print version                
+         start   - start server (in basckground)
+         stop    - stop server                  
+         run     - run server (in foreground)   
 
-fbsql <command>
-
-commands:
-          start - start server (in basckground)
-          stop  - stop serve
-
-          run   - run server (in foreground)   
+Examples:
+  fbsql start
+  fbsql stop
+  fbsql run
 
 ------------------------------------------------------------------------------------------
-Please contact Nėuro Lab by E-Mail neuro.lab.team@gmail.com
-or visit https://neuro-lab.github.io if you need additional
+Please contact FBSQL Team by E-Mail fbsql.team@gmail.com
+or visit https://fbsql.github.io if you need additional
 information or have any questions.
