@@ -363,6 +363,7 @@ Due to security reasons all changes you do in FBSQL home directory are immutable
 
 <br>
 <strong>Anatomy of FBSQL home directory:</strong>
+
 ```text
 <FBSQL_HOME> ─┐ ......................................................│-> FBSQL home directory
               │                                                       │
