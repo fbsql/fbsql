@@ -361,7 +361,7 @@ FBSQL home directory contains init scripts, logs and all configuration files rel
 Due to security reasons all changes you do in FBSQL home directory are immutable across FBSQL server running session. Configuration changes will loaded after FBSQL server starts next time.
 </blockquote>
 
-<br><br>
+<br>
 <strong>Anatomy of FBSQL home directory:</strong>
 ```text
 <FBSQL_HOME> ─┐ ......................................................│-> FBSQL home directory
@@ -421,7 +421,7 @@ Due to security reasons all changes you do in FBSQL home directory are immutable
                         └─ logs ......................................│-> Logs dir.
 
 ```
-<br>
+<br><br>
 <strong>Setup JDBC drivers:</strong><br>
 Install the JDBC drivers for your database, and set them up so they are in your classpath.
 The easiest way to do this is to copy all the necessary JDBC drivers jars into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT/WEB-INF/lib</code> directory.
@@ -457,7 +457,7 @@ See also: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Acc
 
 <strong>Setup static frontend files:</strong><br>
 FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropreate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
-<br>
+<br><br>
 <a id="init_script"></a>
 <h1>Init script</h1>
 
