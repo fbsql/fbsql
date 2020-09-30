@@ -1990,13 +1990,14 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <!-- self-hosted FBSQL scripts -->
         <script src="http://localhost:8080/fbsql.min.js"></script>
         <script src="http://localhost:8080/fbsql-debug.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
             //
-            // Because we use self-hosted client we can use connection name instead of URL
+            // Because we use self-hosted client we can use connection name instead of URL:
             // const conn = new Connection("http://localhost:8080/db/MyExample");
             //
             const conn = new Connection("MyExample");
@@ -2012,15 +2013,15 @@ FBSQL server (optionally) can host your static frontend files. To setup your sta
 <br><br>
 
 <strong>With FBSQL mock methods you can fast prototype your application</strong><br>
-FBSQL have mock functions that allow you create application prototype even without database instance.
+FBSQL have mock functions that allow you create application prototype even you still no decided about concrete database.
 <br><br>
 
-<strong>With FBSQL debug tool you can execute SQL statements before your UI/UX ready</strong><br>
+<strong>Debug tool allow you access the FBSQL backend before your web-application UI is ready</strong><br>
 The frontend debug tool allow you execute queries, updates and listen for database events. Major difference with calling debug tool functions and corresponding FBSQL methods is debug tool automatically outputs verbose debugging information to console and browser window.
 <br><br>
 
 <strong>FBSQL break your database applicative limits by providing custom stored procedures</strong><br>
-Custom stored procedures are database agnostic, can be written in a variety of programming  languages such as Java, JavaScript and Python.
+Custom stored procedures are database and language agnostic, can be written in a variety of programming  languages such as Java, JavaScript, Python etc.
 <br><br>
 
 ```text
