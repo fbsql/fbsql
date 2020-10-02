@@ -1009,7 +1009,161 @@ Example of batch execution:
 FBSQL allow check and/or modify parameters of any SQL statement before execution.
 This can be achieved by using <code>TRIGGER&nbsp;BEFORE</code> clause of <code>DECLARE&nbsp;STATEMENT</code> command.
 
-<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is <code>NULL</code> or exception occur execution will be rejected.<br>
+<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is <code>NULL</code> or exception occurs execution will be rejected.<br>
+
+
+<strong>Backend:</strong><br>
+
+```sql
+/*
+ * init.sql
+ *
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at the server start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
+ */
+
+           CONNECT TO 'jdbc:sqlite:TriggersExample'
+ INCOMING CONNECTIONS ALLOW
+UNDECLARED STATEMENTS ALLOW
+                   AS 'TriggersExample';
+
+DROP TABLE IF EXISTS COUNTRIES;
+CREATE TABLE COUNTRIES (
+    COUNTRY_ID   CHAR(2)     NOT NULL PRIMARY KEY,
+    COUNTRY_NAME VARCHAR(50) NOT NULL
+);
+
+/* Declare Java procedure */
+DECLARE PROCEDURE MY_CHECK_PARAMS TYPE JVM
+OPTIONS '{ "class": "org.fbsql_examples.TriggerExample", "method": "myCheckParams" }';
+
+/* Declare Java procedure */
+DECLARE PROCEDURE MY_NOTIFY TYPE JVM
+OPTIONS '{ "class": "org.fbsql_examples.TriggerExample", "method": "myNotify" }';
+
+DECLARE STATEMENT (INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES (:countryId, :countryName))
+TRIGGER BEFORE MY_CHECK_PARAMS
+TRIGGER AFTER MY_NOTIFY 
+AS myInsertStatement;
+
+```
+
+<code>org.fbsql_examples.TriggerExample</code>
+
+```java
+package org.fbsql_examples;
+
+import java.sql.Connection;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.fbsql.tools.JsonRhinoUtils;
+
+public class TriggerExample {
+
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 * @param connection
+	 * @param instanceName
+	 * @param userInfoJson
+	 * @param statementInfoJson
+	 * @return
+	 * @throws Exception
+	 */
+	public static String myCheckParams(HttpServletRequest request, HttpServletResponse response, Connection connection, String instanceName, String userInfoJson, String statementInfoJson) throws Exception {
+		Map<String, Object> map        = (Map<String, Object>) JsonRhinoUtils.asMap(statementInfoJson);
+		Map<String, Object> parameters = (Map<String, Object>) map.get("parameters");
+		String              countryId  = (String) parameters.get("countryId");
+		countryId = countryId.trim().toUpperCase(Locale.ENGLISH);
+		String countryName = (String) parameters.get("countryName");
+		if (countryName == null)
+			throw new Exception("Country name required");
+		countryName = countryName.trim();
+		return "{\"countryId\":\"" + countryId + "\",\"countryName\":\"" + countryName + "\"}";
+	}
+
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 * @param connection
+	 * @param userInfoJson
+	 * @param selfUserInfoJson
+	 * @param statementInfoJson
+	 * @param executionResultJson
+	 * @return
+	 */
+	public static String myNotify(HttpServletRequest request, HttpServletResponse response, Connection connection, String userInfoJson, String selfUserInfoJson, String statementInfoJson, String executionResultJson) {
+		Map<String, Object> map        = (Map<String, Object>) JsonRhinoUtils.asMap(statementInfoJson);
+		Map<String, Object> parameters = (Map<String, Object>) map.get("parameters");
+		String              countryId  = (String) parameters.get("countryId");
+		countryId = countryId.trim().toUpperCase(Locale.ENGLISH);
+		String countryName = (String) parameters.get("countryName");
+		return "{\"message\":\"New country added\",\"countryId\":\"" + countryId + "\",\"countryName\":\"" + countryName + "\"}";
+	}
+
+}
+```
+<strong>Frontend:</strong><br>
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+        <script src="fbsql-debug.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection('TriggersExample');
+            logDatabaseEvents(conn);
+
+            const psSelect = conn.prepareStatement("SELECT * FROM COUNTRIES");
+
+            /* delete all records */
+            const psDeleteAll = conn.prepareStatement("DELETE FROM COUNTRIES");
+
+            /* add new records */
+            const psInsert = conn.prepareStatement("INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES (:countryId, :countryName)");
+
+            logExecuteUpdate(psDeleteAll) // clear our table
+            .then(result => {
+            	// parameter 'countryId' will be checked and corrected (trimmed and uppercased) by "before" trigger
+                return logExecuteUpdate(psInsert,
+                    [
+                      {countryId: '  us ', countryName: 'United States'},
+            		    {countryId: '  au ', countryName: 'Australia'    },
+                    ]
+                );
+            })
+            .then(result => {
+                return logExecuteQuery(psSelect)
+            })
+            .then(resultSet => {
+                console.log(resultSet);
+                /*
+                 * [
+                 *      {"COUNTRY_ID": "US", "COUNTRY_NAME": "United States"},
+                 *      {"COUNTRY_ID": "AU", "COUNTRY_NAME": "Australia"},
+                 * ]
+                 */
+            });
+        </script>
+    </body>
+</html>
+
+```
 <br>
 See also: <a href="#declare_statement"><code>DECLARE&nbsp;STATEMENT</code></a>
 <br>
@@ -2193,7 +2347,7 @@ Declare native SQL statement. This command allows you to use native SQL statemen
 <tr><td><code>STATIC</code></td><td></td><td>This clause used to mark native SQL statement results as immutable. Such statements are executed once when FBSQL server starts. Results compressed and cashed in server memory for fast access without further database interaction.</td></tr>
 <tr><td><code>COMPRESSION</code></td><td></td><td>Sets compression level for results. Available compression levels are: <code>BEST&nbsp;COMPRESSION</code> - compressed with best compression strategy, <code>BEST&nbsp;SPEED</code> - compressed with best compression speed strategy, <code>NO&nbsp;COMPRESSION</code> - no compression (the default)</td></tr>
 <tr><td><code>ROLES</code></td><td></td><td>Roles list (comma separated). Restrict statement usage to users that are not specified in the roles list.</td></tr>
-<tr><td><code>TRIGGER&nbsp;BEFORE</code></td><td></td><td>Procedure that executed before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occur execution will be rejected.</td></tr>
+<tr><td><code>TRIGGER&nbsp;BEFORE</code></td><td></td><td>Procedure that executed before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is NULL or exception occurs execution will be rejected.</td></tr>
 <tr><td><code>TRIGGER&nbsp;AFTER</code></td><td></td><td>Procedure that executed after the native SQL statement execution. Procedure may return string with the arbitrary JSON event object. If the JSON object is not NULL the database event will fired. Please refer to client's <code>Connection#addDatabaseEventListener()</code> method for information about how to catch database events on frontend side.</td></tr>
 <tr><td><code>AS</code></td><td></td><td>The alias name for this statement. If specified, you can use this name on frontend side instead SQL statement source code. </td></tr>
 </table>
