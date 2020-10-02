@@ -1010,7 +1010,7 @@ FBSQL allow check and/or modify parameters of any SQL statement before execution
 This can be achieved by using <code>TRIGGER&nbsp;BEFORE</code> clause of <code>DECLARE&nbsp;STATEMENT</code> command.
 
 <code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is <code>NULL</code> or exception occurs execution will be rejected.<br>
-
+<br>
 
 <strong>Backend:</strong><br>
 
@@ -1115,6 +1115,7 @@ public class TriggerExample {
 
 }
 ```
+<br>
 <strong>Frontend:</strong><br>
 
 ```html
