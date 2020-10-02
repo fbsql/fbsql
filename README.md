@@ -1053,7 +1053,7 @@ TRIGGER AFTER MY_NOTIFY
 AS myInsertStatement;
 
 ```
-
+<br>
 <code>org.fbsql_examples.TriggerExample</code>
 
 ```java
