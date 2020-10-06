@@ -1009,7 +1009,7 @@ Example of batch execution:
 FBSQL allow check and/or modify parameters of any SQL statement before execution.
 This can be achieved by using <code>TRIGGER&nbsp;BEFORE</code> clause of <code>DECLARE&nbsp;STATEMENT</code> command.
 
-<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is <code>NULL</code> or exception occurs execution will be rejected.<br>
+<code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is <code>NULL</code> or exception occurs execution will be rejected.<br><br>
 <code>TRIGGER&nbsp;AFTER</code>  procedure executes after the native SQL statement execution. Procedure may return string with JSON event object. If JSON event object is not <code>NULL</code> and no exception occurs event object will delivered to subscribers on client side.
 Please refer to client's <code>Connection#addDatabaseEventListener()</code> method for information about how to catch database events on frontend side.
 <br>
