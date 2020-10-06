@@ -26,17 +26,17 @@ We wish to improve the documentation. Any help is welcome!
 
 <br><strong>Tutorial</strong>
 <ul>
-	<li><a href="#installation_and_basic_example" title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Getting started</a></li>
-	<li><a href="#fbsql_distributions" title="FBSQL distributions"      >FBSQL distributions</a></li>
-	<li><a href="#installation"        title="FBSQL Installation"       >Installation</a></li>
-	<li><a href="#cli"                 title="Command line interface (CLI)"        >Command line interface (CLI)</a></li>
-	<li><a href="#init_script"        title="CONNECT TO statement"       >Init script</a></li>
-	<li><a href="#config"        title="Configuration and fine tuning"       >Configuration and fine tuning</a></li>
-	<li><a href="#add_simple_authentication" title="How to add simple authentication and usage of LOGIN statement.">Authentication</a></li>
-	<li><a href="#add_simple_role_based_authorization" title="How to add simple role-based authorization, and usage of LOGIN statement.">Authorization</a></li>
-	<li><a href="#secure_our_backend_with_declare_statement" title="How to secure our backend with DECLARE STATEMENT statement.">Expose our database to frontend</a></li>
-	<li><a href="#execute_query_and_execute_update" title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
-	<li><a href="#parameters_checking" title="Parameters checking and modifying.">Parameters checking and modifying</a></li>
+	<li><a href="#installation_and_basic_example"            title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Getting started</a></li>
+	<li><a href="#fbsql_distributions"                       title="FBSQL distributions."                 >FBSQL distributions</a></li>
+	<li><a href="#installation"                              title="FBSQL Installation."                  >Installation</a></li>
+	<li><a href="#cli"                                       title="Command line interface (CLI)."        >Command line interface (CLI)</a></li>
+	<li><a href="#init_script"                               title="Init script."                         >Init script</a></li>
+	<li><a href="#config"                                    title="Configuration and fine tuning."       >Configuration and fine tuning</a></li>
+	<li><a href="#add_simple_authentication"                 title="How to add simple authentication.">Authentication</a></li>
+	<li><a href="#add_simple_role_based_authorization"       title="How to add simple role-based authorization.">Authorization</a></li>
+	<li><a href="#secure_our_backend_with_declare_statement" title="Expose our database to frontend.">Expose our database to frontend</a></li>
+	<li><a href="#execute_query_and_execute_update"          title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
+	<li><a href="#parameters_checking"                       title="Parameters checking and modifying.">Triggers, parameters checking and modifying</a></li>
 	<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
 	<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
 	<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
@@ -1004,12 +1004,15 @@ Example of batch execution:
 
 <br>
 <a id="parameters_checking"></a>
-<h1>Parameters checking and modifying</h1>
+<h1>Triggers, parameters checking and modifying</h1>
 
 FBSQL allow check and/or modify parameters of any SQL statement before execution.
 This can be achieved by using <code>TRIGGER&nbsp;BEFORE</code> clause of <code>DECLARE&nbsp;STATEMENT</code> command.
 
 <code>TRIGGER&nbsp;BEFORE</code> procedure executes before the native SQL statement execution. Procedure must return string with JSON parameters object. If JSON parameters object is <code>NULL</code> or exception occurs execution will be rejected.<br>
+<code>TRIGGER&nbsp;AFTER</code>  procedure executes after the native SQL statement execution. Procedure may return string with JSON event object. If JSON event object is not <code>NULL</code> and no exception occurs event object will delivered to subscribers on client side.
+Please refer to client's <code>Connection#addDatabaseEventListener()</code> method for information about how to catch database events on frontend side.
+<br>
 <br>
 
 <strong>Backend:</strong><br>
@@ -1040,12 +1043,14 @@ CREATE TABLE COUNTRIES (
 );
 
 /* Declare Java procedure */
-DECLARE PROCEDURE MY_CHECK_PARAMS TYPE JVM
-OPTIONS '{ "class": "org.fbsql_examples.TriggerExample", "method": "myCheckParams" }';
+DECLARE PROCEDURE MY_CHECK_PARAMS
+             TYPE JAVA
+          OPTIONS '{ "class": "org.fbsql_examples.TriggerExample", "method": "myCheckParams" }';
 
 /* Declare Java procedure */
-DECLARE PROCEDURE MY_NOTIFY TYPE JVM
-OPTIONS '{ "class": "org.fbsql_examples.TriggerExample", "method": "myNotify" }';
+DECLARE PROCEDURE MY_NOTIFY
+             TYPE JAVA
+          OPTIONS '{ "class": "org.fbsql_examples.TriggerExample", "method": "myNotify" }';
 
 DECLARE STATEMENT (INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES (:countryId, :countryName))
 TRIGGER BEFORE MY_CHECK_PARAMS
