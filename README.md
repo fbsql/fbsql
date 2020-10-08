@@ -164,7 +164,8 @@ Put the initialization script <code>init.sql</code> into the <code>~/fbsql/confi
 <tr><td align="center" width="48%">init.sql</td><td></td><td align="center"  width="48%">index.html</td></tr>
 <tr>
 	<td>
-<pre lang="sql">
+
+```sql
 /*
  * init.sql
  *
@@ -195,11 +196,11 @@ INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('D455', 'Dan  ');
 INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('J231', 'John ');
 INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
 
-</pre>
+```
 </td>
 	<td><h1>&#8680;</h1></td>
 	<td>
-	<pre lang="html">
+	```html
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -214,7 +215,7 @@ INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
         </script>
     </body>
 </html>
-	</pre>
+	```
 	</td>
 </tr>
 </table>
