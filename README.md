@@ -160,70 +160,6 @@ fbsql-server-2.3.4-linux-x86-64 ─┐
 <li>
 Put the initialization script <code>init.sql</code> into the <code>~/fbsql/config/init</code> directory:
 
-<table>
-<tr><td align="center" width="48%">init.sql</td><td></td><td align="center"  width="48%">index.html</td></tr>
-<tr>
-	<td>
-
-```sql
-/*
- * init.sql
- *
- * Initialization script executes on FBSQL startup,
- * connects to database instance and performs (optionally)
- * any operations that you want to be executed at the server start up time.
- *
- * To be executed at startup init scripts must have the name "init.sql"
- * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
- *
- * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
- */
-
-           CONNECT TO 'jdbc:sqlite:hello_world_db'
-UNDECLARED STATEMENTS ALLOW
- INCOMING CONNECTIONS ALLOW
-                   AS HelloWorldExample;
-
-DROP TABLE IF EXISTS EMPLOYEES;
-
-CREATE TABLE EMPLOYEES (
-    EMPLOYEE_ID   CHAR(4)     PRIMARY KEY,
-    EMPLOYEE_NAME VARCHAR(50) NOT NULL
-);
-
-INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('B342', 'Bill ');
-INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('D455', 'Dan  ');
-INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('J231', 'John ');
-INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
-
-```
-</td>
-	<td><h1>&#8680;</h1></td>
-	<td>
-
-```html
-
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <script src="fbsql.min.js"></script>
-    </head>
-    <body>
-        <script type="text/javascript">
-            const conn = new Connection("http://localhost:8080/db/HelloWorldExample");
-            const ps   = conn.prepareStatement("SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id");
-            ps.executeQuery({id: "W123"})
-            .then(resultSet => alert("Hello, " + resultSet[0].EMPLOYEE_NAME + "!")); // Hello, World!
-        </script>
-    </body>
-</html>
-
-```
-	</td>
-</tr>
-</table>
-
-
 
 ```sql
 /*
@@ -703,7 +639,7 @@ INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
 <a id="secure_our_backend_with_declare_statement"></a>
 <h1>Expose our database to frontend</h1>
 <p>
-In this chapter we will learn how to secure our backend with <code>DECLARE STATEMENT</code> command
+In this chapter we will learn how to secure our backend with <code>DECLARE&nbsp;STATEMENT</code> command
 and reference statements by name.
 </p>
 
@@ -2209,8 +2145,32 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 <a id="did_you_know"></a>
 <h1>Did you know?</h1>
 
+
+<strong>One of cool FBSQL features that you can reference statements by their names</strong><br>
+Just declare statement name with <code>DECLARE&nbsp;STATEMENT</code> command in your <code>init.sql</code> script.<br>
+See also: <a href="#declare_statement"><code>DECLARE&nbsp;STATEMENT</code></a>
+<br><br>
+
+
+<strong>FBSQL server is a sweet home for all of your static stuff</strong><br>
+FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
+<br><br>
+
+<strong>With FBSQL mock methods you can fast prototype your application</strong><br>
+FBSQL have mock functions that allow you create application prototype even you still no decided about concrete database.
+<br><br>
+
+<strong>Debug tool allow you access the FBSQL backend before your web-application UI is ready</strong><br>
+The frontend debug tool allow you execute queries, updates and listen for database events. Major difference with calling debug tool functions and corresponding FBSQL methods is debug tool automatically outputs verbose debugging information to console and browser window.
+<br><br>
+
+<strong>FBSQL break your database applicative limits by providing custom stored procedures</strong><br>
+Custom stored procedures are database and language agnostic, can be written in a variety of programming  languages such as Java, JavaScript, Python etc.
+<br><br>
+
 <strong>You can use self-hosted FBSQL browser client and debug tool</strong><br>
-		
+Both of scripts located in FBSQL Server root directory.
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -2232,22 +2192,7 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 </html>
 
 ```
-<br>
-<strong>FBSQL server is a sweet home for all of your static stuff</strong><br>
-FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
-<br><br>
 
-<strong>With FBSQL mock methods you can fast prototype your application</strong><br>
-FBSQL have mock functions that allow you create application prototype even you still no decided about concrete database.
-<br><br>
-
-<strong>Debug tool allow you access the FBSQL backend before your web-application UI is ready</strong><br>
-The frontend debug tool allow you execute queries, updates and listen for database events. Major difference with calling debug tool functions and corresponding FBSQL methods is debug tool automatically outputs verbose debugging information to console and browser window.
-<br><br>
-
-<strong>FBSQL break your database applicative limits by providing custom stored procedures</strong><br>
-Custom stored procedures are database and language agnostic, can be written in a variety of programming  languages such as Java, JavaScript, Python etc.
-<br><br>
 
 ```text
 
