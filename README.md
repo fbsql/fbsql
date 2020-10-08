@@ -1310,7 +1310,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IN', 'India'    );
 </html>
 
 ```
-
+<br>
 <a id="database_agnostic_stored_procedures"></a>
 <h1>Database agnostic stored procedures</h1>
 <p>
@@ -2142,11 +2142,13 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 </html>
 
 ```
+
+<br>
 <a id="did_you_know"></a>
 <h1>Did you know?</h1>
+<br>
 
-
-<strong>One of cool FBSQL features that you can reference statements by their names</strong><br>
+<strong>One of cool FBSQL features is, you can reference statements by their names</strong><br>
 Instead of using SQL statement body in client code, just declare statement name with <code>DECLARE&nbsp;STATEMENT</code> command in your <code>init.sql</code> script and reference statement by name.<br><br>
 See also: <a href="#declare_statement"><code>DECLARE&nbsp;STATEMENT</code></a>
 <br><br>
