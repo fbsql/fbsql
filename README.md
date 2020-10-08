@@ -200,7 +200,9 @@ INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
 </td>
 	<td><h1>&#8680;</h1></td>
 	<td>
-	```html
+
+```html
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -215,7 +217,8 @@ INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
         </script>
     </body>
 </html>
-	```
+
+```
 	</td>
 </tr>
 </table>
