@@ -160,6 +160,67 @@ fbsql-server-2.3.4-linux-x86-64 ─┐
 <li>
 Put the initialization script <code>init.sql</code> into the <code>~/fbsql/config/init</code> directory:
 
+<table>
+<tr><td align="center" width="48%">init.sql</td><td></td><td align="center"  width="48%">index.html</td></tr>
+<tr>
+	<td>
+<pre lang="sql">
+/*
+ * init.sql
+ *
+ * Initialization script executes on FBSQL startup,
+ * connects to database instance and performs (optionally)
+ * any operations that you want to be executed at the server start up time.
+ *
+ * To be executed at startup init scripts must have the name "init.sql"
+ * or have any other name that ends with ".init.sql". E.g.: "my.init.sql"
+ *
+ * Put your init scripts somewhere under "<FBSQL_HOME>/fbsql/config/init" directory.
+ */
+
+           CONNECT TO 'jdbc:sqlite:hello_world_db'
+UNDECLARED STATEMENTS ALLOW
+ INCOMING CONNECTIONS ALLOW
+                   AS HelloWorldExample;
+
+DROP TABLE IF EXISTS EMPLOYEES;
+
+CREATE TABLE EMPLOYEES (
+    EMPLOYEE_ID   CHAR(4)     PRIMARY KEY,
+    EMPLOYEE_NAME VARCHAR(50) NOT NULL
+);
+
+INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('B342', 'Bill ');
+INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('D455', 'Dan  ');
+INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('J231', 'John ');
+INSERT INTO EMPLOYEES (EMPLOYEE_ID, EMPLOYEE_NAME) VALUES('W123', 'World');
+
+</pre>
+</td>
+	<td><h1>&#8680;</h1></td>
+	<td>
+	<pre lang="html">
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="fbsql.min.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            const conn = new Connection("http://localhost:8080/db/HelloWorldExample");
+            const ps   = conn.prepareStatement("SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id");
+            ps.executeQuery({id: "W123"})
+            .then(resultSet => alert("Hello, " + resultSet[0].EMPLOYEE_NAME + "!")); // Hello, World!
+        </script>
+    </body>
+</html>
+	</pre>
+	</td>
+</tr>
+</table>
+
+
+
 ```sql
 /*
  * init.sql
