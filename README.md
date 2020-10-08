@@ -2147,7 +2147,7 @@ See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manu
 
 
 <strong>One of cool FBSQL features that you can reference statements by their names</strong><br>
-Just declare statement name with <code>DECLARE&nbsp;STATEMENT</code> command in your <code>init.sql</code> script.<br>
+Instead of using SQL statement body in client code, just declare statement name with <code>DECLARE&nbsp;STATEMENT</code> command in your <code>init.sql</code> script and reference statement by name.<br><br>
 See also: <a href="#declare_statement"><code>DECLARE&nbsp;STATEMENT</code></a>
 <br><br>
 
