@@ -2155,7 +2155,7 @@ See also: <a href="#declare_statement"><code>DECLARE&nbsp;STATEMENT</code></a>
 
 
 <strong>FBSQL server is a sweet home for all of your static stuff</strong><br>
-FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>*.html</code>, <code>*.js</code>, <code>*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
+FBSQL server (optionally) can host your static frontend files. To setup your static content (<code>\*.html</code>, <code>\*.js</code>, <code>\*.css</code> etc.) please copy appropriate files into <code>&lt;FBSQL_HOME&gt;/fbsql/config/tomcat/webapps/ROOT</code> directory.
 <br><br>
 
 <strong>With FBSQL mock methods you can fast prototype your application</strong><br>
