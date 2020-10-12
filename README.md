@@ -22,7 +22,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 
 ```
 
-<i align="right">We wish to improve the documentation. Any help is welcome!</i>
+<div align="right"><i>We wish to improve the documentation. Any help is welcome!</i></div>
 
 <br><strong>Tutorial</strong>
 <ul>
