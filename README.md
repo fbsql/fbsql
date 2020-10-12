@@ -18,11 +18,11 @@ FBSQL security is based on the principle of least privilege (<abbr title="Princi
 FBSQL was designed with performance in mind and supports out of the box connection pooling, results prefetching, ETag-optimized communication and response compression.<br>
 <br>
 
-<hr>
+```text
 
-<blockquote>
-We wish to improve the documentation. Any help is welcome!
-</blockquote>
+```
+
+<i>We wish to improve the documentation. Any help is welcome!</i>
 
 <br><strong>Tutorial</strong>
 <ul>
