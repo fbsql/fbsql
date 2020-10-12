@@ -2168,6 +2168,7 @@ The frontend debug tool allow you execute queries, updates and listen for databa
 
 <strong>FBSQL break your database applicative limits by providing custom stored procedures</strong><br>
 Custom stored procedures are database and language agnostic, can be written in a variety of programming  languages such as Java, JavaScript, Python etc.
+Just output your result set data as JSON array of objects to <code>stdout</code> (standard output). 
 <br><br>
 
 <strong>You can use self-hosted FBSQL browser client and debug tool</strong><br>
