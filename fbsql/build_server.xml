@@ -67,6 +67,8 @@ Important properties:
 		<ant antfile="build.xml" target="main" useNativeBaseDir="true" />
 		<antcall target="pack-war" />
 
+		<antcall target="pack-client" />
+
 		<antcall target="server-prepare" />
 		<antcall target="pack-server-min" />
 
@@ -75,6 +77,17 @@ Important properties:
 		<antcall target="pack-server" />
 
 		<antcall target="clean" />
+	</target>
+
+	<target name="pack-client">
+		<property name="release-name-client" value="fbsql-client-${version}" />
+		<property name="zip-file-client" value="${out-dir}/${release-name-client}.zip" />
+		<delete file="${zip-file-client}" failonerror="false" />
+		<zip destfile="${zip-file-client}" comment="FBSQL Client - Frontend Backend SQL JavaScript client for browser">
+			<zipfileset dir="${out-dir}" includes="fbsql.min.js" prefix="${release-name-client}" />
+			<zipfileset dir="${out-dir}" includes="fbsql-debug.min.js" prefix="${release-name-client}" />
+		</zip>
+		<echo>${zip-file-client}</echo>
 	</target>
 
 	<target name="pack-war">
