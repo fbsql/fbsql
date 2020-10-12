@@ -36,7 +36,7 @@ We wish to improve the documentation. Any help is welcome!
 	<li><a href="#add_simple_role_based_authorization"       title="How to add simple role-based authorization.">Authorization</a></li>
 	<li><a href="#secure_our_backend_with_declare_statement" title="Expose our database to frontend.">Expose our database to frontend</a></li>
 	<li><a href="#execute_query_and_execute_update"          title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
-	<li><a href="#parameters_checking"                       title="Parameters checking and modifying.">Triggers, parameters checking and modifying</a></li>
+	<li><a href="#parameters_checking"                       title="Triggers, event notification, parameters checking.">Triggers, event notification, parameters checking</a></li>
 	<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
 	<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
 	<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
@@ -1005,7 +1005,7 @@ Example of batch execution:
 
 <br>
 <a id="parameters_checking"></a>
-<h1>Triggers, parameters checking and modifying</h1>
+<h1>Triggers, event notification, parameters checking</h1>
 
 FBSQL allow check and/or modify parameters of any SQL statement before execution.
 This can be achieved by using <code>TRIGGER&nbsp;BEFORE</code> clause of <code>DECLARE&nbsp;STATEMENT</code> command.
