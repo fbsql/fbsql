@@ -65,7 +65,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#remote_session_id"                     title="">REMOTE_SESSION_ID()</a></li>
 	<li><a href="#remote_session_creation_time"          title="">REMOTE_SESSION_CREATION_TIME()</a></li>
 	<li><a href="#remote_session_last_accessed_time"     title="">REMOTE_SESSION_LAST_ACCESSED_TIME()</a></li>
-	<li><a href="#user_info"                             title="">USER_INFO()</a></li>
+	<li><a href="#remote_user_info"                      title="">REMOTE_USER_INFO()</a></li>
 	<li><a href="#in_role"                               title="">IN_ROLE()</a></li>
 	<li><a href="#get_cookie"                            title="">COOKIE()</a></li>
 	<li><a href="#get_http_session_attribute_as_char"    title="">GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</a></li>
@@ -82,7 +82,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#fbsql_remote_session_id"                     title="">FBSQL_REMOTE_SESSION_ID</a></li>
 	<li><a href="#fbsql_remote_session_creation_time"          title="">FBSQL_REMOTE_SESSION_CREATION_TIME</a></li>
 	<li><a href="#fbsql_remote_session_last_accessed_time"     title="">FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME</a></li>
-	<li><a href="#fbsql_user_info"                             title="">FBSQL_USER_INFO</a></li>
+	<li><a href="#fbsql_remote_user_info"                      title="">FBSQL_REMOTE_USER_INFO</a></li>
 </ul>
 
 <br><strong>Client API</strong>
@@ -2851,15 +2851,15 @@ REMOTE_SESSION_LAST_ACCESSED_TIME()
 
 ```
 
-<a id="user_info"                            ></a>
-<h1>USER_INFO()</h1>
+<a id="remote_user_info"></a>
+<h1>REMOTE_USER_INFO()</h1>
 Return verbose client information as <code>CHARACTER</code> type in form of JSON object.
 
 <br><i>Example:</i>
 
 ```text
 
-USER_INFO()
+REMOTE_USER_INFO()
 
 ```
 
@@ -3015,15 +3015,15 @@ FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME
 
 ```
 
-<a id="fbsql_user_info"                            ></a>
-<h1>FBSQL_USER_INFO</h1>
+<a id="fbsql_remote_user_info"></a>
+<h1>FBSQL_REMOTE_USER_INFO</h1>
 Return verbose client information as <code>CHARACTER</code> type in form of JSON object.
 
 <br><i>Example:</i>
 
 ```text
 
-FBSQL_USER_INFO
+FBSQL_REMOTE_USER_INFO
 
 ```
 

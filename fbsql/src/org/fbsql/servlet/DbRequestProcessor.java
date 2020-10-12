@@ -143,7 +143,7 @@ public class DbRequestProcessor implements Runnable {
 	private static final String FUN_REMOTE_SESSION_ID                 = "REMOTE_SESSION_ID()";
 	private static final String FUN_REMOTE_SESSION_CREATION_TIME      = "REMOTE_SESSION_CREATION_TIME()";
 	private static final String FUN_REMOTE_SESSION_LAST_ACCESSED_TIME = "REMOTE_SESSION_LAST_ACCESSED_TIME()";
-	private static final String FUN_USER_INFO                         = "USER_INFO()";
+	private static final String FUN_REMOTE_USER_INFO                  = "REMOTE_USER_INFO()";
 
 	/* system constants (See JavaSctript class Constants in fbsql.js */
 	private static final String FBSQL_REMOTE_USER                       = "FBSQL_REMOTE_USER";
@@ -151,7 +151,7 @@ public class DbRequestProcessor implements Runnable {
 	private static final String FBSQL_REMOTE_SESSION_ID                 = "FBSQL_REMOTE_SESSION_ID";
 	private static final String FBSQL_REMOTE_SESSION_CREATION_TIME      = "FBSQL_REMOTE_SESSION_CREATION_TIME";
 	private static final String FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME = "FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME";
-	private static final String FBSQL_USER_INFO                         = "FBSQL_USER_INFO";
+	private static final String FBSQL_REMOTE_USER_INFO                  = "FBSQL_REMOTE_USER_INFO";
 
 	private String        instanceName;
 	private String        instanceDirectory;
@@ -475,7 +475,7 @@ public class DbRequestProcessor implements Runnable {
 			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_ID, SQL_QUOTE_CHAR + session.getId() + SQL_QUOTE_CHAR);
 			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_CREATION_TIME, Long.toString(session.getCreationTime()));
 			preparedStatement = preparedStatement.replace(FUN_REMOTE_SESSION_LAST_ACCESSED_TIME, Long.toString(session.getLastAccessedTime()));
-			preparedStatement = preparedStatement.replace(FUN_USER_INFO, userInfoJson == null ? SQL_NULL : SQL_QUOTE_CHAR + userInfoJson + SQL_QUOTE_CHAR);
+			preparedStatement = preparedStatement.replace(FUN_REMOTE_USER_INFO, userInfoJson == null ? SQL_NULL : SQL_QUOTE_CHAR + userInfoJson + SQL_QUOTE_CHAR);
 
 			//
 			// Replace IN_ROLE() built-in function with value
@@ -849,7 +849,7 @@ public class DbRequestProcessor implements Runnable {
 													ps.setLong(n, session.getCreationTime());
 												else if (FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME.equals(pvalue))
 													ps.setLong(n, session.getLastAccessedTime());
-												else if (FBSQL_USER_INFO.equals(pvalue))
+												else if (FBSQL_REMOTE_USER_INFO.equals(pvalue))
 													ps.setString(n, userInfoJson);
 												else
 													ps.setString(n, pvalue);

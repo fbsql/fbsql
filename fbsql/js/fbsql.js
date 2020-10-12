@@ -71,7 +71,7 @@ class Constants {
 	static get FBSQL_REMOTE_SESSION_ID()                 { return "FBSQL_REMOTE_SESSION_ID                "; }
 	static get FBSQL_REMOTE_SESSION_CREATION_TIME()      { return "FBSQL_REMOTE_SESSION_CREATION_TIME     "; }
 	static get FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME() { return "FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME"; }
-	static get FBSQL_USER_INFO()                         { return "FBSQL_USER_INFO                        "; }
+	static get FBSQL_REMOTE_USER_INFO()                  { return "FBSQL_REMOTE_USER_INFO                 "; }
 }
 
 /** 
