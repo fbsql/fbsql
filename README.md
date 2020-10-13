@@ -121,11 +121,11 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 
 <br><strong>Appendices</strong>
 <ul>
-	<li><a href="https://fbsql.github.io/Fbsql.g4.html">FBSQL Grammar</a></li>
-	<li><a href="https://fbsql.github.io/javadoc/index.html">Javadoc</a></li>
-	<li><a href="https://fbsql.github.io/LICENSE.txt">MIT License</a></li>
-	<li><a href="https://fbsql.github.io/JDBC-DRIVERS.txt">JDBC drivers</a></li>
-	<li><a href="https://fbsql.github.io/THIRD-PARTY.txt">Third party products</li>
+	<li><a href="https://fbsql.github.io/Fbsql.g4.html"      title="FBSQL ANTL4 Grammar."         >FBSQL Grammar</a></li>
+	<li><a href="https://fbsql.github.io/javadoc/index.html" title="FBSQL Java API documentation.">Javadoc</a></li>
+	<li><a href="https://fbsql.github.io/LICENSE.txt"        title="Project license."             >MIT License</a></li>
+	<li><a href="https://fbsql.github.io/JDBC-DRIVERS.txt"   title="List of used JDBC Drivers."   >JDBC drivers</a></li>
+	<li><a href="https://fbsql.github.io/THIRD-PARTY.txt"    title="List of third party products.">Third party products</li>
 	
 </ul>
 
