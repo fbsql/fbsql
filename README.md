@@ -131,8 +131,6 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 
 <br>
 
-<hr>
-
 <a id="installation_and_basic_example"></a>
 <h1>Getting started</h1>
 <strong>Backend:</strong><br>
@@ -474,7 +472,7 @@ or have any other name that ends with <code>".init.sql"</code>. E.g.: <code>"my.
 
 Put your init scripts somewhere (directory <code>&lt;FBSQL_HOME&gt;/fbsql/config/init</code> can have arbitrary hierarchy structure) under <code>&lt;FBSQL_HOME&gt;/fbsql/config/init</code> directory.
 
-
+<br>
 <a id="add_simple_authentication"></a>
 <h1>Authentication</h1>
 <p>
@@ -548,7 +546,7 @@ INSERT INTO USERS (USERNAME, PASSWORD) VALUES('jerry', 'secret456');
 </html>
 ```
 
-
+<br>
 <a id="add_simple_role_based_authorization"></a>
 <h1>Authorization</h1>
 <p>
@@ -637,6 +635,7 @@ INSERT INTO USER_ROLES (USERNAME, ROLE) VALUES('jerry', 'administrator');
 </html>
 ```
 
+<br>
 <a id="secure_our_backend_with_declare_statement"></a>
 <h1>Expose our database to frontend</h1>
 <p>
@@ -712,7 +711,7 @@ DECLARE STATEMENT (SELECT EMPLOYEE_NAME FROM EMPLOYEES WHERE EMPLOYEE_ID = :id)
 
 ```
 
-
+<br>
 <a id="execute_query_and_execute_update"></a>
 <h1>Execute SQL statements</h1>
 <p>
@@ -1515,6 +1514,7 @@ EOF
 ```
 See also: <a href="#declare_procedure"><code>DECLARE PROCEDURE</code></a>
 
+<br>
 <a id="schedule_periodic_jobs"></a>
 <h1>Schedule periodic jobs</h1>
 
@@ -1618,9 +1618,7 @@ Catch database events with debug tool:
 
 ```
 
-
-
-
+<br>
 <a id="blob_type"></a>
 <h1>Binary data</h1>
 <p>
@@ -1782,6 +1780,7 @@ INSERT INTO COUNTRIES (COUNTRY_ID, COUNTRY_NAME) VALUES('IT', 'Italy');
 
 ```
 
+<br>
 <a id="date_type"></a>
 <h1>Date and Time</h1>
 <p>
@@ -1872,6 +1871,7 @@ INSERT INTO CITIES (CITY_ID, CITY_NAME, CITY_DATE, CITY_TIME, CITY_TIMESTAMP)
 </html>
 ```
 
+<br>
 <a id="database_event_notification"></a>
 <h1>Database event notification</h1>
 
@@ -1939,6 +1939,8 @@ Catch database events with debug tool:
 </html>
 
 ```
+
+<br>
 <a id="mocking_with_fbsql"></a>
 <h1>Mocking with FBSQL</h1>
 You can simulate FBSQL database interactions with mock functions.
@@ -2063,6 +2065,7 @@ You can fire mock database events by using <code>fireMockDatabaseEvent()</code> 
 
 ```
 
+<br>
 <a id="debug_utility"></a>
 <h1>Frontend debug tool</h1>
 
@@ -2111,6 +2114,7 @@ Functions:
 	</li>
 </ul>
 
+<br>
 <a id="frontend_debug_tool_ref"></a>
 See also: <a href="#frontend_debug_tool_ref">Frontend debug tool (Reference Manual)</a>
 
@@ -2203,6 +2207,7 @@ Both of scripts located in FBSQL Server root directory.
 ```
 <h1 align="center">COMMANDS</h1>
 
+<br>
 <a id="connect_to"></a>
 <h1>CONNECT TO</h1>
 
@@ -2406,6 +2411,8 @@ DECLARE STATEMENT (SELECT * FROM ORDERS WHERE ORDER_ID = :id)
  */
  
 ```
+
+<br>
 <a id="declare_procedure"></a>
 <h1>DECLARE PROCEDURE</h1>
 
@@ -2487,6 +2494,7 @@ DECLARE PROCEDURE GET_ITEMS
 <br>
 See also: <a href="#database_agnostic_stored_procedures">Database agnostic stored procedures</a>
 
+<br>
 <a id="schedule"></a>
 <h1>SCHEDULE</h1>
 
@@ -2755,8 +2763,8 @@ follows:</p>
 </ul>
 <br>
 See also: <a href="#schedule_periodic_jobs">Schedule periodic jobs</a>
-<br>
 
+<br>
 <a id="include"></a>
 <h1>INCLUDE</h1>
 
@@ -2789,6 +2797,7 @@ INCLUDE 'a.sql', 'b.sql', '/home/john/scripts/c.sql';
 
 <h1 align="center">FUNCTIONS</h1>
 
+<br>
 <a id="remote_user"                          ></a>
 <h1>REMOTE_USER()</h1>
 Return remote user name as <code>CHARACTER</code> type. Remote user name transmitted to server from client's Connection object.
@@ -2802,6 +2811,7 @@ REMOTE_USER()
 
 ```
 
+<br>
 <a id="remote_role"                          ></a>
 <h1>REMOTE_ROLE()</h1>
 Return remote user role as <code>CHARACTER</code> type. Remote user role transmitted to server from client's Connection object.
@@ -2815,6 +2825,7 @@ REMOTE_ROLE()
 
 ```
 
+<br>
 <a id="remote_session_id"                    ></a>
 <h1>REMOTE_SESSION_ID()</h1>
 Return remote session id as <code>CHARACTER</code> type.
@@ -2828,6 +2839,7 @@ REMOTE_SESSION_ID()
 
 ```
 
+<br>
 <a id="remote_session_creation_time"         ></a>
 <h1>REMOTE_SESSION_CREATION_TIME()</h1>
 Return remote session creation time as <code>INTEGER</code> type.
@@ -2840,6 +2852,7 @@ REMOTE_SESSION_CREATION_TIME()
 
 ```
 
+<br>
 <a id="remote_session_last_accessed_time"    ></a>
 <h1>REMOTE_SESSION_LAST_ACCESSED_TIME()</h1>
 Return remote session last accessed time as <code>INTEGER</code> type.
@@ -2852,6 +2865,7 @@ REMOTE_SESSION_LAST_ACCESSED_TIME()
 
 ```
 
+<br>
 <a id="remote_user_info"></a>
 <h1>REMOTE_USER_INFO()</h1>
 Return verbose client information as <code>CHARACTER</code> type in form of JSON object.
@@ -2864,6 +2878,7 @@ REMOTE_USER_INFO()
 
 ```
 
+<br>
 <a id="in_role"                              ></a>
 <h1>IN_ROLE(character)</h1>
 Checks if remote user in role provided as parameter as <code>BOOLEAN</code> type.
@@ -2876,6 +2891,7 @@ IN_ROLE('manager')
 
 ```
 
+<br>
 <a id="get_cookie"                           ></a>
 <h1>COOKIE(character)</h1>
 Get cookie value as <code>CHARACTER</code> type.
@@ -2887,6 +2903,8 @@ Get cookie value as <code>CHARACTER</code> type.
 COOKIE('customer_id')
 
 ```
+
+<br>
 <a id="get_http_session_attribute_as_char"   ></a>
 <h1>GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</h1>
 Get HTTP session attribute as <code>CHARACTER</code> type.
@@ -2899,6 +2917,7 @@ GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR('my_entry')
 
 ```
 
+<br>
 <a id="get_http_session_attribute_as_integer"></a>
 <h1>GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</h1>
 Get HTTP session attribute as <code>INTEGER</code> type.
@@ -2911,6 +2930,7 @@ GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER('my_entry')
 
 ```
 
+<br>
 <a id="get_http_header_as_char"              ></a>
 <h1>GET_HTTP_HEADER_AS_CHAR(character)</h1>
 Get HTTP request header value as <code>CHARACTER</code> type.
@@ -2923,6 +2943,7 @@ GET_HTTP_HEADER_AS_CHAR('Accept-Charset')
 
 ```
 
+<br>
 <a id="get_http_header_as_date"              ></a>
 <h1>GET_HTTP_HEADER_AS_DATE(character)</h1>
 Get HTTP request header value as <code>DATE</code> type.
@@ -2935,6 +2956,7 @@ GET_HTTP_HEADER_AS_DATE('Date')
 
 ```
 
+<br>
 <a id="get_http_header_as_integer"           ></a>
 <h1>GET_HTTP_HEADER_AS_INTEGER(character)</h1>
 Get HTTP request header value as <code>INTEGER</code> type.
@@ -2953,6 +2975,7 @@ GET_HTTP_HEADER_AS_INTEGER('Content-Length')
 
 <h1 align="center">CONSTANTS</h1>
 
+<br>
 <a id="fbsql_remote_user"                          ></a>
 <h1>FBSQL_REMOTE_USER</h1>
 Return remote user name as <code>CHARACTER</code> type. Remote user name transmitted to server from client's Connection object.
@@ -2966,6 +2989,7 @@ FBSQL_REMOTE_USER
 
 ```
 
+<br>
 <a id="fbsql_remote_role"                          ></a>
 <h1>FBSQL_REMOTE_ROLE</h1>
 Return remote user role as <code>CHARACTER</code> type. Remote user role transmitted to server from client's Connection object.
@@ -2979,6 +3003,7 @@ FBSQL_REMOTE_ROLE
 
 ```
 
+<br>
 <a id="fbsql_remote_session_id"                    ></a>
 <h1>FBSQL_REMOTE_SESSION_ID</h1>
 Return remote session id as <code>CHARACTER</code> type.
@@ -2992,6 +3017,7 @@ FBSQL_REMOTE_SESSION_ID
 
 ```
 
+<br>
 <a id="fbsql_remote_session_creation_time"         ></a>
 <h1>FBSQL_REMOTE_SESSION_CREATION_TIME</h1>
 Return remote session creation time as <code>INTEGER</code> type.
@@ -3004,6 +3030,7 @@ FBSQL_REMOTE_SESSION_CREATION_TIME
 
 ```
 
+<br>
 <a id="fbsql_remote_session_last_accessed_time"    ></a>
 <h1>FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME</h1>
 Return remote session last accessed time as <code>INTEGER</code> type.
@@ -3016,6 +3043,7 @@ FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME
 
 ```
 
+<br>
 <a id="fbsql_remote_user_info"></a>
 <h1>FBSQL_REMOTE_USER_INFO</h1>
 Return verbose client information as <code>CHARACTER</code> type in form of JSON object.
@@ -3035,14 +3063,17 @@ FBSQL_REMOTE_USER_INFO
 <h1 align="center">Client API</h1>
 
 
+<br>
 <a id="connection_object"></a>
 <h1>Connection</h1>
 
+<br>
 <a id="prepare_statement_method"></a>
 <h1>Method prepareStatement()</h1>
 Creates a PreparedStatement object for sending parameterized SQL statements to the database.
 A SQL statement stored in a PreparedStatement object. This object can then be used to efficiently execute this statement multiple times.
 
+<br>
 <a id="add_database_event_listener_method"></a>
 <h1>Method addDatabaseEventListener()</h1>
 
@@ -3057,6 +3088,7 @@ conn.addDatabaseEventListener(event => console.log(event));
 
 ```
 
+<br>
 <a id="fire_mock_database_event_method"></a>
 <h1>Method fireMockDatabaseEvent()</h1>
 Fires a custom database event on client.
@@ -3079,9 +3111,11 @@ myButton.addEventListener('click', function() {
 
 ```
 
+<br>
 <a id="prepared_statement_object"></a>
 <h1>PreparedStatement</h1>
 
+<br>
 <a id="execute_query_method"></a>
 <h1>Method executeQuery()</h1>
 Executes the SQL query in this PreparedStatement object and returns the result set array generated by the query.
@@ -3108,6 +3142,8 @@ a result set array that contains the data produced by the query; never <code>nul
 ]
 
 ```
+
+<br>
 <a id="execute_update_method"></a>
 <h1>Method executeUpdate()</h1>
 Executes the SQL statement in this PreparedStatement object, which must be an SQL Data Manipulation Language (DML) statement, such as <code>INSERT</code>, <code>UPDATE</code> or <code>DELETE</code>; or an SQL statement that returns nothing, such as a DDL statement.
@@ -3131,8 +3167,10 @@ Returns: execution result information (row count and generated keys for SQL Data
 
 ```
 
+<br>
 <a id="set_result_set_format_method"></a>
 <h1>Method setResultSetFormat()</h1>
+<br>
 <a id="reseult_set_format"></a>
 Sets the result set format.
 
@@ -3238,6 +3276,7 @@ ps.executeQuery()
 
 ```
 
+<br>
 <a id="set_mock_function_method"></a>
 <h1>Method setMockFunction()</h1>
 Sets custom mock function.
@@ -3318,6 +3357,8 @@ To use frontend debug tool just add <code>fbsql-debug.min.js</code> script after
 </html>
 
 ```
+
+<br>
 <a id="log_execute_query"></a>
 <h1>Function logExecuteQuery()</h1>
 <code>logExecuteQuery()</code> - helper function for corresponding <code>executeQuery</code> method of <code>PreparedStatement</code>.<br>
@@ -3327,6 +3368,7 @@ Parameters are:
 	<li><code>Object</code> - parameters JSON object. E.g. <code>{nameStartsWith: "Samsu"}</code></li>
 </ul>
 
+<br>
 <a id="log_execute_update"></a>
 <h1>Function logExecuteUpdate()</h1>
 <code>logExecuteUpdate()</code> - helper function for corresponding <code>executeUpdate</code> method of <code>PreparedStatement</code>.<br>
@@ -3336,6 +3378,7 @@ Parameters are:
 	<li><code>Object</code> - parameters JSON object. E.g. <code>{id: "LG-1134", newPrice: 950.00}</code></li>
 </ul>
 
+<br>
 <a id="log_database_events"></a>
 <h1>Function logDatabaseEvents()</h1>
 <code>logDatabaseEvents()</code> - helper function for corresponding <code>addDatabaseEventListener</code> method of <code>Connection</code>.<br>
