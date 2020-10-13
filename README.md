@@ -28,25 +28,25 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 <br><strong>Tutorial</strong>
 <ul>
 	<li><a href="#installation_and_basic_example"            title="How to install FBSQL, create database connector, use CONNECT TO statement, write simple «Hello, world!» HTML page where we execute query and get data from our backend database.">Getting started</a></li>
-	<li><a href="#fbsql_distributions"                       title="FBSQL distributions."                 >FBSQL distributions</a></li>
-	<li><a href="#installation"                              title="FBSQL Installation."                  >Installation</a></li>
-	<li><a href="#cli"                                       title="Command line interface (CLI)."        >Command line interface (CLI)</a></li>
-	<li><a href="#init_script"                               title="Init script."                         >Init script</a></li>
-	<li><a href="#config"                                    title="Configuration and fine tuning."       >Configuration and fine tuning</a></li>
-	<li><a href="#add_simple_authentication"                 title="How to add simple authentication.">Authentication</a></li>
+	<li><a href="#fbsql_distributions"                       title="FBSQL distributions."                       >FBSQL distributions</a></li>
+	<li><a href="#installation"                              title="Installation."                              >Installation</a></li>
+	<li><a href="#cli"                                       title="Command line interface (CLI)."              >Command line interface (CLI)</a></li>
+	<li><a href="#init_script"                               title="Init script."                               >Init script</a></li>
+	<li><a href="#config"                                    title="Configuration and fine tuning."             >Configuration and fine tuning</a></li>
+	<li><a href="#add_simple_authentication"                 title="How to add simple authentication."          >Authentication</a></li>
 	<li><a href="#add_simple_role_based_authorization"       title="How to add simple role-based authorization.">Authorization</a></li>
-	<li><a href="#secure_our_backend_with_declare_statement" title="Expose our database to frontend.">Expose our database to frontend</a></li>
+	<li><a href="#secure_our_backend_with_declare_statement" title="Expose our database to frontend."           >Expose our database to frontend</a></li>
 	<li><a href="#execute_query_and_execute_update"          title="How to execute SQL statements from frontend JavaScript by using executeQuery() and executeUpdate() methods.">Execute SQL statements</a></li>
 	<li><a href="#parameters_checking"                       title="Triggers, event notification, parameters checking.">Triggers, event notification, parameters checking</a></li>
-	<li><a href="#reseult_set_format" title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
-	<li><a href="#database_agnostic_stored_procedures" title="How to write and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
-	<li><a href="#schedule_periodic_jobs" title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
-	<li><a href="#blob_type" title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
-	<li><a href="#date_type" title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
-	<li><a href="#database_event_notification" title="Database event notification.">Database event notification</a></li>
-	<li><a href="#mocking_with_fbsql" title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
-	<li><a href="#debug_utility" title="Frontend debug tool (fbsql-debug.js).">Frontend debug tool</a></li>
-	<li><a href="#did_you_know" title="Did you know?">Did you know?</a></li>
+	<li><a href="#reseult_set_format"                        title="How to receive result set in various formats by using setResultSetFormat() method.">Reseult set formats</a></li>
+	<li><a href="#database_agnostic_stored_procedures"       title="How to create and use database agnostic stored procedures written in JavaScript or JVM languages (DECLARE PROCEDURE statement)">Database agnostic stored procedures</a></li>
+	<li><a href="#schedule_periodic_jobs"                    title="How to schedule periodic jobs (SCHEDULE statement).">Schedule periodic jobs</a></li>
+	<li><a href="#blob_type"                                 title="How to work with BINARY, VARBINARY, LONGVARBINARY and BLOB types.">Binary data</a></li>
+	<li><a href="#date_type"                                 title="How to work with DATE, TIME and TIMESTAMP types.">Date and Time</a></li>
+	<li><a href="#database_event_notification"               title="Database event notification.">Database event notification</a></li>
+	<li><a href="#mocking_with_fbsql"                        title="Mocking with FBSQL.">Mocking with FBSQL</a></li>
+	<li><a href="#debug_utility"                             title="Frontend debug tool (fbsql-debug.min.js).">Frontend debug tool</a></li>
+	<li><a href="#did_you_know"                              title="Did you know?">Did you know?</a></li>
 </ul>
 
 <br><strong>Commands</strong><br>
@@ -61,29 +61,29 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 
 <br><strong>Functions</strong><br>
 <ul>
-	<li><a href="#remote_user"                           title="">REMOTE_USER()</a></li>
-	<li><a href="#remote_role"                           title="">REMOTE_ROLE()</a></li>
-	<li><a href="#remote_session_id"                     title="">REMOTE_SESSION_ID()</a></li>
-	<li><a href="#remote_session_creation_time"          title="">REMOTE_SESSION_CREATION_TIME()</a></li>
-	<li><a href="#remote_session_last_accessed_time"     title="">REMOTE_SESSION_LAST_ACCESSED_TIME()</a></li>
-	<li><a href="#remote_user_info"                      title="">REMOTE_USER_INFO()</a></li>
-	<li><a href="#in_role"                               title="">IN_ROLE()</a></li>
-	<li><a href="#get_cookie"                            title="">COOKIE()</a></li>
-	<li><a href="#get_http_session_attribute_as_char"    title="">GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</a></li>
-	<li><a href="#get_http_session_attribute_as_integer" title="">GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</a></li>
-	<li><a href="#get_http_header_as_char"               title="">GET_HTTP_HEADER_AS_CHAR()</a></li>
-	<li><a href="#get_http_header_as_date"               title="">GET_HTTP_HEADER_AS_DATE()</a></li>
-	<li><a href="#get_http_header_as_integer"            title="">GET_HTTP_HEADER_AS_INTEGER()</a></li>
+	<li><a href="#remote_user"                           title="REMOTE_USER()                          ">REMOTE_USER()</a></li>
+	<li><a href="#remote_role"                           title="REMOTE_ROLE()                          ">REMOTE_ROLE()</a></li>
+	<li><a href="#remote_session_id"                     title="REMOTE_SESSION_ID()                    ">REMOTE_SESSION_ID()</a></li>
+	<li><a href="#remote_session_creation_time"          title="REMOTE_SESSION_CREATION_TIME()         ">REMOTE_SESSION_CREATION_TIME()</a></li>
+	<li><a href="#remote_session_last_accessed_time"     title="REMOTE_SESSION_LAST_ACCESSED_TIME()    ">REMOTE_SESSION_LAST_ACCESSED_TIME()</a></li>
+	<li><a href="#remote_user_info"                      title="REMOTE_USER_INFO()                     ">REMOTE_USER_INFO()</a></li>
+	<li><a href="#in_role"                               title="IN_ROLE()                              ">IN_ROLE()</a></li>
+	<li><a href="#get_cookie"                            title="COOKIE()                               ">COOKIE()</a></li>
+	<li><a href="#get_http_session_attribute_as_char"    title="GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()   ">GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</a></li>
+	<li><a href="#get_http_session_attribute_as_integer" title="GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()">GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</a></li>
+	<li><a href="#get_http_header_as_char"               title="GET_HTTP_HEADER_AS_CHAR()              ">GET_HTTP_HEADER_AS_CHAR()</a></li>
+	<li><a href="#get_http_header_as_date"               title="GET_HTTP_HEADER_AS_DATE()              ">GET_HTTP_HEADER_AS_DATE()</a></li>
+	<li><a href="#get_http_header_as_integer"            title="GET_HTTP_HEADER_AS_INTEGER()           ">GET_HTTP_HEADER_AS_INTEGER()</a></li>
 </ul>
 
 <br><strong>Constants</strong>
 <ul>
-	<li><a href="#fbsql_remote_user"                           title="">FBSQL_REMOTE_USER</a></li>
-	<li><a href="#fbsql_remote_role"                           title="">FBSQL_REMOTE_ROLE</a></li>
-	<li><a href="#fbsql_remote_session_id"                     title="">FBSQL_REMOTE_SESSION_ID</a></li>
-	<li><a href="#fbsql_remote_session_creation_time"          title="">FBSQL_REMOTE_SESSION_CREATION_TIME</a></li>
-	<li><a href="#fbsql_remote_session_last_accessed_time"     title="">FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME</a></li>
-	<li><a href="#fbsql_remote_user_info"                      title="">FBSQL_REMOTE_USER_INFO</a></li>
+	<li><a href="#fbsql_remote_user"                       title="FBSQL_REMOTE_USER                      ">FBSQL_REMOTE_USER</a></li>
+	<li><a href="#fbsql_remote_role"                       title="FBSQL_REMOTE_ROLE                      ">FBSQL_REMOTE_ROLE</a></li>
+	<li><a href="#fbsql_remote_session_id"                 title="FBSQL_REMOTE_SESSION_ID                ">FBSQL_REMOTE_SESSION_ID</a></li>
+	<li><a href="#fbsql_remote_session_creation_time"      title="FBSQL_REMOTE_SESSION_CREATION_TIME     ">FBSQL_REMOTE_SESSION_CREATION_TIME</a></li>
+	<li><a href="#fbsql_remote_session_last_accessed_time" title="FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME">FBSQL_REMOTE_SESSION_LAST_ACCESSED_TIME</a></li>
+	<li><a href="#fbsql_remote_user_info"                  title="FBSQL_REMOTE_USER_INFO                 ">FBSQL_REMOTE_USER_INFO</a></li>
 </ul>
 
 <br><strong>Client API</strong>
