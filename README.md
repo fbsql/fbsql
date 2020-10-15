@@ -243,7 +243,7 @@ Start FBSQL server:<br><br>
 <ul>
 <li><strong>FBSQL Server</strong> is «all included» zero-config distribution for these who want complete backend solution including popular embedded databases and their JDBC drivers, connection engine and application server. It's best choice if you want to give try to FBSQL.</li>
 <br>
-<li><strong>FBSQL Server Min</strong> is minimalist distribution without embedded databases, JDBC drivers and debugging tools. Good for production usage.</li>
+<li><strong>FBSQL Server Min</strong> is minimalist distribution without embedded databases, JDBC drivers and debugging tools. Good choice for production usage.</li>
 <br>
 <li><strong>FBSQL Servlet</strong> targeted for these who want run FBSQL on own application server infrastructure.</li>
 </ul>
