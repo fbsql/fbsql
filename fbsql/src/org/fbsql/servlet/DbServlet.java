@@ -114,8 +114,7 @@ public class DbServlet extends HttpServlet {
 	 * true in debug mode
 	 * false in production mode
 	 */
-	//public static final boolean DEBUG = "true".equals(System.getenv("FBSQL_DEBUG"));
-	public static final boolean DEBUG = true; //!!!!!!!!!!!
+	public static final boolean DEBUG = "true".equals(System.getenv("FBSQL_DEBUG"));
 
 	/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control */
 	private static final String HTTP_HEADER_CACHE_CONTROL = "Cache-Control";
