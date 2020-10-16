@@ -68,7 +68,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 	<li><a href="#remote_session_last_accessed_time"     title="REMOTE_SESSION_LAST_ACCESSED_TIME()    ">REMOTE_SESSION_LAST_ACCESSED_TIME()</a></li>
 	<li><a href="#remote_user_info"                      title="REMOTE_USER_INFO()                     ">REMOTE_USER_INFO()</a></li>
 	<li><a href="#in_role"                               title="IN_ROLE()                              ">IN_ROLE()</a></li>
-	<li><a href="#get_cookie"                            title="COOKIE()                               ">COOKIE()</a></li>
+	<li><a href="#get_cookie"                            title="GET_COOKIE()                           ">GET_COOKIE()</a></li>
 	<li><a href="#get_http_session_attribute_as_char"    title="GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()   ">GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</a></li>
 	<li><a href="#get_http_session_attribute_as_integer" title="GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()">GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</a></li>
 	<li><a href="#get_http_header_as_char"               title="GET_HTTP_HEADER_AS_CHAR()              ">GET_HTTP_HEADER_AS_CHAR()</a></li>
@@ -2893,14 +2893,14 @@ IN_ROLE('manager')
 
 <br>
 <a id="get_cookie"                           ></a>
-<h1>COOKIE(character)</h1>
+<h1>GET_COOKIE(character)</h1>
 Get cookie value as <code>CHARACTER</code> type.
 
 <br><i>Example:</i>
 
 ```text
 
-COOKIE('customer_id')
+GET_COOKIE('customer_id')
 
 ```
 
