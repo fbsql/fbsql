@@ -2906,7 +2906,7 @@ GET_COOKIE('customer_id')
 
 <br>
 <a id="get_http_session_attribute_as_char"   ></a>
-<h1>GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR()</h1>
+<h1>GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR(character)</h1>
 Get HTTP session attribute as <code>CHARACTER</code> type.
 
 <br><i>Example:</i>
@@ -2919,7 +2919,7 @@ GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR('my_entry')
 
 <br>
 <a id="get_http_session_attribute_as_integer"></a>
-<h1>GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER()</h1>
+<h1>GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER(character)</h1>
 Get HTTP session attribute as <code>INTEGER</code> type.
 
 <br><i>Example:</i>
