@@ -2451,7 +2451,7 @@ Declare non-native stored procedure. This command allows you to custom non-nativ
 <tr><td><code>JAVA</code></td><td>Java language (or any JVM compatible languages)</td><td><ul><li><code>class</code> - Java class name</li><li><code>method</code> - Method name</li></ul></td></tr>
 <tr><td><code>JS</code></td><td>JavaScript/ECMAScript language</td><td><ul><li><code>file</code> - JavaScript file name</li><li><code>function</code> - Function name</li></ul></td></tr>
 <tr><td><code>EXEC</code></td><td>Operating system executable</td><td><ul><li><code>file</code> - OS executable file name</li></ul></td></tr>
-<tr><td><code>URL</code></td><td>Resource URL</td><td><ul><li><code>url</code> - Resource URL (<code>"http://"</code>, <code>"https://"</code>, <code>"file://"</code>, <code>data:application/json;charset=utf-8,URL encoded JSON array</code>  are supported) or local file (absolute and relative path supported)</li></ul></td></tr>
+<tr><td><code>URL</code></td><td>Resource URL</td><td><ul><li><code>url</code> - Resource URL (<code>"http://"</code>, <code>"https://"</code>, <code>"file://"</code> are supported) or local file (absolute and relative path supported)</li></ul></td></tr>
 </table>
 
 <i>Examples:</i><br>
