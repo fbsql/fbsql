@@ -130,7 +130,7 @@ public class DbRequestProcessor implements Runnable {
 
 	/* functions with parameter */
 	private static final String FUT_IN_ROLE                               = "IN_ROLE(";
-	private static final String FUT_GET_COOKIE                            = "COOKIE(";
+	private static final String FUT_GET_COOKIE                            = "GET_COOKIE(";
 	private static final String FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR    = "GET_HTTP_SESSION_ATTRIBUTE_AS_CHAR(";
 	private static final String FUT_GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER = "GET_HTTP_SESSION_ATTRIBUTE_AS_INTEGER(";
 	private static final String FUT_GET_HTTP_HEADER_AS_CHAR               = "GET_HTTP_HEADER_AS_CHAR(";
