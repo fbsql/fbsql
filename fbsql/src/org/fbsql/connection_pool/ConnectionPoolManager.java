@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -47,6 +48,7 @@ import java.util.Properties;
  * When connection closed, it is returned to connection pool for future use.
  */
 public class ConnectionPoolManager implements AutoCloseable {
+
 	private int initialPoolSize;
 	private int maxPoolSize;
 	//
@@ -64,6 +66,7 @@ public class ConnectionPoolManager implements AutoCloseable {
 	 * @param jdbcUrl
 	 * @param jdbcUser
 	 * @param jdbcPassword
+	 * @param jdbcProperties
 	 * @param initialPoolSize
 	 * @param maxPoolSize
 	 */
@@ -79,13 +82,9 @@ public class ConnectionPoolManager implements AutoCloseable {
 	/**
 	 * Initialize ConnectionPoolManager
 	 * 
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchProviderException
 	 * @throws SQLException
-	 * @throws FileNotFoundException
-	 * @throws IOException
 	 */
-	public void init() throws NoSuchAlgorithmException, NoSuchProviderException, SQLException, FileNotFoundException, IOException {
+	public void init() throws SQLException {
 		inUseList     = Collections.synchronizedList(new ArrayList<>(initialPoolSize));
 		availableList = Collections.synchronizedList(new ArrayList<>(initialPoolSize));
 		for (int i = 0; i < initialPoolSize; i++)
@@ -157,6 +156,28 @@ public class ConnectionPoolManager implements AutoCloseable {
 
 		DbConnection dbConnection = new DbConnection(connection);
 		availableList.add(dbConnection);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(availableList, inUseList, initialPoolSize, jdbcPassword, jdbcProperties, jdbcUrl, jdbcUser, maxPoolSize);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ConnectionPoolManager other = (ConnectionPoolManager) obj;
+		return Objects.equals(availableList, other.availableList) && Objects.equals(inUseList, other.inUseList) && initialPoolSize == other.initialPoolSize && Objects.equals(jdbcPassword, other.jdbcPassword) && Objects.equals(jdbcProperties, other.jdbcProperties) && Objects.equals(jdbcUrl, other.jdbcUrl) && Objects.equals(jdbcUser, other.jdbcUser) && maxPoolSize == other.maxPoolSize;
+	}
+
+	@Override
+	public String toString() {
+		return "ConnectionPoolManager [initialPoolSize=" + initialPoolSize + ", maxPoolSize=" + maxPoolSize + ", jdbcUrl=" + jdbcUrl + ", jdbcUser=" + jdbcUser + ", jdbcPassword=" + jdbcPassword + ", jdbcProperties=" + jdbcProperties + ", availableList=" + availableList + ", inUseList=" + inUseList + "]";
 	}
 
 }
