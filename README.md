@@ -140,7 +140,7 @@ FBSQL was designed with performance in mind and supports out of the box connecti
 <li>
 Install FBSQL:<br><br>
 <ul>
-<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-server-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server</strong> release: <a href="https://github.com/fbsql/fbsql/releases/download/v2.3.4/fbsql-server-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -269,7 +269,7 @@ If you are having troubles choosing a distribution, you probably need the <stron
 
 <strong>FBSQL Server</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Server</strong> release: <a href="fbsql-server-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server</strong> release: <a href="https://github.com/fbsql/fbsql/releases/download/v2.3.4/fbsql-server-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -284,7 +284,7 @@ fbsql-server-2.3.4-linux-x86-64 ─┐
 ```
 <strong>FBSQL Server Min</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="fbsql-server-min-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-min-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="https://github.com/fbsql/fbsql/releases/download/v2.3.4/fbsql-server-min-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-min-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
@@ -298,17 +298,17 @@ fbsql-server-min-2.3.4-linux-x86-64 ─┐
 ```
 <strong>FBSQL Servlet</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Servlet</strong> release: <a href="fbsql-servlet-2.3.4.zip" title="The latest «FBSQL Servlet» release">fbsql-servlet-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Servlet</strong> release: <a href="https://github.com/fbsql/fbsql/releases/download/v2.3.4/fbsql-war-2.3.4.zip" title="The latest «FBSQL Servlet» release">fbsql-war-2.3.4.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
 ```text
 
-fbsql-servlet-2.3.4 ─┐
-                     ├─ fbsql.war    - FBSQL servlet
-                     ├─ fbsql-min.js - Client for browser
-                     ├─ README       - Release information 
-                     └─ LICENSES     - Third party licenses
+fbsql-war-2.3.4 ─┐
+                 ├─ fbsql.war    - FBSQL servlet
+                 ├─ fbsql-min.js - Client for browser
+                 ├─ README       - Release information 
+                 └─ LICENSES     - Third party licenses
 ```
 <ul>
 <li>Deploy <code>fbsql.war</code> to your application server infrastructure.</li>
