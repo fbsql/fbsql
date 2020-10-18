@@ -106,7 +106,7 @@ public class QueryUtils {
 	 * @throws SQLException
 	 * @throws IOException 
 	 */
-	public static ReadyResult createReadyResult(List<Map<String /* column name */, String /* JSON value */>> list, int resultSetFormat, int compressionLevel, Base64.Encoder encoder) throws SQLException, IOException {
+	public static ReadyResult createReadyResult(List<Map<String /* column name */, String /* JSON value */>> list, int resultSetFormat, int compressionLevel) throws SQLException, IOException {
 		String json = convertToJsonArray(list, resultSetFormat);
 
 		//

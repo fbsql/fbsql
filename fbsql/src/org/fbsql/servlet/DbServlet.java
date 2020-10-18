@@ -476,12 +476,12 @@ public class DbServlet extends HttpServlet {
 
 				// array of objects
 				StaticStatement staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_OBJECTS);
-				ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION, sharedCoder.encoder);
+				ReadyResult     readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION);
 				mapReadyResults.put(staticStatement, readyResult);
 
 				// array of arrays
 				staticStatement = new StaticStatement(sql, QueryUtils.RESULT_FORMAT_ARRAY_OF_ARRAYS);
-				readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION, sharedCoder.encoder);
+				readyResult     = QueryUtils.createReadyResult(list, staticStatement.resultSetFormat, CompressionLevel.BEST_COMPRESSION);
 				mapReadyResults.put(staticStatement, readyResult);
 			}
 		}

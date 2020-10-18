@@ -646,7 +646,7 @@ public class DbRequestProcessor implements Runnable {
 									list = QueryUtils.resutlSetToListOfMapsJsonValues((ResultSet) obj, sharedCoder.encoder);
 								else if (obj instanceof CharSequence)
 									list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(obj.toString());
-								ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+								ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression);
 								bs         = rr.bs;
 								etag       = rr.etag;
 								compressed = rr.compressed;
@@ -700,7 +700,7 @@ public class DbRequestProcessor implements Runnable {
 										list = QueryUtils.resutlSetToListOfMapsJsonValues((ResultSet) obj, sharedCoder.encoder);
 									else if (obj instanceof CharSequence)
 										list = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(obj.toString());
-									ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+									ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression);
 									bs         = rr.bs;
 									etag       = rr.etag;
 									compressed = rr.compressed;
@@ -734,7 +734,7 @@ public class DbRequestProcessor implements Runnable {
 
 								Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
 								List<Map<String /* column name */, String /* JSON value */>> list        = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArray);
-								ReadyResult                                                  rr          = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+								ReadyResult                                                  rr          = QueryUtils.createReadyResult(list, resultSetFormat, compression);
 								bs         = rr.bs;
 								etag       = rr.etag;
 								compressed = rr.compressed;
@@ -762,7 +762,7 @@ public class DbRequestProcessor implements Runnable {
 
 								Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
 								List<Map<String /* column name */, String /* JSON value */>> list        = QueryUtils.convertJsonArrayOfObjectsToListOfMaps(jsonArray);
-								ReadyResult                                                  rr          = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+								ReadyResult                                                  rr          = QueryUtils.createReadyResult(list, resultSetFormat, compression);
 								bs         = rr.bs;
 								etag       = rr.etag;
 								compressed = rr.compressed;
@@ -865,11 +865,8 @@ public class DbRequestProcessor implements Runnable {
 							Integer                                                      compression = stmtDeclareStatement == null ? CompressionLevel.BEST_COMPRESSION : stmtDeclareStatement.compressionLevel;
 							ResultSet                                                    rs          = ps.executeQuery();
 							List<Map<String /* column name */, String /* JSON value */>> list        = QueryUtils.resutlSetToListOfMapsJsonValues(rs, sharedCoder.encoder);
-							//							try (ResultSet rs = ps.executeQuery()) {
-							//								List<Map<String /* column name */, Object /* column value */>> resultsListOfMaps = QueryUtils.resutlSetToListOfMaps(rs);
-							//								List<Map<String /* column name */, String /* JSON value */>>   list              = QueryUtils.listOfMapsToListOfMapsJsonValues(resultsListOfMaps, sharedCoder.encoder);
 
-							ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression, sharedCoder.encoder);
+							ReadyResult rr = QueryUtils.createReadyResult(list, resultSetFormat, compression);
 							bs         = rr.bs;
 							etag       = rr.etag;
 							compressed = rr.compressed;

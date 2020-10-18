@@ -177,7 +177,7 @@ public class ConnectionPoolManager implements AutoCloseable {
 
 	@Override
 	public String toString() {
-		return "ConnectionPoolManager [initialPoolSize=" + initialPoolSize + ", maxPoolSize=" + maxPoolSize + ", jdbcUrl=" + jdbcUrl + ", jdbcUser=" + jdbcUser + ", jdbcPassword=" + jdbcPassword + ", jdbcProperties=" + jdbcProperties + ", availableList=" + availableList + ", inUseList=" + inUseList + "]";
+		return String.format("ConnectionPoolManager [jdbcUrl=%s, jdbcUser=%s, jdbcProperties=%s, initialPoolSize=%s, maxPoolSize=%s]", jdbcUrl, jdbcUser, jdbcProperties, initialPoolSize, maxPoolSize);
 	}
 
 }
