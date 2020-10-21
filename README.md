@@ -420,7 +420,7 @@ Due to security reasons all changes you do in FBSQL home directory are immutable
                         │              ├─ lib ........................│-> JDBC drivers
                         │              └─ web.xml                     │
                         │                                             │
-                        └─ logs ......................................│-> Logs dir.
+                        └─ logs ......................................│-> Logs dir
 
 ```
 <br><br>
