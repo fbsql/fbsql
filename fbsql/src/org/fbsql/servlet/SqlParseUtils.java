@@ -542,12 +542,13 @@ public class SqlParseUtils {
 	 * Standard semicolon character «;» is used as statement separator.
 	 *
 	 * This method also:
-	 * - compress row(s) of each SQL statement by removing
+	 * - compress each SQL statement by removing
 	 * ambiguous  trailing white spaces characters.
 	 * - remove trailing statement separator «;»
+	 * - remove empty SQL statements 
 	 *
-	 * @param sqlScript - SQL script to parse
-	 * @param list      - list of all presented in script SQL statements (output parameter)
+	 * @param is   - SQL script to parse
+	 * @param list - list of all presented in script SQL statements (output parameter)
 	 * @throws IOException 
 	 */
 	private static void readSqlScriptToList(String sqlScript, List<String /* SQL statements */> list) throws IOException {
