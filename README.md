@@ -284,7 +284,7 @@ fbsql-server-2.3.4-linux-x86-64 ─┐
 ```
 <strong>FBSQL Server Min</strong>
 <ul>
-<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="https://github.com/fbsql/fbsql/releases/download/v2.3.4/fbsql-server-min-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server» release">fbsql-server-min-2.3.4-linux-x86-64.zip</a></li>
+<li>Download the latest <strong>FBSQL Server Min</strong> release: <a href="https://github.com/fbsql/fbsql/releases/download/v2.3.4/fbsql-server-min-2.3.4-linux-x86-64.zip" title="The latest «FBSQL Server Min» release">fbsql-server-min-2.3.4-linux-x86-64.zip</a></li>
 <li>Unzip the downloaded file on your machine:</li>
 </ul>
 
