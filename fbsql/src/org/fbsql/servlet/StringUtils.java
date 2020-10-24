@@ -146,7 +146,9 @@ public class StringUtils {
 
 	public static String inputSreamToString(InputStream is) {
 		Scanner s = new Scanner(is, StandardCharsets.UTF_8.name()).useDelimiter("\\A");
-		return s.hasNext() ? s.next().trim() : "";
+		try (s) {
+			return s.hasNext() ? s.next().trim() : "";
+		}
 	}
 
 }
