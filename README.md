@@ -1,6 +1,6 @@
 <br>
 <h1>FBSQL - Frontend Backend SQL</h1>
-Work (secure) with your backend database within HTML<br>
+100% pure SQL | 100% pure REST<br>
 <br><br>
 <strong>What is FBSQL?</strong><br>
 FBSQL is a server that transparently yet secure connects your frontend to the remote databases.<br>
